@@ -1,17 +1,40 @@
 {
-  "extension.name": "Sample Extension",
-  "card.sample.title": "Sample Card",
-  "card.sample.greeting": "Welcome, {firstName}.",
-  "card.sample.description": "Replace this card with your own content. See REPLACE_THESE.md.",
-  "card.sample.cta": "Refresh data",
-  "card.sample.empty.title": "Nothing to show yet",
-  "card.sample.empty.description": "Once data arrives, it will appear here.",
-  "page.sample.title": "Sample Page",
-  "page.sample.intro": "This page demonstrates page-level SDK hooks and shared utilities.",
-  "ethos.error.auth": "You are not authorized for this data.",
-  "ethos.error.network": "Cannot reach the server. Check your connection and try again.",
-  "ethos.error.timeout": "The request timed out. Please try again.",
-  "ethos.error.server": "The server returned an error. Please try again later.",
-  "ethos.error.validation": "The request could not be processed.",
-  "ethos.error.unknown": "An unexpected error occurred."
+  "messages": {
+    "extension.name": "Experience Extension Template",
+
+    "card.helloUser.title": "Hello, {firstName}",
+    "card.helloUser.subtitle": "Welcome to the community Experience extension template.",
+    "card.helloUser.cta": "Got it",
+
+    "card.ethosFetch.title": "Active terms",
+    "card.ethosFetch.empty.title": "No active terms",
+    "card.ethosFetch.empty.description": "The pipeline returned no academic periods.",
+    "card.ethosFetch.cta.refresh": "Refresh",
+    "card.ethosFetch.announce.loaded": "{count, plural, one {# term loaded} other {# terms loaded}}.",
+    "card.ethosFetch.announce.failed": "Failed to load terms.",
+
+    "card.configurable.title": "Configurable links",
+    "card.configurable.empty.title": "No links configured",
+    "card.configurable.empty.description": "Open the card configuration to add some.",
+    "card.configurable.config.heading": "Configure links",
+    "card.configurable.config.label": "Label",
+    "card.configurable.config.url": "URL",
+    "card.configurable.config.add": "Add link",
+    "card.configurable.config.remove": "Remove",
+    "card.configurable.config.invalidUrl": "Enter a valid URL.",
+
+    "card.pageLink.title": "Open the sample page",
+    "card.pageLink.description": "Demonstrates page navigation from a card.",
+    "card.pageLink.cta": "Open page",
+
+    "page.sample.title": "Sample page",
+    "page.sample.intro": "This page exercises page-level SDK hooks. Replace it for your real use case.",
+
+    "ethos.error.auth": "You are not authorized for this data.",
+    "ethos.error.network": "Cannot reach the server. Check your connection and try again.",
+    "ethos.error.timeout": "The request timed out. Please try again.",
+    "ethos.error.server": "The server returned an error. Please try again later.",
+    "ethos.error.validation": "The request could not be processed.",
+    "ethos.error.unknown": "An unexpected error occurred."
+  }
 }

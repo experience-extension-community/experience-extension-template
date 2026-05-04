@@ -1,0 +1,56 @@
+{
+  "name": "eec-template-persons-get",
+  "description": "Returns the signed-in user's persons record from the Ethos persons resource. Universal — works at any Banner or Colleague institution running Ethos.",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "required": true,
+      "sensitive": true
+    },
+    {
+      "name": "testPersonId",
+      "type": "string",
+      "default": ""
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "GET"
+  },
+  "pipeline": [
+    "Resolve person id",
+    "Get person",
+    "Shape response"
+  ],
+  "segments": {
+    "Resolve person id": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  const contextUser = context.get('__user');\n  const testPersonId = context.get('testPersonId');\n  const personId = (testPersonId && testPersonId.length > 0)\n    ? testPersonId\n    : (contextUser && contextUser.id) ? contextUser.id : '';\n  context.set('personId', personId);\n  return { payload: {} }, context;\n}\n"
+      }
+    },
+    "Get person": {
+      "class": "ethosProxyGet",
+      "config": {
+        "resource": "persons",
+        "id": "{{context.personId}}",
+        "acceptVersions": ["12"],
+        "cache": false,
+        "ignoreErrors": false
+      }
+    },
+    "Shape response": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  const person = message && message.payload;\n  if (!person) {\n    return { payload: { success: false, message: 'No person record returned', data: null } };\n  }\n  const names = Array.isArray(person.names) ? person.names[0] : person.names;\n  return {\n    payload: {\n      success: true,\n      data: {\n        id: person.id,\n        firstName: names && names.firstName,\n        lastName: names && names.lastName,\n        preferredName: names && names.preferredName,\n        roles: person.roles,\n        credentials: person.credentials\n      }\n    }\n  };\n}\n"
+      }
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "eec-template-academic-periods-get",
+  "description": "Returns the active academic periods (terms) from the Ethos academic-periods resource. Universal — works at any Banner or Colleague institution running Ethos.",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "required": true,
+      "sensitive": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "GET"
+  },
+  "pipeline": [
+    "Get academic periods",
+    "Filter active",
+    "Shape response"
+  ],
+  "segments": {
+    "Get academic periods": {
+      "class": "ethosProxyGet",
+      "config": {
+        "resource": "academic-periods",
+        "acceptVersions": ["16"],
+        "cache": true,
+        "cacheTTLSeconds": 300,
+        "ignoreErrors": false
+      }
+    },
+    "Filter active": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  const periods = Array.isArray(message && message.payload) ? message.payload : [];\n  const today = new Date().toISOString().slice(0, 10);\n  const active = periods.filter(p => {\n    const start = p.startOn ? p.startOn.slice(0, 10) : null;\n    const end = p.endOn ? p.endOn.slice(0, 10) : null;\n    if (!start || !end) return false;\n    return start <= today && today <= end;\n  });\n  return { payload: active };\n}\n"
+      }
+    },
+    "Shape response": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  const periods = Array.isArray(message && message.payload) ? message.payload : [];\n  const data = periods.map(p => ({\n    id: p.id,\n    code: p.code,\n    title: p.title,\n    startOn: p.startOn,\n    endOn: p.endOn,\n    category: p.category && p.category.type\n  }));\n  return { payload: data };\n}\n"
+      }
+    }
+  }
+}
