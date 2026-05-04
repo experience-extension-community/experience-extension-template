@@ -1,0 +1,10 @@
+node_modules/
+coverage/
+.nyc_output/
+.env
+.env.*
+!sample.env
+*.log
+__mocks__/
+src/**/*.test.{js,jsx}
+DataConnect/

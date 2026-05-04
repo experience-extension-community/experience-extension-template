@@ -2,43 +2,95 @@
 // Copyright 2026 Experience Extension Community contributors
 
 import { useEffect } from 'react';
+import { useIntl } from 'react-intl';
 import { Typography } from '@ellucian/react-design-system/core';
-import { useUserInfo } from '@ellucian/experience-extension-utils';
+import { makeStyles } from '@ellucian/react-design-system/core/styles';
+import {
+    spacing30,
+    spacing40,
+} from '@ellucian/react-design-system/core/styles/tokens';
+import { IconSprite } from '@ellucian/ds-icons/lib';
+import {
+    useDashboardInfo,
+    useExtensionControl,
+    useExtensionInfo,
+    useUserInfo,
+} from '@ellucian/experience-extension-utils';
 
-import { useResolvedTheme, loadIconFont, loadBrandFont } from '../../utils/branding';
+import { useResolvedTheme } from '../../utils/branding/theme';
+import { useTypekitFont, useMaterialIconFonts } from '../../hooks';
 import { Icon } from '../../components';
-import strings from '../../i18n/en.json';
 
-export const SamplePage = () => {
-  const { spacing, palette } = useResolvedTheme();
-  const userInfo = useUserInfo() || {};
-
-  useEffect(() => {
-    loadIconFont();
-    loadBrandFont();
-  }, []);
-
-  return (
-    <main
-      style={{
-        padding: spacing.lg,
+const useStyles = makeStyles(() => ({
+    root: {
+        padding: spacing40,
         maxWidth: 960,
         margin: '0 auto',
-        color: palette.textPrimary,
-      }}
-    >
-      <header style={{ display: 'flex', gap: spacing.sm, alignItems: 'center' }}>
-        <Icon name="dashboard" size={32} style={{ color: palette.primary }} />
-        <Typography variant="h4">{strings['page.sample.title']}</Typography>
-      </header>
-      <Typography variant="body1" style={{ marginTop: spacing.md }}>
-        {strings['page.sample.intro']}
-      </Typography>
-      {userInfo.firstName ? (
-        <Typography variant="body2" style={{ marginTop: spacing.sm, color: palette.textSecondary }}>
-          Signed in as {userInfo.firstName} {userInfo.lastName}.
-        </Typography>
-      ) : null}
-    </main>
-  );
+    },
+    header: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: spacing30,
+    },
+    section: {
+        marginTop: spacing40,
+    },
+}));
+
+export const SamplePage = () => {
+    const classes = useStyles();
+    const intl = useIntl();
+    const { palette } = useResolvedTheme();
+    const userInfo = useUserInfo() || {};
+    const dashboardInfo = useDashboardInfo() || {};
+    const extensionInfo = useExtensionInfo() || {};
+    const { setPageTitle, setLoadingStatus } = useExtensionControl() || {};
+
+    useTypekitFont();
+    useMaterialIconFonts();
+
+    useEffect(() => {
+        if (typeof setPageTitle === 'function') {
+            setPageTitle(
+                intl.formatMessage({ id: 'page.sample.title', defaultMessage: 'Sample page' }),
+            );
+        }
+        if (typeof setLoadingStatus === 'function') {
+            setLoadingStatus(false);
+        }
+    }, [intl, setPageTitle, setLoadingStatus]);
+
+    return (
+        <main className={classes.root}>
+            <IconSprite />
+            <header className={classes.header}>
+                <Icon name="dashboard" size={32} style={{ color: palette.primary }} />
+                <Typography variant="h4">
+                    {intl.formatMessage({ id: 'page.sample.title', defaultMessage: 'Sample page' })}
+                </Typography>
+            </header>
+
+            <Typography variant="body1" className={classes.section}>
+                {intl.formatMessage({
+                    id: 'page.sample.intro',
+                    defaultMessage: 'This page exercises page-level SDK hooks. Replace it for your real use case.',
+                })}
+            </Typography>
+
+            <section className={classes.section} aria-labelledby="page-context-heading">
+                <Typography id="page-context-heading" variant="h6">
+                    Context
+                </Typography>
+                <Typography variant="body2" style={{ color: palette.textSecondary }}>
+                    User: {userInfo.firstName} {userInfo.lastName} ({userInfo.locale})
+                </Typography>
+                <Typography variant="body2" style={{ color: palette.textSecondary }}>
+                    Dashboard: {dashboardInfo.name || dashboardInfo.dashboardId || '(unknown)'}
+                </Typography>
+                <Typography variant="body2" style={{ color: palette.textSecondary }}>
+                    Extension: {extensionInfo.name || '(unknown)'}
+                </Typography>
+            </section>
+        </main>
+    );
 };

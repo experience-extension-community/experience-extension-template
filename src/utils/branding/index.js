@@ -3,5 +3,6 @@
 
 export * from './tokens';
 export { useResolvedTheme } from './theme';
-export { ICON_FONT_FAMILY, loadIconFont, iconStyle } from './icons';
-export { loadBrandFont } from './fontLoader';
+export { ICON_FONT_FAMILY, iconStyle } from './icons';
+export { ensureTypekitFont } from './fontLoader';
+export { loadMaterialSymbolsCSS } from './loadMaterialSymbols';

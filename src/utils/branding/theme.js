@@ -2,47 +2,39 @@
 // Copyright 2026 Experience Extension Community contributors
 
 import { useThemeInfo } from '@ellucian/experience-extension-utils';
-import {
-  palette,
-  typography,
-  spacing,
-  radius,
-  elevation,
-  focus,
-  motion,
-  assets,
-} from './tokens';
+import { path, palette, typography, focus, motion, assets } from './tokens';
 
 /**
- * Compose static institutional tokens with the live dashboard theme.
+ * Compose the three branding layers into a single theme object:
  *
- * Resolution rule: dashboard theme wins for properties it defines
- * (primary, secondary, CTA colors). Static tokens fill the gaps
- * (typography, spacing, radius, elevation, focus, motion, semantic colors).
+ *   1. Path Design System tokens   (baseline)
+ *   2. Institutional overlay       (this fork's brand)
+ *   3. Live dashboard theme        (current tenant — wins for
+ *      primary/secondary/CTA only)
  *
- * The practical effect: an extension built by Florida Poly will adopt
- * Stetson University's dashboard primary color when running in Stetson's
- * tenant — without code changes.
+ * Components consume `useResolvedTheme()` only. Never import `path`
+ * or `palette` directly into a component — that breaks the override
+ * chain.
  */
 export const useResolvedTheme = () => {
-  const dashboardTheme = useThemeInfo() || {};
+    const dashboardTheme = useThemeInfo() || {};
 
-  return {
-    palette: {
-      ...palette,
-      primary: dashboardTheme.primaryColor || palette.primary,
-      secondary: dashboardTheme.secondaryColor || palette.accent,
-      ctaActive: dashboardTheme.ctaColors?.active || palette.primaryDark,
-      ctaBase: dashboardTheme.ctaColors?.base || palette.primary,
-      ctaHover: dashboardTheme.ctaColors?.hover || palette.primaryDark,
-      ctaTint: dashboardTheme.ctaColors?.tint || palette.primaryLight,
-    },
-    typography,
-    spacing,
-    radius,
-    elevation,
-    focus,
-    motion,
-    assets,
-  };
+    return {
+        // Path baseline — already imported once, available for use.
+        path,
+        // Institutional overlay, with dashboard theme winning where it defines a value.
+        palette: {
+            ...palette,
+            primary: dashboardTheme.primaryColor || palette.primary,
+            secondary: dashboardTheme.secondaryColor || palette.accent,
+            ctaActive: dashboardTheme.ctaColors?.active || palette.primaryDark,
+            ctaBase: dashboardTheme.ctaColors?.base || palette.primary,
+            ctaHover: dashboardTheme.ctaColors?.hover || palette.primaryDark,
+            ctaTint: dashboardTheme.ctaColors?.tint || palette.primaryLight,
+        },
+        typography,
+        focus,
+        motion,
+        assets,
+    };
 };
