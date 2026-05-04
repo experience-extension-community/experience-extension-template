@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Experience Extension Community contributors
+
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: experience-extension-community/.github/.github/workflows/reusable-ci.yml@main
+    with:
+      node-version: '24.13.0'
