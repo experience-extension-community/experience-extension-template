@@ -1,0 +1,66 @@
+name: Bug report
+description: Report a defect in the extension scaffolded from this template.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please fill in the details below so a maintainer can reproduce the issue.
+
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension version
+      description: From `package.json`.
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: sdk-version
+    attributes:
+      label: Experience SDK version
+      placeholder: 8.1.2
+    validations:
+      required: true
+
+  - type: input
+    id: tenant
+    attributes:
+      label: Tenant / institution (optional)
+      description: Helpful for context. Leave blank if you'd rather not share.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug. Include error messages or screenshots.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run `npm start`
+        2. Open the card
+        3. Observe …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: |
+        - OS: macOS 14.5
+        - Browser: Chrome 124
+        - Node: 24.13.0

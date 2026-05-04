@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Community Discussion
+    url: https://github.com/orgs/experience-extension-community/discussions
+    about: Ask a question or start a conversation with other adopters.
+  - name: Security report
+    url: https://github.com/experience-extension-community/experience-extension-template/security/advisories/new
+    about: Report a vulnerability privately. Do not open a public issue.

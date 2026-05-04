@@ -1,0 +1,74 @@
+{
+  "name": "experience-extension-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Community template for Ellucian Experience extensions. Fork this repo, customize the branding tokens and configuration, and you have a publishable extension scaffolded against Experience SDK 8.1.2.",
+  "license": "Apache-2.0",
+  "author": "Experience Extension Community contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/experience-extension-community/experience-extension-template.git"
+  },
+  "homepage": "https://github.com/experience-extension-community/experience-extension-template#readme",
+  "bugs": {
+    "url": "https://github.com/experience-extension-community/experience-extension-template/issues"
+  },
+  "keywords": [
+    "ellucian-experience",
+    "experience-extension",
+    "experience-template",
+    "higher-education"
+  ],
+  "engines": {
+    "node": ">=24.13.0"
+  },
+  "scripts": {
+    "start": "experience-extension start",
+    "build": "experience-extension build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "jest",
+    "test:ci": "jest --ci --coverage --runInBand",
+    "test:watch": "jest --watch",
+    "verify": "npm run lint && npm run format:check && npm test"
+  },
+  "dependencies": {
+    "@ellucian/ds-icons": "https://cdn.elluciancloud.com/assets/EDS2/8.4.0/umd/path_design_system_icons.tgz",
+    "@ellucian/experience-extension-utils": "https://cdn.elluciancloud.com/assets/SDK/utils/1.1.0/ellucian-experience-extension-utils-1.1.0.tgz",
+    "@ellucian/react-design-system": "https://cdn.elluciancloud.com/assets/EDS2/8.4.0/umd/path_design_system.tgz",
+    "prop-types": "15.8.1",
+    "react": "19.0.3",
+    "react-dom": "19.0.3",
+    "react-intl": "7.1.11",
+    "react-router-dom": "5.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7.24.7",
+    "@babel/eslint-parser": "7.24.7",
+    "@babel/plugin-transform-runtime": "7.24.7",
+    "@babel/preset-env": "7.24.7",
+    "@babel/preset-react": "7.24.7",
+    "@ellucian/experience-extension": "https://cdn.elluciancloud.com/assets/SDK/8.1.2/ellucian-experience-extension-8.1.2.tgz",
+    "@eslint/js": "9.33.0",
+    "@testing-library/jest-dom": "6.4.2",
+    "@testing-library/react": "16.0.0",
+    "@testing-library/user-event": "14.5.2",
+    "babel-jest": "29.7.0",
+    "eslint": "9.33.0",
+    "eslint-plugin-jsx-a11y": "6.10.0",
+    "eslint-plugin-react": "7.35.0",
+    "eslint-plugin-react-hooks": "5.1.0",
+    "globals": "15.9.0",
+    "jest": "29.7.0",
+    "jest-axe": "9.0.0",
+    "jest-environment-jsdom": "29.7.0",
+    "prettier": "3.3.3"
+  },
+  "overrides": {
+    "@ellucian/react-design-system": {
+      "@tanstack/react-virtual": "3.11.3"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Experience Extension Community contributors
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+    # Don't auto-bump the SDK packages — they're pinned to specific
+    # CDN URLs and need a coordinated upgrade per experience-update-docs.md.
+    ignore:
+      - dependency-name: '@ellucian/*'
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels:
+      - dependencies
+      - github-actions

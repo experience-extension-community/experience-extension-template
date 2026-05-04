@@ -1,0 +1,17 @@
+{
+  "extension.name": "Sample Extension",
+  "card.sample.title": "Sample Card",
+  "card.sample.greeting": "Welcome, {firstName}.",
+  "card.sample.description": "Replace this card with your own content. See REPLACE_THESE.md.",
+  "card.sample.cta": "Refresh data",
+  "card.sample.empty.title": "Nothing to show yet",
+  "card.sample.empty.description": "Once data arrives, it will appear here.",
+  "page.sample.title": "Sample Page",
+  "page.sample.intro": "This page demonstrates page-level SDK hooks and shared utilities.",
+  "ethos.error.auth": "You are not authorized for this data.",
+  "ethos.error.network": "Cannot reach the server. Check your connection and try again.",
+  "ethos.error.timeout": "The request timed out. Please try again.",
+  "ethos.error.server": "The server returned an error. Please try again later.",
+  "ethos.error.validation": "The request could not be processed.",
+  "ethos.error.unknown": "An unexpected error occurred."
+}
