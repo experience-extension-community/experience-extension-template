@@ -43,10 +43,10 @@
     "@ellucian/ds-icons": "https://cdn.elluciancloud.com/assets/EDS2/8.4.0/umd/path_design_system_icons.tgz",
     "@ellucian/experience-extension-utils": "https://cdn.elluciancloud.com/assets/SDK/utils/1.1.0/ellucian-experience-extension-utils-1.1.0.tgz",
     "@ellucian/react-design-system": "https://cdn.elluciancloud.com/assets/EDS2/8.4.0/umd/path_design_system.tgz",
-    "classnames": "2.5.1",
-    "date-fns": "3.6.0",
+    "classnames": "2.2.6",
+    "date-fns": "2.29.3",
     "loglevel": "1.9.1",
-    "prop-types": "15.8.1",
+    "prop-types": "15.7.2",
     "react": "19.0.3",
     "react-dom": "19.0.3",
     "react-intl": "7.1.11",
@@ -77,7 +77,10 @@
     "jest": "29.7.0",
     "jest-axe": "9.0.0",
     "jest-environment-jsdom": "29.7.0",
-    "prettier": "3.3.3"
+    "prettier": "3.3.3",
+    "webpack": "5.76.0",
+    "webpack-cli": "4.10.0",
+    "webpack-dev-server": "4.7.4"
   },
   "overrides": {
     "@ellucian/react-design-system": {
