@@ -120,7 +120,7 @@ module.exports = {
 
     page: {
         source: './src/pages/SamplePage/router.jsx',
-        title: { en: 'Sample page' },
+        title: { 'en-US': 'Sample page' },
         fullWidth: true,
         backgroundColor: 'neutral',
     },
