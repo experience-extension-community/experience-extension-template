@@ -26,7 +26,6 @@ import { makeStyles } from '@ellucian/react-design-system/core/styles';
 import {
     spacing10,
     spacing20,
-    spacing30,
 } from '@ellucian/react-design-system/core/styles/tokens';
 import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useExtensionControl, useUserInfo } from '@ellucian/experience-extension-utils';

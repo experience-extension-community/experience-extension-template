@@ -36,7 +36,7 @@ const parseBody = async (response) => {
   if (contentType.includes('application/json') || contentType.includes('+json')) {
     try {
       return await response.json();
-    } catch (_err) {
+    } catch {
       return null;
     }
   }

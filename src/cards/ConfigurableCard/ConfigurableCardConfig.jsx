@@ -11,7 +11,6 @@
 // The shape persisted is `{ links: [{ label, url }, ...] }`.
 
 import { useEffect, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
     Button,
@@ -45,7 +44,7 @@ const isValidUrl = (str) => {
     try {
         const u = new URL(str);
         return u.protocol === 'http:' || u.protocol === 'https:';
-    } catch (_e) {
+    } catch {
         return false;
     }
 };
@@ -152,8 +151,7 @@ const ConfigurableCardConfig = () => {
     );
 };
 
-ConfigurableCardConfig.propTypes = {
-    // No props — all state comes from useCardInfo / useCardControl
-};
+// No propTypes — this component takes no props; all state comes from
+// useCardInfo() and useCardControl() inside the component body.
 
 export default withIntl(ConfigurableCardConfig);
