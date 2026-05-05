@@ -14,6 +14,7 @@
 //   * formatDate for locale-aware date rendering
 
 import { useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
     Button,
@@ -22,7 +23,7 @@ import {
     Divider,
     Typography,
 } from '@ellucian/react-design-system/core';
-import { makeStyles } from '@ellucian/react-design-system/core/styles';
+import { withStyles } from '@ellucian/react-design-system/core/styles';
 import {
     spacing10,
     spacing20,
@@ -47,7 +48,7 @@ import {
 import { formatDate } from '../../utils/format';
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
-const useStyles = makeStyles(() => ({
+const styles = () => ({
     root: { height: '100%', display: 'flex', flexDirection: 'column' },
     header: {
         display: 'flex',
@@ -63,10 +64,9 @@ const useStyles = makeStyles(() => ({
         gap: spacing10,
         padding: spacing20,
     },
-}));
+});
 
-const EthosFetchCard = () => {
-    const classes = useStyles();
+const EthosFetchCardBase = ({ classes }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
     const userInfo = useUserInfo() || {};
@@ -88,7 +88,8 @@ const EthosFetchCard = () => {
                 intl.formatMessage(
                     {
                         id: 'card.ethosFetch.announce.loaded',
-                        defaultMessage: '{count, plural, one {# term loaded} other {# terms loaded}}.',
+                        defaultMessage:
+                            '{count, plural, one {# term loaded} other {# terms loaded}}.',
                     },
                     { count: data.length },
                 ),
@@ -121,7 +122,12 @@ const EthosFetchCard = () => {
                             })}
                         </Typography>
                     </span>
-                    <Button size="small" color="secondary" onClick={refresh} disabled={isLoading || isRefreshing}>
+                    <Button
+                        size="small"
+                        color="secondary"
+                        onClick={refresh}
+                        disabled={isLoading || isRefreshing}
+                    >
                         {intl.formatMessage({
                             id: 'card.ethosFetch.cta.refresh',
                             defaultMessage: 'Refresh',
@@ -159,9 +165,14 @@ const EthosFetchCard = () => {
                                     {term.title || term.code || `Term ${idx + 1}`}
                                 </Typography>
                                 {term.startOn || term.endOn ? (
-                                    <Typography variant="body2" style={{ color: palette.textSecondary }}>
+                                    <Typography
+                                        variant="body2"
+                                        style={{ color: palette.textSecondary }}
+                                    >
                                         {formatDate(term.startOn, { locale: userInfo.locale })}
-                                        {term.endOn ? ` – ${formatDate(term.endOn, { locale: userInfo.locale })}` : ''}
+                                        {term.endOn
+                                            ? ` – ${formatDate(term.endOn, { locale: userInfo.locale })}`
+                                            : ''}
                                     </Typography>
                                 ) : null}
                                 {idx < data.length - 1 ? <Divider /> : null}
@@ -174,4 +185,8 @@ const EthosFetchCard = () => {
     );
 };
 
-export default withIntl(EthosFetchCard);
+EthosFetchCardBase.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withIntl(withStyles(styles)(EthosFetchCardBase));

@@ -381,11 +381,13 @@ Typekit), and **what's purely for debugging**.
    know where to extend.
 
 2. **`useStyles` vs `withStyles`.**
-   *Decision:* `useStyles` (hook produced by `makeStyles`) per the
-   project owner's explicit request. Imports come from
-   `@ellucian/react-design-system/core/styles`. The FL Poly cards use
-   the equivalent `withStyles` HOC; both are supported by EDS and
-   produce identical CSS, so this is purely a syntax preference.
+   *Decision:* `withStyles` HOC. Initial guess of `makeStyles` /
+   `useStyles` proved wrong at smoke-test runtime: the EDS
+   `@ellucian/react-design-system/core/styles` module only exports
+   `withStyles`. Refactored every component to match. Pattern: define
+   `styles = (theme) => ({...})`, pass to `withStyles(styles)`,
+   destructure `classes` from props. Matches Ellucian's official
+   sample-extensions and every Florida Poly extension exactly.
 
 3. **`react-intl`.** *Decision:* Yes — both Ellucian's official sample
    and every FL Poly extension use it, so we follow.

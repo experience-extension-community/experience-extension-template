@@ -8,7 +8,7 @@ Demonstrates:
 - `useUserInfo()` — read the signed-in user's name
 - `useThemeInfo()` via `useResolvedTheme()` — branded colors
 - `useExtensionControl().setLoadingStatus(false)` — dismiss the SDK loading spinner once mounted
-- `makeStyles` / `useStyles` from `@ellucian/react-design-system/core/styles`
+- `withStyles` HOC from `@ellucian/react-design-system/core/styles`
 - Path tokens (`spacing20`, `spacing30`)
 - `IconSprite` from `@ellucian/ds-icons/lib`
 - `<Icon>` for a Material Symbols Outlined glyph

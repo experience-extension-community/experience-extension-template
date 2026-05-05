@@ -5,22 +5,23 @@
 //
 // Demonstrates the smallest set of patterns every Experience card uses:
 //   * useUserInfo / useThemeInfo / useExtensionControl from the SDK
-//   * useStyles via makeStyles from EDS
+//   * withStyles HOC + Path tokens for layout/spacing
 //   * IconSprite for Path icons
 //   * useTypekitFont + useMaterialIconFonts for branded fonts
 //   * react-intl for all user-facing strings
 //
-// No data fetching. No configuration. ~80 lines. Use as a copy/paste
-// starting point for a new card.
+// No data fetching. No configuration. Use as a copy/paste starting
+// point for a new card.
 
 import { useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
     Card,
     CardContent,
     Typography,
 } from '@ellucian/react-design-system/core';
-import { makeStyles } from '@ellucian/react-design-system/core/styles';
+import { withStyles } from '@ellucian/react-design-system/core/styles';
 import {
     spacing20,
     spacing30,
@@ -36,7 +37,7 @@ import { useTypekitFont, useMaterialIconFonts } from '../../hooks';
 import { Icon } from '../../components';
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
-const useStyles = makeStyles(() => ({
+const styles = () => ({
     root: {
         height: '100%',
         display: 'flex',
@@ -51,10 +52,9 @@ const useStyles = makeStyles(() => ({
     body: {
         marginBottom: spacing30,
     },
-}));
+});
 
-const HelloUserCard = () => {
-    const classes = useStyles();
+const HelloUserCardBase = ({ classes }) => {
     const intl = useIntl();
     const userInfo = useUserInfo() || {};
     const { palette } = useResolvedTheme();
@@ -94,4 +94,8 @@ const HelloUserCard = () => {
     );
 };
 
-export default withIntl(HelloUserCard);
+HelloUserCardBase.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withIntl(withStyles(styles)(HelloUserCardBase));
