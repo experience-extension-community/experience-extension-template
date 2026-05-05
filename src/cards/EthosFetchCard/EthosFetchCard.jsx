@@ -13,7 +13,7 @@
 //   * useAnnouncer for screen-reader announcements
 //   * formatDate for locale-aware date rendering
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
@@ -66,7 +66,7 @@ const styles = () => ({
     },
 });
 
-const EthosFetchCardBase = ({ classes }) => {
+const EthosFetchCard = ({ classes }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
     const userInfo = useUserInfo() || {};
@@ -185,8 +185,8 @@ const EthosFetchCardBase = ({ classes }) => {
     );
 };
 
-EthosFetchCardBase.propTypes = {
+EthosFetchCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withIntl(withStyles(styles)(EthosFetchCardBase));
+export default withStyles(styles)(withIntl(EthosFetchCard));

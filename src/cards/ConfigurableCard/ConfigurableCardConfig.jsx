@@ -10,7 +10,7 @@
 //
 // The shape persisted is `{ links: [{ label, url }, ...] }`.
 
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
@@ -55,7 +55,7 @@ const isValidUrl = (str) => {
     }
 };
 
-const ConfigurableCardConfigBase = ({ classes }) => {
+const ConfigurableCardConfig = ({ classes }) => {
     const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setCustomConfiguration, setIsCustomConfigurationValid } = useCardControl() || {};
@@ -156,8 +156,8 @@ const ConfigurableCardConfigBase = ({ classes }) => {
     );
 };
 
-ConfigurableCardConfigBase.propTypes = {
+ConfigurableCardConfig.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withIntl(withStyles(styles)(ConfigurableCardConfigBase));
+export default withStyles(styles)(withIntl(ConfigurableCardConfig));

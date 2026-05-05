@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Typography } from '@ellucian/react-design-system/core';
@@ -38,7 +38,7 @@ const styles = () => ({
     },
 });
 
-const SamplePageBase = ({ classes }) => {
+const SamplePage = ({ classes }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
     const userInfo = useUserInfo() || {};
@@ -96,8 +96,11 @@ const SamplePageBase = ({ classes }) => {
     );
 };
 
-SamplePageBase.propTypes = {
+SamplePage.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export const SamplePage = withStyles(styles)(SamplePageBase);
+const Wrapped = withStyles(styles)(SamplePage);
+
+export default Wrapped;
+export { Wrapped as SamplePage };

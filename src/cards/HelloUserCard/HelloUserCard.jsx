@@ -10,10 +10,10 @@
 //   * useTypekitFont + useMaterialIconFonts for branded fonts
 //   * react-intl for all user-facing strings
 //
-// No data fetching. No configuration. Use as a copy/paste starting
-// point for a new card.
+// HOC order follows FL Poly's working pattern:
+//   withStyles(styles)(withIntl(Card))   — withStyles outermost.
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
@@ -54,7 +54,7 @@ const styles = () => ({
     },
 });
 
-const HelloUserCardBase = ({ classes }) => {
+const HelloUserCard = ({ classes }) => {
     const intl = useIntl();
     const userInfo = useUserInfo() || {};
     const { palette } = useResolvedTheme();
@@ -94,8 +94,8 @@ const HelloUserCardBase = ({ classes }) => {
     );
 };
 
-HelloUserCardBase.propTypes = {
+HelloUserCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withIntl(withStyles(styles)(HelloUserCardBase));
+export default withStyles(styles)(withIntl(HelloUserCard));

@@ -1,28 +1,26 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 
+import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Button, Typography } from '@ellucian/react-design-system/core';
-import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { spacing20, spacing40 } from '@ellucian/react-design-system/core/styles/tokens';
 
 import { Icon } from '../../Icon';
 import { EthosError } from '../../../utils/ethos';
 import { useResolvedTheme } from '../../../utils/branding/theme';
 
-const styles = () => ({
-    root: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        textAlign: 'center',
-        padding: spacing40,
-        gap: spacing20,
-    },
-});
+const rootStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    padding: spacing40,
+    gap: spacing20,
+};
 
-const ErrorStateBase = ({ classes, error, onRetry, fallbackMessage }) => {
+const ErrorState = ({ error, onRetry, fallbackMessage }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
 
@@ -43,7 +41,7 @@ const ErrorStateBase = ({ classes, error, onRetry, fallbackMessage }) => {
     });
 
     return (
-        <div className={classes.root} role="alert">
+        <div style={rootStyle} role="alert">
             <Icon name="error" size={32} fill={1} label="Error" style={{ color: palette.danger }} />
             <Typography variant="body1">{message}</Typography>
             {onRetry ? (
@@ -55,17 +53,11 @@ const ErrorStateBase = ({ classes, error, onRetry, fallbackMessage }) => {
     );
 };
 
-ErrorStateBase.propTypes = {
-    classes: PropTypes.object.isRequired,
+ErrorState.propTypes = {
     error: PropTypes.oneOfType([PropTypes.instanceOf(Error), PropTypes.object]),
     onRetry: PropTypes.func,
     fallbackMessage: PropTypes.string,
 };
 
-ErrorStateBase.defaultProps = {
-    error: undefined,
-    onRetry: undefined,
-    fallbackMessage: undefined,
-};
-
-export const ErrorState = withStyles(styles)(ErrorStateBase);
+export default ErrorState;
+export { ErrorState };

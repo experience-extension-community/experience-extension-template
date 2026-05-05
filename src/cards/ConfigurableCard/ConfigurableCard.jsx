@@ -9,7 +9,7 @@
 // Demonstrates the read-side of the customConfiguration pattern.
 // The write-side (form) lives in ConfigurableCardConfig.jsx.
 
-import { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
@@ -53,7 +53,7 @@ const styles = () => ({
     },
 });
 
-const ConfigurableCardBase = ({ classes }) => {
+const ConfigurableCard = ({ classes }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
     const cardInfo = useCardInfo() || {};
@@ -119,8 +119,8 @@ const ConfigurableCardBase = ({ classes }) => {
     );
 };
 
-ConfigurableCardBase.propTypes = {
+ConfigurableCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withIntl(withStyles(styles)(ConfigurableCardBase));
+export default withStyles(styles)(withIntl(ConfigurableCard));

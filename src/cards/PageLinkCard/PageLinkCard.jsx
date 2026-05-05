@@ -8,7 +8,7 @@
 //   * useCardControl().navigateToPage to imperatively launch the page
 //   * The card body itself stays trivial — the page does the work
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
@@ -39,7 +39,7 @@ const styles = () => ({
     cta: { marginTop: spacing30, alignSelf: 'flex-start' },
 });
 
-const PageLinkCardBase = ({ classes }) => {
+const PageLinkCard = ({ classes }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
     const { setLoadingStatus } = useExtensionControl();
@@ -96,8 +96,8 @@ const PageLinkCardBase = ({ classes }) => {
     );
 };
 
-PageLinkCardBase.propTypes = {
+PageLinkCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withIntl(withStyles(styles)(PageLinkCardBase));
+export default withStyles(styles)(withIntl(PageLinkCard));
