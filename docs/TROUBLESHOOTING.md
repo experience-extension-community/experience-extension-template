@@ -40,6 +40,33 @@ provides a default `useThemeInfo`. Tests need to call
 `jest.mock('@ellucian/experience-extension-utils')` for that mock to
 take effect — see existing component tests for the pattern.
 
+## `npm run build-prod` crashes with "Cannot read properties of null (reading 'accountId')"
+
+Full error:
+
+```
+TypeError: Cannot read properties of null (reading 'accountId')
+    at WebpackExperienceValidatorPlugin.validateExtensionConfig
+```
+
+Cause: your `.env` has `EXPERIENCE_EXTENSION_UPLOAD_TOKEN` set to a
+non-JWT value (e.g. the literal placeholder `<upload-token>` or any
+string that isn't a real token). The SDK's webpack validator
+unconditionally JWT-decodes whatever value is present and crashes
+when decoding returns `null`.
+
+Fix: either supply a real upload token from the Experience admin UI,
+or **comment out the line entirely** while you only need to build /
+test / lint locally:
+
+```
+# EXPERIENCE_EXTENSION_UPLOAD_TOKEN=<paste-real-jwt-here>
+```
+
+Local-only commands (`npm install`, `npm test`, `npm run lint`,
+`npm run build-prod`) work without the token. Only the deploy
+commands (`deploy-dev`, `deploy-prod`, `watch-and-upload`) need it.
+
 ## CI's reusable workflow fails to resolve
 
 The `ci.yml` references
