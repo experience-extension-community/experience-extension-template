@@ -11,8 +11,6 @@
 // Mirrors the pattern used in Ellucian's official sample-extensions
 // and FL Poly's existing extensions.
 
-/* eslint-disable global-require */
-
 import ENGLISH_TRANSLATION from './en.json';
 
 export const getMessages = (userLocale) => {
