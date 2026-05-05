@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Typography } from '@ellucian/react-design-system/core';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import { spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
+import { spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
 import { IconSprite } from '@ellucian/ds-icons/lib';
 import {
     useDashboardInfo,
