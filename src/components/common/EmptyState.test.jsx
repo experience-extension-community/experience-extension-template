@@ -4,14 +4,19 @@
 /**
  * @jest-environment jsdom
  */
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { axe } from 'jest-axe';
 import { IntlProvider } from 'react-intl';
 
-import { EmptyState } from './EmptyState';
+import EmptyState from './EmptyState';
 
 const renderWithIntl = (ui) =>
-    render(<IntlProvider locale="en" messages={{}}>{ui}</IntlProvider>);
+    render(
+        <IntlProvider locale="en" messages={{}}>
+            {ui}
+        </IntlProvider>,
+    );
 
 describe('EmptyState', () => {
     it('renders title and optional description', () => {

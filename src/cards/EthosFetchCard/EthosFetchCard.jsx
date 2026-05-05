@@ -8,12 +8,13 @@
 //     env-var fallback
 //   * useAcademicPeriods (domain hook) → fetchAcademicPeriods (data fn)
 //     → authenticatedFetch (transport)
-//   * LoadingState / ErrorState / EmptyState
-//   * RefreshDataStatusMessage for refresh flow
+//   * LoadingState / ErrorState / EmptyState / RefreshDataStatusMessage
 //   * useAnnouncer for screen-reader announcements
 //   * formatDate for locale-aware date rendering
+//
+// HOC composition: withStyles(styles)(withIntl(Card)) — withStyles outermost.
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
@@ -24,29 +25,23 @@ import {
     Typography,
 } from '@ellucian/react-design-system/core';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import {
-    spacing10,
-    spacing20,
-} from '@ellucian/react-design-system/core/styles/tokens';
+import { spacing10, spacing20 } from '@ellucian/react-design-system/core/styles/tokens';
 import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useExtensionControl, useUserInfo } from '@ellucian/experience-extension-utils';
 
-import { useResolvedTheme } from '../../utils/branding/theme';
-import {
-    useAcademicPeriods,
-    useAnnouncer,
-    useTypekitFont,
-    useMaterialIconFonts,
-} from '../../hooks';
-import {
-    Icon,
-    LoadingState,
-    ErrorState,
-    EmptyState,
-    RefreshDataStatusMessage,
-} from '../../components';
-import { formatDate } from '../../utils/format';
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
+import { useResolvedTheme } from '../../utils/branding/theme';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+import { useAcademicPeriods } from '../../hooks/useAcademicPeriods';
+import { useAnnouncer } from '../../hooks/useAnnouncer';
+import { formatDate } from '../../utils/format';
+
+import Icon from '../../components/Icon';
+import LoadingState from '../../components/common/LoadingState';
+import ErrorState from '../../components/common/ErrorState';
+import EmptyState from '../../components/common/EmptyState';
+import RefreshDataStatusMessage from '../../components/common/RefreshDataStatusMessage';
 
 const styles = () => ({
     root: { height: '100%', display: 'flex', flexDirection: 'column' },
@@ -66,7 +61,7 @@ const styles = () => ({
     },
 });
 
-const EthosFetchCardBase = ({ classes }) => {
+const EthosFetchCard = ({ classes }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
     const userInfo = useUserInfo() || {};
@@ -185,8 +180,8 @@ const EthosFetchCardBase = ({ classes }) => {
     );
 };
 
-EthosFetchCardBase.propTypes = {
+EthosFetchCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withIntl(withStyles(styles)(EthosFetchCardBase));
+export default withStyles(styles)(withIntl(EthosFetchCard));

@@ -4,19 +4,24 @@
 /**
  * @jest-environment jsdom
  */
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
 import { IntlProvider } from 'react-intl';
 
-import { ErrorState } from './ErrorState';
-import { EthosError, ErrorCategory } from '../../../utils/ethos';
+import ErrorState from './ErrorState';
+import { EthosError, ErrorCategory } from '../../utils/ethos';
 
 const renderWithIntl = (ui) =>
-    render(<IntlProvider locale="en" messages={{}}>{ui}</IntlProvider>);
+    render(
+        <IntlProvider locale="en" messages={{}}>
+            {ui}
+        </IntlProvider>,
+    );
 
 describe('ErrorState', () => {
-    it('renders the fallback message when no error is given', () => {
+    it('renders an alert region', () => {
         renderWithIntl(<ErrorState />);
         expect(screen.getByRole('alert')).toBeInTheDocument();
     });

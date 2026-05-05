@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
+//
+// Sample page. Wrapped only in withStyles — the IntlProvider is
+// supplied by router.jsx so a useIntl() call here works without an
+// extra withIntl wrap.
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Typography } from '@ellucian/react-design-system/core';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import {
-    spacing30,
-    spacing40,
-} from '@ellucian/react-design-system/core/styles/tokens';
+import { spacing30, spacing40 } from '@ellucian/react-design-system/core/styles/tokens';
 import { IconSprite } from '@ellucian/ds-icons/lib';
 import {
     useDashboardInfo,
@@ -19,8 +20,9 @@ import {
 } from '@ellucian/experience-extension-utils';
 
 import { useResolvedTheme } from '../../utils/branding/theme';
-import { useTypekitFont, useMaterialIconFonts } from '../../hooks';
-import { Icon } from '../../components';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+import Icon from '../../components/Icon';
 
 const styles = () => ({
     root: {
@@ -38,7 +40,7 @@ const styles = () => ({
     },
 });
 
-const SamplePageBase = ({ classes }) => {
+const SamplePage = ({ classes }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
     const userInfo = useUserInfo() || {};
@@ -96,8 +98,8 @@ const SamplePageBase = ({ classes }) => {
     );
 };
 
-SamplePageBase.propTypes = {
+SamplePage.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export const SamplePage = withStyles(styles)(SamplePageBase);
+export default withStyles(styles)(SamplePage);

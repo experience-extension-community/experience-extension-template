@@ -8,31 +8,25 @@
 //
 // Demonstrates the read-side of the customConfiguration pattern.
 // The write-side (form) lives in ConfigurableCardConfig.jsx.
+//
+// HOC composition: withStyles(styles)(withIntl(Card)) — withStyles outermost.
 
-import { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import {
-    Button,
-    Card,
-    CardContent,
-    Typography,
-} from '@ellucian/react-design-system/core';
+import { Button, Card, CardContent, Typography } from '@ellucian/react-design-system/core';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import {
-    spacing10,
-    spacing20,
-} from '@ellucian/react-design-system/core/styles/tokens';
+import { spacing10, spacing20 } from '@ellucian/react-design-system/core/styles/tokens';
 import { IconSprite } from '@ellucian/ds-icons/lib';
-import {
-    useCardInfo,
-    useExtensionControl,
-} from '@ellucian/experience-extension-utils';
+import { useCardInfo, useExtensionControl } from '@ellucian/experience-extension-utils';
 
-import { useResolvedTheme } from '../../utils/branding/theme';
-import { useTypekitFont, useMaterialIconFonts } from '../../hooks';
-import { Icon, EmptyState } from '../../components';
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
+import { useResolvedTheme } from '../../utils/branding/theme';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+
+import Icon from '../../components/Icon';
+import EmptyState from '../../components/common/EmptyState';
 
 const styles = () => ({
     root: { height: '100%', display: 'flex', flexDirection: 'column' },
@@ -53,7 +47,7 @@ const styles = () => ({
     },
 });
 
-const ConfigurableCardBase = ({ classes }) => {
+const ConfigurableCard = ({ classes }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
     const cardInfo = useCardInfo() || {};
@@ -119,8 +113,8 @@ const ConfigurableCardBase = ({ classes }) => {
     );
 };
 
-ConfigurableCardBase.propTypes = {
+ConfigurableCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withIntl(withStyles(styles)(ConfigurableCardBase));
+export default withStyles(styles)(withIntl(ConfigurableCard));

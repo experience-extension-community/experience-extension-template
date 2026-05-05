@@ -9,7 +9,7 @@
 
 import { HashRouter, Route, Switch } from 'react-router-dom';
 
-import { SamplePage } from './SamplePage';
+import SamplePage from './SamplePage';
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
 const Router = () => (
