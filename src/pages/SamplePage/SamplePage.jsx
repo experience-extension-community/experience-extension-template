@@ -19,6 +19,7 @@ import {
 } from '@ellucian/experience-extension-utils';
 
 import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 import { brandColors } from '../../utils/branding/brandColors';
 import Icon from '../../components/Icon';
 
@@ -49,6 +50,7 @@ function SamplePage(props) {
     const { setPageTitle, setLoadingStatus } = useExtensionControl() || {};
 
     useTypekitFont();
+    useMaterialIconFonts();
 
     useEffect(() => {
         if (typeof setPageTitle === 'function') {
@@ -63,11 +65,6 @@ function SamplePage(props) {
 
     return (
         <main className={classes.root}>
-            <link rel="stylesheet" href="https://use.typekit.net/yld8vhe.css" />
-            <link
-                rel="stylesheet"
-                href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=block"
-            />
             <IconSprite />
             <header className={classes.header}>
                 <Icon name="dashboard" size={32} className={classes.headerIcon} />

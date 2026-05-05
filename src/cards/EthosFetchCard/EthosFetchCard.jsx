@@ -29,6 +29,7 @@ import { useExtensionControl, useUserInfo } from '@ellucian/experience-extension
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 import { useAcademicPeriods } from '../../hooks/useAcademicPeriods';
 import { useAnnouncer } from '../../hooks/useAnnouncer';
 import { formatDate } from '../../utils/format';
@@ -68,6 +69,7 @@ function EthosFetchCard(props) {
     const announce = useAnnouncer();
 
     useTypekitFont();
+    useMaterialIconFonts();
 
     const { data, isLoading, isRefreshing, isError, error, refresh } = useAcademicPeriods();
 
@@ -103,11 +105,6 @@ function EthosFetchCard(props) {
 
     return (
         <Card className={classes.root}>
-            <link rel="stylesheet" href="https://use.typekit.net/yld8vhe.css" />
-            <link
-                rel="stylesheet"
-                href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=block"
-            />
             <IconSprite />
             <CardContent>
                 <header className={classes.header}>

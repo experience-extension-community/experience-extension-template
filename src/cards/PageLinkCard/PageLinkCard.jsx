@@ -18,6 +18,7 @@ import { useCardControl, useExtensionControl } from '@ellucian/experience-extens
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 import { brandColors } from '../../utils/branding/brandColors';
 import Icon from '../../components/Icon';
 
@@ -37,6 +38,7 @@ function PageLinkCard(props) {
     const { navigateToPage } = useCardControl() || {};
 
     useTypekitFont();
+    useMaterialIconFonts();
 
     useEffect(() => {
         setLoadingStatus(false);
@@ -50,11 +52,6 @@ function PageLinkCard(props) {
 
     return (
         <Card className={classes.root}>
-            <link rel="stylesheet" href="https://use.typekit.net/yld8vhe.css" />
-            <link
-                rel="stylesheet"
-                href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=block"
-            />
             <IconSprite />
             <CardContent>
                 <div className={classes.body}>
