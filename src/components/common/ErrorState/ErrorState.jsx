@@ -4,14 +4,14 @@
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Button, Typography } from '@ellucian/react-design-system/core';
-import { makeStyles } from '@ellucian/react-design-system/core/styles';
+import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { spacing20, spacing40 } from '@ellucian/react-design-system/core/styles/tokens';
 
 import { Icon } from '../../Icon';
 import { EthosError } from '../../../utils/ethos';
 import { useResolvedTheme } from '../../../utils/branding/theme';
 
-const useStyles = makeStyles(() => ({
+const styles = () => ({
     root: {
         display: 'flex',
         flexDirection: 'column',
@@ -20,10 +20,9 @@ const useStyles = makeStyles(() => ({
         padding: spacing40,
         gap: spacing20,
     },
-}));
+});
 
-export const ErrorState = ({ error, onRetry, fallbackMessage }) => {
-    const classes = useStyles();
+const ErrorStateBase = ({ classes, error, onRetry, fallbackMessage }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
 
@@ -56,14 +55,17 @@ export const ErrorState = ({ error, onRetry, fallbackMessage }) => {
     );
 };
 
-ErrorState.propTypes = {
+ErrorStateBase.propTypes = {
+    classes: PropTypes.object.isRequired,
     error: PropTypes.oneOfType([PropTypes.instanceOf(Error), PropTypes.object]),
     onRetry: PropTypes.func,
     fallbackMessage: PropTypes.string,
 };
 
-ErrorState.defaultProps = {
+ErrorStateBase.defaultProps = {
     error: undefined,
     onRetry: undefined,
     fallbackMessage: undefined,
 };
+
+export const ErrorState = withStyles(styles)(ErrorStateBase);

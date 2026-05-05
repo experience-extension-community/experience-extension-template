@@ -3,13 +3,13 @@
 
 import PropTypes from 'prop-types';
 import { Typography } from '@ellucian/react-design-system/core';
-import { makeStyles } from '@ellucian/react-design-system/core/styles';
+import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { spacing20, spacing40 } from '@ellucian/react-design-system/core/styles/tokens';
 
 import { Icon } from '../../Icon';
 import { useResolvedTheme } from '../../../utils/branding/theme';
 
-const useStyles = makeStyles(() => ({
+const styles = () => ({
     root: {
         display: 'flex',
         flexDirection: 'column',
@@ -18,10 +18,9 @@ const useStyles = makeStyles(() => ({
         padding: spacing40,
         gap: spacing20,
     },
-}));
+});
 
-export const EmptyState = ({ title, description, icon }) => {
-    const classes = useStyles();
+const EmptyStateBase = ({ classes, title, description, icon }) => {
     const { palette } = useResolvedTheme();
 
     return (
@@ -33,13 +32,16 @@ export const EmptyState = ({ title, description, icon }) => {
     );
 };
 
-EmptyState.propTypes = {
+EmptyStateBase.propTypes = {
+    classes: PropTypes.object.isRequired,
     title: PropTypes.string.isRequired,
     description: PropTypes.string,
     icon: PropTypes.string,
 };
 
-EmptyState.defaultProps = {
+EmptyStateBase.defaultProps = {
     description: undefined,
     icon: 'inbox',
 };
+
+export const EmptyState = withStyles(styles)(EmptyStateBase);

@@ -9,6 +9,7 @@
 //   * The card body itself stays trivial — the page does the work
 
 import { useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
     Button,
@@ -16,7 +17,7 @@ import {
     CardContent,
     Typography,
 } from '@ellucian/react-design-system/core';
-import { makeStyles } from '@ellucian/react-design-system/core/styles';
+import { withStyles } from '@ellucian/react-design-system/core/styles';
 import {
     spacing20,
     spacing30,
@@ -32,14 +33,13 @@ import { useTypekitFont, useMaterialIconFonts } from '../../hooks';
 import { Icon } from '../../components';
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
-const useStyles = makeStyles(() => ({
+const styles = () => ({
     root: { height: '100%', display: 'flex', flexDirection: 'column' },
     body: { display: 'flex', flexDirection: 'column', gap: spacing20 },
     cta: { marginTop: spacing30, alignSelf: 'flex-start' },
-}));
+});
 
-const PageLinkCard = () => {
-    const classes = useStyles();
+const PageLinkCardBase = ({ classes }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
     const { setLoadingStatus } = useExtensionControl();
@@ -63,7 +63,10 @@ const PageLinkCard = () => {
             <IconSprite />
             <CardContent>
                 <div className={classes.body}>
-                    <Typography variant="h6" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Typography
+                        variant="h6"
+                        style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                    >
                         <Icon name="open_in_new" size={24} style={{ color: palette.primary }} />
                         {intl.formatMessage({
                             id: 'card.pageLink.title',
@@ -93,4 +96,8 @@ const PageLinkCard = () => {
     );
 };
 
-export default withIntl(PageLinkCard);
+PageLinkCardBase.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withIntl(withStyles(styles)(PageLinkCardBase));

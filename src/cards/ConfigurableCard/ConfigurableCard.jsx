@@ -10,6 +10,7 @@
 // The write-side (form) lives in ConfigurableCardConfig.jsx.
 
 import { useEffect, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
     Button,
@@ -17,7 +18,7 @@ import {
     CardContent,
     Typography,
 } from '@ellucian/react-design-system/core';
-import { makeStyles } from '@ellucian/react-design-system/core/styles';
+import { withStyles } from '@ellucian/react-design-system/core/styles';
 import {
     spacing10,
     spacing20,
@@ -33,7 +34,7 @@ import { useTypekitFont, useMaterialIconFonts } from '../../hooks';
 import { Icon, EmptyState } from '../../components';
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
-const useStyles = makeStyles(() => ({
+const styles = () => ({
     root: { height: '100%', display: 'flex', flexDirection: 'column' },
     header: {
         display: 'flex',
@@ -50,10 +51,9 @@ const useStyles = makeStyles(() => ({
         justifyContent: 'flex-start',
         textTransform: 'none',
     },
-}));
+});
 
-const ConfigurableCard = () => {
-    const classes = useStyles();
+const ConfigurableCardBase = ({ classes }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
     const cardInfo = useCardInfo() || {};
@@ -119,4 +119,8 @@ const ConfigurableCard = () => {
     );
 };
 
-export default withIntl(ConfigurableCard);
+ConfigurableCardBase.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withIntl(withStyles(styles)(ConfigurableCardBase));

@@ -11,6 +11,7 @@
 // The shape persisted is `{ links: [{ label, url }, ...] }`.
 
 import { useEffect, useMemo, useState } from 'react';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
     Button,
@@ -18,7 +19,7 @@ import {
     TextField,
     Typography,
 } from '@ellucian/react-design-system/core';
-import { makeStyles } from '@ellucian/react-design-system/core/styles';
+import { withStyles } from '@ellucian/react-design-system/core/styles';
 import {
     spacing10,
     spacing20,
@@ -32,12 +33,17 @@ import {
 import { Icon } from '../../components';
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
-const useStyles = makeStyles(() => ({
+const styles = () => ({
     root: { display: 'flex', flexDirection: 'column', gap: spacing20 },
     row: { display: 'flex', alignItems: 'flex-start', gap: spacing10 },
-    fieldsCol: { flex: '1 1 auto', display: 'flex', flexDirection: 'column', gap: spacing10 },
+    fieldsCol: {
+        flex: '1 1 auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing10,
+    },
     addRow: { marginTop: spacing30 },
-}));
+});
 
 const isValidUrl = (str) => {
     if (!str) return false;
@@ -49,8 +55,7 @@ const isValidUrl = (str) => {
     }
 };
 
-const ConfigurableCardConfig = () => {
-    const classes = useStyles();
+const ConfigurableCardConfigBase = ({ classes }) => {
     const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setCustomConfiguration, setIsCustomConfigurationValid } = useCardControl() || {};
@@ -151,7 +156,8 @@ const ConfigurableCardConfig = () => {
     );
 };
 
-// No propTypes — this component takes no props; all state comes from
-// useCardInfo() and useCardControl() inside the component body.
+ConfigurableCardConfigBase.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
 
-export default withIntl(ConfigurableCardConfig);
+export default withIntl(withStyles(styles)(ConfigurableCardConfigBase));

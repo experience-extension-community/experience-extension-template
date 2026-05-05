@@ -42,8 +42,9 @@ documentation skeleton. Out of the box it ships:
   font auto-loaded with retry.
 - **Adobe Typekit** brand-font loader, configurable per institution.
 - **`react-intl`** with locale cascade (exact → language → English).
-- **`useStyles`** (`makeStyles` from `@ellucian/react-design-system/core/styles`)
-  on every component — no inline hex values.
+- **`withStyles`** HOC from `@ellucian/react-design-system/core/styles`
+  on every component — matches Ellucian samples and FL Poly extensions.
+  No inline hex values.
 - **Two-layer data flow**: pure async `src/data/<domain>.js` fetchers
   consumed by React `src/hooks/use<Domain>.js` state machines.
 - **WCAG 2.2 AA** floor — every component has render + `jest-axe` tests.

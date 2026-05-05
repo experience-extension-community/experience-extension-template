@@ -4,10 +4,10 @@
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { CircularProgress } from '@ellucian/react-design-system/core';
-import { makeStyles } from '@ellucian/react-design-system/core/styles';
+import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { spacing20, spacing40 } from '@ellucian/react-design-system/core/styles/tokens';
 
-const useStyles = makeStyles(() => ({
+const styles = () => ({
     root: {
         display: 'flex',
         flexDirection: 'column',
@@ -19,14 +19,12 @@ const useStyles = makeStyles(() => ({
     label: {
         marginTop: spacing20,
     },
-}));
+});
 
-export const LoadingState = ({ label }) => {
-    const classes = useStyles();
+const LoadingStateBase = ({ classes, label }) => {
     const intl = useIntl();
     const text =
-        label ||
-        intl.formatMessage({ id: 'common.loading', defaultMessage: 'Loading…' });
+        label || intl.formatMessage({ id: 'common.loading', defaultMessage: 'Loading…' });
 
     return (
         <div className={classes.root} role="status" aria-live="polite">
@@ -36,10 +34,13 @@ export const LoadingState = ({ label }) => {
     );
 };
 
-LoadingState.propTypes = {
+LoadingStateBase.propTypes = {
+    classes: PropTypes.object.isRequired,
     label: PropTypes.string,
 };
 
-LoadingState.defaultProps = {
+LoadingStateBase.defaultProps = {
     label: undefined,
 };
+
+export const LoadingState = withStyles(styles)(LoadingStateBase);
