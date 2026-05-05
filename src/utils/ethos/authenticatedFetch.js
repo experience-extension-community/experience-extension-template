@@ -42,7 +42,7 @@ const parseBody = async (response) => {
   }
   try {
     return await response.text();
-  } catch (_err) {
+  } catch {
     return null;
   }
 };
