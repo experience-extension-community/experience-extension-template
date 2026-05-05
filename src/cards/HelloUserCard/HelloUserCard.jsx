@@ -3,15 +3,17 @@
 //
 // HelloUserCard — minimum-viable card.
 //
-// Demonstrates the smallest set of patterns every Experience card uses:
-//   * useUserInfo / useExtensionControl from the SDK
-//   * withStyles HOC + Path tokens for layout/spacing
-//   * IconSprite for Path icons (required once per card)
-//   * useTypekitFont + useMaterialIconFonts for branded fonts
-//   * react-intl for all user-facing strings
+// Demonstrates the smallest set of patterns every Experience card uses,
+// matching FL Poly's exp-account-details-custom pattern exactly:
+//   * `classes` injected via withStyles, read from props
+//   * SDK hooks used inside the card body (useUserInfo, useExtensionControl)
+//   * useTypekitFont() loads the brand stylesheet on mount
+//   * react-intl's useIntl() for messages
+//   * brandColors literal hex values in the styles function
+//   * Spacing from Path DS tokens (spacing10, spacing20, ...)
 //
-// HOC composition follows the FL Poly canonical order:
-//   withStyles(styles)(withIntl(Card))   — withStyles outermost.
+// HOC composition: withStyles(styles)(withIntl(Card)) — withStyles
+// outermost, matching the canonical FL Poly export pattern.
 
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
@@ -23,9 +25,8 @@ import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useExtensionControl, useUserInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import { useResolvedTheme } from '../../utils/branding/theme';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+import { brandColors } from '../../utils/branding/brandColors';
 import Icon from '../../components/Icon';
 
 const styles = () => ({
@@ -40,19 +41,21 @@ const styles = () => ({
         gap: spacing20,
         marginBottom: spacing20,
     },
+    icon: {
+        color: brandColors.polyPurple,
+    },
     body: {
         marginBottom: spacing30,
     },
 });
 
-const HelloUserCard = ({ classes }) => {
+function HelloUserCard(props) {
+    const { classes } = props;
     const intl = useIntl();
     const userInfo = useUserInfo() || {};
-    const { palette } = useResolvedTheme();
     const { setLoadingStatus } = useExtensionControl();
 
     useTypekitFont();
-    useMaterialIconFonts();
 
     useEffect(() => {
         setLoadingStatus(false);
@@ -63,7 +66,7 @@ const HelloUserCard = ({ classes }) => {
             <IconSprite />
             <CardContent>
                 <header className={classes.header}>
-                    <Icon name="waving_hand" size={28} style={{ color: palette.primary }} />
+                    <Icon name="waving_hand" size={28} className={classes.icon} />
                     <Typography variant="h6">
                         {intl.formatMessage(
                             {
@@ -83,7 +86,7 @@ const HelloUserCard = ({ classes }) => {
             </CardContent>
         </Card>
     );
-};
+}
 
 HelloUserCard.propTypes = {
     classes: PropTypes.object.isRequired,

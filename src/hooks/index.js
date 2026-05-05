@@ -6,5 +6,4 @@ export { useExtensionConfig } from './useExtensionConfig';
 export { useAnnouncer } from './useAnnouncer';
 export { usePrefersReducedMotion } from './usePrefersReducedMotion';
 export { useTypekitFont } from './useTypekitFont';
-export { useMaterialIconFonts } from './useMaterialIconFonts';
 export { useAcademicPeriods } from './useAcademicPeriods';

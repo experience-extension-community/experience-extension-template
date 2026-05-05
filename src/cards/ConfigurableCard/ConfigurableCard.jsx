@@ -3,13 +3,10 @@
 //
 // ConfigurableCard — admin-configured content via customConfiguration.
 //
-// Reads `customConfiguration.links` (an array of { label, url })
-// from the card config. Renders each link as a Path Button.
-//
-// Demonstrates the read-side of the customConfiguration pattern.
-// The write-side (form) lives in ConfigurableCardConfig.jsx.
-//
-// HOC composition: withStyles(styles)(withIntl(Card)) — withStyles outermost.
+// Reads `customConfiguration.links` from the card config. Renders each
+// link as a Path Button. Demonstrates the read-side of the
+// customConfiguration pattern; the write-side (form) lives in
+// ConfigurableCardConfig.jsx.
 
 import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
@@ -21,9 +18,8 @@ import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useCardInfo, useExtensionControl } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import { useResolvedTheme } from '../../utils/branding/theme';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+import { brandColors } from '../../utils/branding/brandColors';
 
 import Icon from '../../components/Icon';
 import EmptyState from '../../components/common/EmptyState';
@@ -36,6 +32,7 @@ const styles = () => ({
         gap: spacing10,
         marginBottom: spacing20,
     },
+    headerIcon: { color: brandColors.polyPurple },
     list: {
         display: 'flex',
         flexDirection: 'column',
@@ -47,14 +44,13 @@ const styles = () => ({
     },
 });
 
-const ConfigurableCard = ({ classes }) => {
+function ConfigurableCard(props) {
+    const { classes } = props;
     const intl = useIntl();
-    const { palette } = useResolvedTheme();
     const cardInfo = useCardInfo() || {};
     const { setLoadingStatus } = useExtensionControl();
 
     useTypekitFont();
-    useMaterialIconFonts();
 
     useEffect(() => {
         setLoadingStatus(false);
@@ -71,7 +67,7 @@ const ConfigurableCard = ({ classes }) => {
             <IconSprite />
             <CardContent>
                 <header className={classes.header}>
-                    <Icon name="link" size={24} style={{ color: palette.primary }} />
+                    <Icon name="link" size={24} className={classes.headerIcon} />
                     <Typography variant="h6">
                         {intl.formatMessage({
                             id: 'card.configurable.title',
@@ -111,7 +107,7 @@ const ConfigurableCard = ({ classes }) => {
             </CardContent>
         </Card>
     );
-};
+}
 
 ConfigurableCard.propTypes = {
     classes: PropTypes.object.isRequired,

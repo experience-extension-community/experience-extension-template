@@ -4,10 +4,8 @@
 // EthosFetchCard — Data Connect / Ethos data lifecycle.
 //
 // Demonstrates:
-//   * Data Connect pipeline name read from card configuration with
-//     env-var fallback
+//   * Configurable Data Connect pipeline name
 //   * useAcademicPeriods (domain hook) → fetchAcademicPeriods (data fn)
-//     → authenticatedFetch (transport)
 //   * LoadingState / ErrorState / EmptyState / RefreshDataStatusMessage
 //   * useAnnouncer for screen-reader announcements
 //   * formatDate for locale-aware date rendering
@@ -30,12 +28,11 @@ import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useExtensionControl, useUserInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import { useResolvedTheme } from '../../utils/branding/theme';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 import { useAcademicPeriods } from '../../hooks/useAcademicPeriods';
 import { useAnnouncer } from '../../hooks/useAnnouncer';
 import { formatDate } from '../../utils/format';
+import { brandColors } from '../../utils/branding/brandColors';
 
 import Icon from '../../components/Icon';
 import LoadingState from '../../components/common/LoadingState';
@@ -52,6 +49,7 @@ const styles = () => ({
         marginBottom: spacing20,
     },
     headerTitle: { display: 'flex', alignItems: 'center', gap: spacing10 },
+    headerIcon: { color: brandColors.polyPurple },
     list: { display: 'flex', flexDirection: 'column', gap: spacing10, marginTop: spacing20 },
     listItem: {
         display: 'flex',
@@ -59,17 +57,17 @@ const styles = () => ({
         gap: spacing10,
         padding: spacing20,
     },
+    dateRange: { color: brandColors.textSecondary },
 });
 
-const EthosFetchCard = ({ classes }) => {
+function EthosFetchCard(props) {
+    const { classes } = props;
     const intl = useIntl();
-    const { palette } = useResolvedTheme();
     const userInfo = useUserInfo() || {};
     const { setLoadingStatus } = useExtensionControl();
     const announce = useAnnouncer();
 
     useTypekitFont();
-    useMaterialIconFonts();
 
     const { data, isLoading, isRefreshing, isError, error, refresh } = useAcademicPeriods();
 
@@ -109,7 +107,7 @@ const EthosFetchCard = ({ classes }) => {
             <CardContent>
                 <header className={classes.header}>
                     <span className={classes.headerTitle}>
-                        <Icon name="event" size={24} style={{ color: palette.primary }} />
+                        <Icon name="event" size={24} className={classes.headerIcon} />
                         <Typography variant="h6">
                             {intl.formatMessage({
                                 id: 'card.ethosFetch.title',
@@ -160,10 +158,7 @@ const EthosFetchCard = ({ classes }) => {
                                     {term.title || term.code || `Term ${idx + 1}`}
                                 </Typography>
                                 {term.startOn || term.endOn ? (
-                                    <Typography
-                                        variant="body2"
-                                        style={{ color: palette.textSecondary }}
-                                    >
+                                    <Typography variant="body2" className={classes.dateRange}>
                                         {formatDate(term.startOn, { locale: userInfo.locale })}
                                         {term.endOn
                                             ? ` – ${formatDate(term.endOn, { locale: userInfo.locale })}`
@@ -178,7 +173,7 @@ const EthosFetchCard = ({ classes }) => {
             </CardContent>
         </Card>
     );
-};
+}
 
 EthosFetchCard.propTypes = {
     classes: PropTypes.object.isRequired,
