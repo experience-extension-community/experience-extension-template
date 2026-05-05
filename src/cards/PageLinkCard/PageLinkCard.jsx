@@ -7,31 +7,23 @@
 //   * pageRoute declared in extension.js
 //   * useCardControl().navigateToPage to imperatively launch the page
 //   * The card body itself stays trivial — the page does the work
+//
+// HOC composition: withStyles(styles)(withIntl(Card)) — withStyles outermost.
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import {
-    Button,
-    Card,
-    CardContent,
-    Typography,
-} from '@ellucian/react-design-system/core';
+import { Button, Card, CardContent, Typography } from '@ellucian/react-design-system/core';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import {
-    spacing20,
-    spacing30,
-} from '@ellucian/react-design-system/core/styles/tokens';
+import { spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
 import { IconSprite } from '@ellucian/ds-icons/lib';
-import {
-    useCardControl,
-    useExtensionControl,
-} from '@ellucian/experience-extension-utils';
+import { useCardControl, useExtensionControl } from '@ellucian/experience-extension-utils';
 
-import { useResolvedTheme } from '../../utils/branding/theme';
-import { useTypekitFont, useMaterialIconFonts } from '../../hooks';
-import { Icon } from '../../components';
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
+import { useResolvedTheme } from '../../utils/branding/theme';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+import Icon from '../../components/Icon';
 
 const styles = () => ({
     root: { height: '100%', display: 'flex', flexDirection: 'column' },
@@ -39,7 +31,7 @@ const styles = () => ({
     cta: { marginTop: spacing30, alignSelf: 'flex-start' },
 });
 
-const PageLinkCardBase = ({ classes }) => {
+const PageLinkCard = ({ classes }) => {
     const intl = useIntl();
     const { palette } = useResolvedTheme();
     const { setLoadingStatus } = useExtensionControl();
@@ -96,8 +88,8 @@ const PageLinkCardBase = ({ classes }) => {
     );
 };
 
-PageLinkCardBase.propTypes = {
+PageLinkCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withIntl(withStyles(styles)(PageLinkCardBase));
+export default withStyles(styles)(withIntl(PageLinkCard));

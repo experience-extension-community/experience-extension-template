@@ -9,8 +9,10 @@
 //   * Gate save with useCardControl().setIsCustomConfigurationValid
 //
 // The shape persisted is `{ links: [{ label, url }, ...] }`.
+//
+// HOC composition: withStyles(styles)(withIntl(Form)) — withStyles outermost.
 
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import {
@@ -25,13 +27,10 @@ import {
     spacing20,
     spacing30,
 } from '@ellucian/react-design-system/core/styles/tokens';
-import {
-    useCardControl,
-    useCardInfo,
-} from '@ellucian/experience-extension-utils';
+import { useCardControl, useCardInfo } from '@ellucian/experience-extension-utils';
 
-import { Icon } from '../../components';
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
+import Icon from '../../components/Icon';
 
 const styles = () => ({
     root: { display: 'flex', flexDirection: 'column', gap: spacing20 },
@@ -55,7 +54,7 @@ const isValidUrl = (str) => {
     }
 };
 
-const ConfigurableCardConfigBase = ({ classes }) => {
+const ConfigurableCardConfig = ({ classes }) => {
     const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setCustomConfiguration, setIsCustomConfigurationValid } = useCardControl() || {};
@@ -67,11 +66,8 @@ const ConfigurableCardConfigBase = ({ classes }) => {
 
     const [links, setLinks] = useState(initialLinks);
 
-    // Validate and persist on every change.
     useEffect(() => {
-        const allValid = links.every(
-            (l) => typeof l.url === 'string' && isValidUrl(l.url),
-        );
+        const allValid = links.every((l) => typeof l.url === 'string' && isValidUrl(l.url));
         if (typeof setIsCustomConfigurationValid === 'function') {
             setIsCustomConfigurationValid(allValid);
         }
@@ -83,10 +79,8 @@ const ConfigurableCardConfigBase = ({ classes }) => {
     const updateLink = (index, key, value) => {
         setLinks((prev) => prev.map((l, i) => (i === index ? { ...l, [key]: value } : l)));
     };
-    const removeLink = (index) =>
-        setLinks((prev) => prev.filter((_l, i) => i !== index));
-    const addLink = () =>
-        setLinks((prev) => [...prev, { label: '', url: '' }]);
+    const removeLink = (index) => setLinks((prev) => prev.filter((_l, i) => i !== index));
+    const addLink = () => setLinks((prev) => [...prev, { label: '', url: '' }]);
 
     return (
         <div className={classes.root}>
@@ -156,8 +150,8 @@ const ConfigurableCardConfigBase = ({ classes }) => {
     );
 };
 
-ConfigurableCardConfigBase.propTypes = {
+ConfigurableCardConfig.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withIntl(withStyles(styles)(ConfigurableCardConfigBase));
+export default withStyles(styles)(withIntl(ConfigurableCardConfig));

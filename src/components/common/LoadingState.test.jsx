@@ -4,17 +4,22 @@
 /**
  * @jest-environment jsdom
  */
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { axe } from 'jest-axe';
 import { IntlProvider } from 'react-intl';
 
-import { LoadingState } from './LoadingState';
+import LoadingState from './LoadingState';
 
 const renderWithIntl = (ui) =>
-    render(<IntlProvider locale="en" messages={{}}>{ui}</IntlProvider>);
+    render(
+        <IntlProvider locale="en" messages={{}}>
+            {ui}
+        </IntlProvider>,
+    );
 
 describe('LoadingState', () => {
-    it('renders the default label and spinner', () => {
+    it('renders the default label and a spinner', () => {
         renderWithIntl(<LoadingState />);
         expect(screen.getByRole('status')).toBeInTheDocument();
         expect(screen.getByTestId('spinner')).toBeInTheDocument();
