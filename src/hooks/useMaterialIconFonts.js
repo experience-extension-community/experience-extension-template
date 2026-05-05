@@ -57,7 +57,7 @@ async function loadFontsWithRetry() {
             }
             await waitForFonts(CONFIG.FONTS_TO_LOAD, CONFIG.FONT_TIMEOUT_MS);
             return true;
-        } catch (_e) {
+        } catch {
             if (attempt >= CONFIG.MAX_RETRIES) return false;
         }
     }
