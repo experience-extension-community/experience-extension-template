@@ -1,47 +1,60 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// React-Intl provider wrapper + `withIntl` HOC.
-//
-// Cards read the current user's locale from `useUserInfo()` and
-// resolve messages via `getMessages(userLocale)`. Wrap each card
-// (or the page root) in `withIntl(Component)` so descendants can
-// call `useIntl()`.
+// withIntl HOC — class component using injectIntl. Mirrors the pattern
+// used by Florida Poly's exp-account-details-custom and
+// exp-canvas-teachers extensions exactly. Reads `userInfo` from props
+// (the Experience SDK passes it down) and renders the institutional
+// brand-font + Material Symbols Outlined stylesheets inline so they
+// load whenever a card or page wrapped with withIntl mounts.
 
-import { IntlProvider } from 'react-intl';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { useUserInfo } from '@ellucian/experience-extension-utils';
+import { injectIntl, IntlProvider } from 'react-intl';
 
 import { getMessages } from './intlUtility';
 
-const DEFAULT_LOCALE = 'en';
+// Adobe Typekit kit ID for the institutional brand font. Replace with
+// your kit, or remove the matching <link> below if your institution
+// doesn't use Typekit.
+const TYPEKIT_HREF = 'https://use.typekit.net/yld8vhe.css';
 
-export const ReactIntlProviderWrapper = ({ children }) => {
-    const userInfo = useUserInfo() || {};
-    const locale = userInfo.locale || DEFAULT_LOCALE;
-    const messages = getMessages(locale);
+// Material Symbols Outlined — Google Fonts hosted icon font. Used by
+// the <Icon> component. Loaded inline so any card / page that mounts
+// gets the icon glyphs available immediately.
+const MATERIAL_SYMBOLS_HREF =
+    'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=block';
 
-    return (
-        <IntlProvider locale={locale} defaultLocale={DEFAULT_LOCALE} messages={messages}>
-            {children}
-        </IntlProvider>
-    );
-};
+export function withIntl(WrappedComponent) {
+    let InjectedComponent;
 
-ReactIntlProviderWrapper.propTypes = {
-    children: PropTypes.node.isRequired,
-};
+    class WithIntl extends React.Component {
+        constructor(props) {
+            super(props);
+            InjectedComponent = injectIntl(WrappedComponent);
+        }
 
-/**
- * HOC that wraps a component in the IntlProvider. Use this on the
- * root component of every card and page.
- */
-export const withIntl = (Component) => {
-    const Wrapped = (props) => (
-        <ReactIntlProviderWrapper>
-            <Component {...props} />
-        </ReactIntlProviderWrapper>
-    );
-    Wrapped.displayName = `withIntl(${Component.displayName || Component.name || 'Component'})`;
-    return Wrapped;
-};
+        render() {
+            const { userInfo: { locale } = {} } = this.props;
+
+            return (
+                <IntlProvider
+                    locale={locale || 'en'}
+                    messages={getMessages(locale || 'en')}
+                >
+                    <link rel="stylesheet" href={TYPEKIT_HREF} />
+                    <link rel="stylesheet" href={MATERIAL_SYMBOLS_HREF} />
+                    <InjectedComponent {...this.props} />
+                </IntlProvider>
+            );
+        }
+    }
+
+    WithIntl.propTypes = {
+        userInfo: PropTypes.object,
+    };
+
+    WithIntl.displayName = `WithIntl(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+
+    return WithIntl;
+}

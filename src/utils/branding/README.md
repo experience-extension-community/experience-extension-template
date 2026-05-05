@@ -1,47 +1,43 @@
 # Branding utilities
 
-Three layers, lowest-priority first:
-
-1. **Path Design System tokens** — imported in `tokens.js` from
-   `@ellucian/react-design-system/core/styles/tokens`. Baseline
-   visual system. Add tokens to the import block as components
-   need them.
-2. **Institutional overlay** — also `tokens.js`. Brand colors, font
-   stack, asset URLs, Typekit kit ID. Florida Polytechnic defaults.
-3. **Live dashboard theme** — `useThemeInfo()` from the SDK. Wins
-   for primary/secondary/CTA at the current tenant.
-
-`useResolvedTheme()` (in `theme.js`) merges all three. Components
-consume that hook only.
+Mirrors Florida Poly's `src/styles/brandColors.js` + `src/utils/fontLoader.js`
+pattern used in `exp-account-details-custom` and `exp-canvas-teachers`.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `tokens.js` | Path token re-export + institutional overlay. **The only file institutions need to edit.** |
-| `theme.js` | `useResolvedTheme()` — composes all three layers. |
-| `icons.js` | `iconStyle()` for Material Symbols Outlined glyph rendering. |
-| `loadMaterialSymbols.js` | Imperative loader (with retry) for the icon stylesheet. |
-| `fontLoader.js` | Imperative Adobe Typekit loader. |
-| `index.js` | Public surface. |
-
-The React-side wrappers (status-aware hooks for the imperative
-loaders) live in `src/hooks/useTypekitFont.js` and
-`src/hooks/useMaterialIconFonts.js`.
+| `brandColors.js` | Flat object of literal hex values, plus `colorBackgroundDefault` from EDS as the one Path token used. **The only file institutions need to edit.** Also exports `fontLoader` (Typekit kit ID) and `assets` (logo URLs). |
+| `fontLoader.js` | `ensureTypekitFont()` imperative loader — used by `useTypekitFont()` hook in `src/hooks/`. |
+| `icons.js` | `iconStyle()` helper for Material Symbols Outlined glyph rendering. The stylesheet itself is loaded inline by `withIntl` (`src/i18n/ReactIntlProviderWrapper.jsx`); no programmatic loader needed. |
 
 ## Editing for your institution
 
-1. Open `tokens.js`.
-2. Replace `palette`, `typography.fontFamily`, `assets`, and
-   `fontLoader.typekitKitId` with your institution's values.
-3. **Do not** rename keys or restructure — components import them.
-4. Verify color contrast (≥ 4.5:1 for body text on `palette.surface`,
-   ≥ 3:1 for UI components / focus rings).
-5. If you do not use Adobe Typekit, set `fontLoader.typekitKitId`
-   to `''` and update `typography.fontFamily` to your stack.
+1. Open `brandColors.js`.
+2. Replace the hex values (`polyPurple`, `cyberBlue`, etc.) with your
+   institution's brand colors.
+3. Verify color contrast: text-on-`surface` ≥ 4.5:1, UI ≥ 3:1.
+4. Replace `fontLoader.typekitKitId` with your kit ID, or set it to
+   `''` if you don't use Typekit.
+5. Replace `assets` URLs with your institution's hosted logos.
 
-## Why a hook, not a context provider?
+## Why no `useResolvedTheme` hook?
 
-The dashboard theme already arrives via `useThemeInfo()` (an
-SDK-provided React context). Adding our own provider on top would be
-redundant.
+An earlier iteration of this template had a runtime theme-merging
+hook that combined Path tokens, an institutional overlay, and the
+live dashboard theme via `useThemeInfo`. It crashed in the SDK dev
+shell. FL Poly's working extensions don't have one — they use static
+`brandColors` literal hex values. We do the same.
+
+If your institution wants per-tenant runtime theme override, you
+can add `useThemeInfo()` reads inside individual cards. Don't
+introduce a layer of indirection that isn't proven against the SDK.
+
+## What about Path's color tokens?
+
+Path Design System exports many color tokens. We import only the
+single token FL Poly imports in production: `colorBackgroundDefault`.
+The full token catalog lives at
+<https://path-designsystem.elluciancloud.com/#/utilities/tokens>
+— add additional imports here if your styles need them, but don't
+guess names; verify each against the docs first.

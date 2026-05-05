@@ -3,12 +3,9 @@
 //
 // PageLinkCard — card-to-page navigation.
 //
-// Demonstrates:
-//   * pageRoute declared in extension.js
-//   * useCardControl().navigateToPage to imperatively launch the page
-//   * The card body itself stays trivial — the page does the work
-//
-// HOC composition: withStyles(styles)(withIntl(Card)) — withStyles outermost.
+// Demonstrates pageRoute + useCardControl().navigateToPage. The card
+// body itself stays trivial — the page (src/pages/SamplePage) does
+// the work.
 
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
@@ -20,25 +17,26 @@ import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useCardControl, useExtensionControl } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import { useResolvedTheme } from '../../utils/branding/theme';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+import { brandColors } from '../../utils/branding/brandColors';
 import Icon from '../../components/Icon';
 
 const styles = () => ({
     root: { height: '100%', display: 'flex', flexDirection: 'column' },
     body: { display: 'flex', flexDirection: 'column', gap: spacing20 },
+    title: { display: 'flex', alignItems: 'center', gap: 8 },
+    titleIcon: { color: brandColors.polyPurple },
+    description: { color: brandColors.textSecondary },
     cta: { marginTop: spacing30, alignSelf: 'flex-start' },
 });
 
-const PageLinkCard = ({ classes }) => {
+function PageLinkCard(props) {
+    const { classes } = props;
     const intl = useIntl();
-    const { palette } = useResolvedTheme();
     const { setLoadingStatus } = useExtensionControl();
     const { navigateToPage } = useCardControl() || {};
 
     useTypekitFont();
-    useMaterialIconFonts();
 
     useEffect(() => {
         setLoadingStatus(false);
@@ -55,17 +53,14 @@ const PageLinkCard = ({ classes }) => {
             <IconSprite />
             <CardContent>
                 <div className={classes.body}>
-                    <Typography
-                        variant="h6"
-                        style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-                    >
-                        <Icon name="open_in_new" size={24} style={{ color: palette.primary }} />
+                    <Typography variant="h6" className={classes.title}>
+                        <Icon name="open_in_new" size={24} className={classes.titleIcon} />
                         {intl.formatMessage({
                             id: 'card.pageLink.title',
                             defaultMessage: 'Open the sample page',
                         })}
                     </Typography>
-                    <Typography variant="body2" style={{ color: palette.textSecondary }}>
+                    <Typography variant="body2" className={classes.description}>
                         {intl.formatMessage({
                             id: 'card.pageLink.description',
                             defaultMessage: 'Demonstrates page navigation from a card.',
@@ -86,7 +81,7 @@ const PageLinkCard = ({ classes }) => {
             </CardContent>
         </Card>
     );
-};
+}
 
 PageLinkCard.propTypes = {
     classes: PropTypes.object.isRequired,

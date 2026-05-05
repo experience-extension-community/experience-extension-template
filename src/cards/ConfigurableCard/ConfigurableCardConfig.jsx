@@ -9,8 +9,6 @@
 //   * Gate save with useCardControl().setIsCustomConfigurationValid
 //
 // The shape persisted is `{ links: [{ label, url }, ...] }`.
-//
-// HOC composition: withStyles(styles)(withIntl(Form)) — withStyles outermost.
 
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
@@ -22,11 +20,7 @@ import {
     Typography,
 } from '@ellucian/react-design-system/core';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import {
-    spacing10,
-    spacing20,
-    spacing30,
-} from '@ellucian/react-design-system/core/styles/tokens';
+import { spacing10, spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
 import { useCardControl, useCardInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
@@ -54,7 +48,8 @@ const isValidUrl = (str) => {
     }
 };
 
-const ConfigurableCardConfig = ({ classes }) => {
+function ConfigurableCardConfig(props) {
+    const { classes } = props;
     const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setCustomConfiguration, setIsCustomConfigurationValid } = useCardControl() || {};
@@ -148,7 +143,7 @@ const ConfigurableCardConfig = ({ classes }) => {
             </div>
         </div>
     );
-};
+}
 
 ConfigurableCardConfig.propTypes = {
     classes: PropTypes.object.isRequired,
