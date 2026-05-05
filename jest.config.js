@@ -3,7 +3,7 @@
 
 module.exports = {
     testEnvironment: 'jsdom',
-    setupFilesAfterEach: ['<rootDir>/jest.setup.js'],
+    setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
     moduleFileExtensions: ['js', 'jsx', 'json'],
     moduleNameMapper: {
         // Style + asset mocks
