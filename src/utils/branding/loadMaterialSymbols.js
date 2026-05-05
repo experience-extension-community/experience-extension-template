@@ -18,7 +18,7 @@ const delay = (ms) =>
         setTimeout(resolve, ms);
     });
 
-const attemptLoad = (attempt) =>
+const attemptLoad = () =>
     new Promise((resolve) => {
         const existing = document.getElementById(FONT_CONFIG.LINK_ID);
         if (existing && existing.sheet) {
@@ -55,7 +55,7 @@ export const loadMaterialSymbolsCSS = async () => {
         if (attempt > 0) {
             await delay(FONT_CONFIG.RETRY_DELAY_BASE_MS * attempt);
         }
-        const ok = await attemptLoad(attempt);
+        const ok = await attemptLoad();
         if (ok) return true;
     }
     return false;
