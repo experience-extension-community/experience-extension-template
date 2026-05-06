@@ -11,7 +11,7 @@ import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import { Box, Button, Typography } from '@ellucian/react-design-system/core';
+import { Box } from '@ellucian/react-design-system/core';
 import {
     spacing10,
     spacing20,
@@ -33,6 +33,7 @@ const BRAND_FONT_STACK =
 
 const styles = () => ({
     root: {
+        position: 'relative',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -40,20 +41,48 @@ const styles = () => ({
         fontFamily: BRAND_FONT_STACK,
         backgroundColor: brandColors.surface,
     },
-    header: {
+    actionRow: {
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: spacing20,
-        paddingBottom: spacing20,
-        borderBottom: `1px solid ${brandColors.border}`,
-        marginBottom: spacing20,
+        justifyContent: 'flex-end',
+        marginBottom: spacing10,
     },
-    title: {
-        fontFamily: BRAND_FONT_STACK,
-        fontSize: '1rem',
-        fontWeight: 700,
-        color: brandColors.textPrimary,
+    refreshButton: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 26,
+        height: 26,
+        padding: 0,
+        background: 'transparent',
+        border: 'none',
+        borderRadius: 4,
+        cursor: 'pointer',
+        color: brandColors.textMuted,
+        transition: 'color 120ms ease-out, background-color 120ms ease-out',
+        '&:hover:not(:disabled)': {
+            color: brandColors.primary,
+            backgroundColor: brandColors.surfaceMuted,
+        },
+        '&:disabled': {
+            opacity: 0.5,
+            cursor: 'wait',
+        },
+        '&:focus-visible': {
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 1,
+        },
+    },
+    refreshButtonSpinning: {
+        animation: '$spin 800ms linear infinite',
+    },
+    '@keyframes spin': {
+        to: { transform: 'rotate(360deg)' },
+    },
+    refreshIcon: {
+        fontFamily: 'Material Symbols Outlined',
+        fontSize: '1.125rem',
+        fontVariationSettings: '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
+        lineHeight: 1,
     },
     list: {
         listStyle: 'none',
@@ -185,30 +214,31 @@ const EthosFetchCard = (props) => {
 
     return (
         <Box className={classes.root}>
-            <header className={classes.header}>
-                <Typography component="h2" className={classes.title}>
-                    {intl.formatMessage({
-                        id: 'card.ethosFetch.title',
-                        defaultMessage: 'Active terms',
-                    })}
-                </Typography>
-                <Button
-                    size="small"
-                    color="secondary"
+            <div className={classes.actionRow}>
+                <button
+                    type="button"
                     onClick={refresh}
                     disabled={isRefreshing}
+                    aria-label={intl.formatMessage({
+                        id: 'card.ethosFetch.cta.refresh',
+                        defaultMessage: 'Refresh',
+                    })}
+                    title={intl.formatMessage({
+                        id: 'card.ethosFetch.cta.refresh',
+                        defaultMessage: 'Refresh',
+                    })}
+                    className={classes.refreshButton}
                 >
-                    {isRefreshing
-                        ? intl.formatMessage({
-                              id: 'common.refreshing',
-                              defaultMessage: 'Refreshing…',
-                          })
-                        : intl.formatMessage({
-                              id: 'card.ethosFetch.cta.refresh',
-                              defaultMessage: 'Refresh',
-                          })}
-                </Button>
-            </header>
+                    <span
+                        aria-hidden="true"
+                        className={`${classes.refreshIcon}${
+                            isRefreshing ? ` ${classes.refreshButtonSpinning}` : ''
+                        }`}
+                    >
+                        refresh
+                    </span>
+                </button>
+            </div>
 
             <ul className={classes.list}>
                 {sortedTerms.map((term, idx) => {
