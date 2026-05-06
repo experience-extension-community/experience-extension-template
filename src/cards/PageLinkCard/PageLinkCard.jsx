@@ -3,45 +3,46 @@
 //
 // PageLinkCard — card-to-page navigation.
 //
-// Demonstrates pageRoute + useCardControl().navigateToPage. The card
-// body itself stays trivial — the page (src/pages/SamplePage) does
-// the work.
+// Demonstrates useCardControl().navigateToPage. The card body itself
+// is trivial — the page does the work. Page is declared in
+// extension.js; the route registered there is what navigateToPage()
+// targets.
+//
+// Mirrors account-details + custom-simple-links convention: hooks
+// for SDK access, withStyles only, no withIntl, <div> wrapper.
 
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { Button, Card, CardContent, Typography } from '@ellucian/react-design-system/core';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
+import { Button, Typography } from '@ellucian/react-design-system/core';
 import { spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
 import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useCardControl, useExtensionControl } from '@ellucian/experience-extension-utils';
 
-import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import { useTypekitFont } from '../../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
-import { brandColors } from '../../utils/branding/brandColors';
-import Icon from '../../components/Icon';
-
 const styles = () => ({
-    root: { height: '100%', display: 'flex', flexDirection: 'column' },
-    body: { display: 'flex', flexDirection: 'column', gap: spacing20 },
-    title: { display: 'flex', alignItems: 'center', gap: 8 },
-    titleIcon: { color: brandColors.polyPurple },
-    description: { color: brandColors.textSecondary },
-    cta: { marginTop: spacing30, alignSelf: 'flex-start' },
+    root: {
+        padding: spacing30,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing20,
+    },
+    description: {
+        color: '#5B5E65',
+    },
+    cta: {
+        alignSelf: 'flex-start',
+    },
 });
 
-function PageLinkCard(props) {
-    const { classes } = props;
-    const intl = useIntl();
-    const { setLoadingStatus } = useExtensionControl();
+function PageLinkCard({ classes }) {
+    const { setLoadingStatus } = useExtensionControl() || {};
     const { navigateToPage } = useCardControl() || {};
 
-    useTypekitFont();
-    useMaterialIconFonts();
-
     useEffect(() => {
-        setLoadingStatus(false);
+        if (typeof setLoadingStatus === 'function') {
+            setLoadingStatus(false);
+        }
     }, [setLoadingStatus]);
 
     const open = () => {
@@ -51,37 +52,21 @@ function PageLinkCard(props) {
     };
 
     return (
-        <Card className={classes.root}>
+        <div className={classes.root}>
             <IconSprite />
-            <CardContent>
-                <div className={classes.body}>
-                    <Typography variant="h6" className={classes.title}>
-                        <Icon name="open_in_new" size={24} className={classes.titleIcon} />
-                        {intl.formatMessage({
-                            id: 'card.pageLink.title',
-                            defaultMessage: 'Open the sample page',
-                        })}
-                    </Typography>
-                    <Typography variant="body2" className={classes.description}>
-                        {intl.formatMessage({
-                            id: 'card.pageLink.description',
-                            defaultMessage: 'Demonstrates page navigation from a card.',
-                        })}
-                    </Typography>
-                    <Button
-                        className={classes.cta}
-                        color="primary"
-                        onClick={open}
-                        disabled={typeof navigateToPage !== 'function'}
-                    >
-                        {intl.formatMessage({
-                            id: 'card.pageLink.cta',
-                            defaultMessage: 'Open page',
-                        })}
-                    </Button>
-                </div>
-            </CardContent>
-        </Card>
+            <Typography variant="h6">Open the sample page</Typography>
+            <Typography variant="body2" className={classes.description}>
+                Demonstrates page navigation from a card.
+            </Typography>
+            <Button
+                color="primary"
+                onClick={open}
+                disabled={typeof navigateToPage !== 'function'}
+                className={classes.cta}
+            >
+                Open page
+            </Button>
+        </div>
     );
 }
 
@@ -89,4 +74,4 @@ PageLinkCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(withIntl(PageLinkCard));
+export default withStyles(styles)(PageLinkCard);

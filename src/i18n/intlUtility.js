@@ -1,40 +1,32 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// Locale-cascade message resolver.
-//
-// Lookup order:
-//   1. Exact match     (e.g. `en-GB.json`)
-//   2. Language match  (e.g. `en.json` for `en-GB`)
-//   3. English fallback
-//
-// Mirrors the pattern used in Ellucian's official sample-extensions
-// and FL Poly's existing extensions.
+// Ported from Florida Poly's exp-canvas-teachers/src/i18n/intlUtility.js.
+// Identical logic; only the catch bindings use ES2019 optional catch
+// binding (FL Poly's `catch (e)` trips our SDK's stricter
+// no-unused-vars eslint rule).
 
 import ENGLISH_TRANSLATION from './en.json';
 
 export const getMessages = (userLocale) => {
     const { messages: baseMessages } = ENGLISH_TRANSLATION;
-    if (!userLocale) return baseMessages;
 
     try {
         const { messages: localeMessages } = require(`./${userLocale}.json`);
         if (localeMessages) {
-            return { ...baseMessages, ...localeMessages };
+            return Object.assign({}, baseMessages, localeMessages);
+        } else {
+            const actionLanguage = userLocale.split(/[-_]/)[0];
+            const { messages } = require(`./${actionLanguage}.json`);
+            return Object.assign({}, baseMessages, messages);
         }
     } catch {
-        // exact match not found; fall through to language match
-    }
-
-    try {
-        const language = userLocale.split(/[-_]/)[0];
-        if (language && language !== userLocale) {
-            const { messages: localeMessages } = require(`./${language}.json`);
-            return { ...baseMessages, ...localeMessages };
+        try {
+            const actionLanguage = userLocale.split(/[-_]/)[0];
+            const { messages } = require(`./${actionLanguage}.json`);
+            return Object.assign({}, baseMessages, messages);
+        } catch {
+            return baseMessages;
         }
-    } catch {
-        // language match not found; fall through to base
     }
-
-    return baseMessages;
 };

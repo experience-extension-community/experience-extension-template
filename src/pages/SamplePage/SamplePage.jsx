@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// Sample page. Wrapped only in withStyles — the IntlProvider is
-// supplied by router.jsx so a useIntl() call here works.
+// SamplePage — minimal full-width page paired with PageLinkCard.
+//
+// Mirrors FL Poly's exp-events-studentlife page pattern: function
+// component, classes from withStyles, hooks for SDK access, no
+// react-intl. Uses plain HTML elements + EDS Typography.
 
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { Typography } from '@ellucian/react-design-system/core';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import { spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
+import { Typography } from '@ellucian/react-design-system/core';
+import { spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
 import { IconSprite } from '@ellucian/ds-icons/lib';
 import {
     useDashboardInfo,
@@ -18,67 +20,42 @@ import {
     useUserInfo,
 } from '@ellucian/experience-extension-utils';
 
-import { useTypekitFont } from '../../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
-import { brandColors } from '../../utils/branding/brandColors';
-import Icon from '../../components/Icon';
-
 const styles = () => ({
     root: {
         padding: spacing30,
         maxWidth: 960,
         margin: '0 auto',
     },
-    header: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: spacing30,
-    },
-    headerIcon: { color: brandColors.polyPurple },
     section: {
         marginTop: spacing30,
     },
-    contextLine: { color: brandColors.textSecondary },
+    contextLine: {
+        color: '#5B5E65',
+    },
 });
 
-function SamplePage(props) {
-    const { classes } = props;
-    const intl = useIntl();
+function SamplePage({ classes }) {
     const userInfo = useUserInfo() || {};
     const dashboardInfo = useDashboardInfo() || {};
     const extensionInfo = useExtensionInfo() || {};
     const { setPageTitle, setLoadingStatus } = useExtensionControl() || {};
 
-    useTypekitFont();
-    useMaterialIconFonts();
-
     useEffect(() => {
         if (typeof setPageTitle === 'function') {
-            setPageTitle(
-                intl.formatMessage({ id: 'page.sample.title', defaultMessage: 'Sample page' }),
-            );
+            setPageTitle('Sample page');
         }
         if (typeof setLoadingStatus === 'function') {
             setLoadingStatus(false);
         }
-    }, [intl, setPageTitle, setLoadingStatus]);
+    }, [setPageTitle, setLoadingStatus]);
 
     return (
         <main className={classes.root}>
             <IconSprite />
-            <header className={classes.header}>
-                <Icon name="dashboard" size={32} className={classes.headerIcon} />
-                <Typography variant="h4">
-                    {intl.formatMessage({ id: 'page.sample.title', defaultMessage: 'Sample page' })}
-                </Typography>
-            </header>
+            <Typography variant="h4">Sample page</Typography>
 
             <Typography variant="body1" className={classes.section}>
-                {intl.formatMessage({
-                    id: 'page.sample.intro',
-                    defaultMessage:
-                        'This page exercises page-level SDK hooks. Replace it for your real use case.',
-                })}
+                This page exercises page-level SDK hooks. Replace it for your real use case.
             </Typography>
 
             <section className={classes.section} aria-labelledby="page-context-heading">
