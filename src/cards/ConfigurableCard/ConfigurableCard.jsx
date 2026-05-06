@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// ConfigurableCard — categorized links optimised for dashboard tile UX.
+// ConfigurableCard — categorized links optimised for dashboard tile UX
+// with COLLAPSIBLE category sections.
 //
 // Design intent:
-//   * Looks at home next to other Path-styled cards on a dashboard
-//   * Scannable in 1-2 seconds (clear category hierarchy)
-//   * Easy to click — full-row hit targets, ~44px tall
-//   * Restrained brand presence — primary color only on category
-//     headings + on hover. Links default to readable secondaryDark.
-//   * Scrolls cleanly for many links / many categories
+//   * Each category collapses/expands via native <details>/<summary>
+//     (free keyboard + screen-reader support, no JS expand state).
+//   * Default state: all categories expanded. Users click any
+//     category heading to collapse it. Sticks until card unmount.
+//   * Link count shown next to category name as a density signal.
+//   * 20 links across 4 categories: collapse the irrelevant ones,
+//     scroll the rest. No accordion exclusivity — multiple sections
+//     can be expanded simultaneously.
 //
 // Persistence (read side):
 //   cardInfo.configuration.customConfiguration.categories
-// (SDK lifts customConfiguration.client.categories on read)
 //
 // EDS 8.x: withStyles(Component, styles, { name }) + withIntl outermost.
 
@@ -43,13 +45,12 @@ const styles = () => ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing50,
+        gap: spacing40,
         padding: spacing40,
         overflowY: 'auto',
         fontFamily: BRAND_FONT_STACK,
         backgroundColor: brandColors.surface,
 
-        // Tasteful native scrollbar tinting (only Webkit).
         '&::-webkit-scrollbar': { width: 8 },
         '&::-webkit-scrollbar-track': { backgroundColor: 'transparent' },
         '&::-webkit-scrollbar-thumb': {
@@ -61,12 +62,40 @@ const styles = () => ({
         },
     },
     section: {
-        display: 'flex',
-        flexDirection: 'column',
+        // <details> element styling
+        '&[open] $expandIcon': {
+            transform: 'rotate(180deg)',
+        },
     },
     categoryHeading: {
-        margin: 0,
-        marginBottom: spacing30,
+        // <summary> element styling
+        listStyle: 'none',
+        cursor: 'pointer',
+        userSelect: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        gap: spacing30,
+        padding: `${spacing30} 0`,
+        borderBottom: `2px solid ${brandColors.secondary}`,
+        marginBottom: spacing20,
+        transition: 'color 120ms ease-out',
+        '&::-webkit-details-marker': {
+            display: 'none',
+        },
+        '&:hover $categoryName': {
+            color: brandColors.primaryDark,
+        },
+        '&:hover $expandIcon': {
+            color: brandColors.primary,
+        },
+        '&:focus-visible': {
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 2,
+            borderRadius: 3,
+        },
+    },
+    categoryName: {
+        flex: '1 1 auto',
         color: brandColors.primary,
         fontFamily: BRAND_FONT_STACK,
         fontSize: '0.8125rem',     // 13px
@@ -74,6 +103,24 @@ const styles = () => ({
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
         lineHeight: 1.3,
+        transition: 'color 120ms ease-out',
+    },
+    categoryCount: {
+        flex: '0 0 auto',
+        color: brandColors.textSecondary,
+        fontFamily: BRAND_FONT_STACK,
+        fontSize: '0.75rem',
+        fontWeight: 500,
+        // Numeric pill — gives a quick density read.
+    },
+    expandIcon: {
+        flex: '0 0 auto',
+        fontFamily: 'Material Symbols Outlined',
+        fontSize: '1.25rem',
+        lineHeight: 1,
+        color: brandColors.neutralDark,
+        transition: 'transform 200ms ease-out, color 120ms ease-out',
+        userSelect: 'none',
     },
     list: {
         listStyle: 'none',
@@ -91,17 +138,16 @@ const styles = () => ({
         display: 'flex',
         alignItems: 'center',
         gap: spacing30,
-        padding: `${spacing30} ${spacing20}`,    // 8px / 4px
-        minHeight: 44,                            // WCAG 2.5.5 target size
+        padding: `${spacing30} ${spacing20}`,
+        minHeight: 44,
         color: brandColors.secondaryDark,
         fontFamily: BRAND_FONT_STACK,
-        fontSize: '0.9375rem',                    // 15px
+        fontSize: '0.9375rem',
         fontWeight: 500,
         lineHeight: 1.35,
         textDecoration: 'none',
         borderRadius: 3,
-        transition:
-            'background-color 120ms ease-out, color 120ms ease-out',
+        transition: 'background-color 120ms ease-out, color 120ms ease-out',
         '&:hover': {
             backgroundColor: brandColors.surfaceMuted,
             color: brandColors.primary,
@@ -125,7 +171,7 @@ const styles = () => ({
     chevron: {
         flex: '0 0 auto',
         fontFamily: 'Material Symbols Outlined',
-        fontSize: '1.125rem',          // 18px
+        fontSize: '1.125rem',
         lineHeight: 1,
         color: brandColors.neutralLight,
         opacity: 0.7,
@@ -194,10 +240,25 @@ const ConfigurableCard = (props) => {
     return (
         <Box className={classes.root}>
             {categories.map((cat, catIdx) => (
-                <section key={cat.id || catIdx} className={classes.section}>
-                    {cat.name ? (
-                        <h3 className={classes.categoryHeading}>{cat.name}</h3>
-                    ) : null}
+                <details
+                    key={cat.id || catIdx}
+                    className={classes.section}
+                    open
+                >
+                    <summary className={classes.categoryHeading}>
+                        <span className={classes.categoryName}>
+                            {cat.name || intl.formatMessage({
+                                id: 'card.configurable.unnamedCategory',
+                                defaultMessage: 'Links',
+                            })}
+                        </span>
+                        <span className={classes.categoryCount}>
+                            {cat.links.length}
+                        </span>
+                        <span aria-hidden="true" className={classes.expandIcon}>
+                            expand_more
+                        </span>
+                    </summary>
                     <ul className={classes.list}>
                         {cat.links.map((link, idx) => (
                             <li
@@ -220,7 +281,7 @@ const ConfigurableCard = (props) => {
                             </li>
                         ))}
                     </ul>
-                </section>
+                </details>
             ))}
         </Box>
     );
