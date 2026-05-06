@@ -16,6 +16,7 @@ import { fetchAcademicPeriods } from '../data/academicPeriods';
 export const useAcademicPeriods = () => {
     const { authenticatedEthosFetch } = useData() || {};
     const cardInfo = useCardInfo() || {};
+    const cardId = cardInfo.cardId;
     const pipeline =
         cardInfo.configuration?.client?.termsPipeline ||
         cardInfo.configuration?.termsPipeline ||
@@ -38,6 +39,7 @@ export const useAcademicPeriods = () => {
             const controller = new AbortController();
             const result = await fetchAcademicPeriods({
                 authenticatedEthosFetch,
+                cardId,
                 pipeline,
                 signal: controller.signal,
             });
@@ -51,7 +53,7 @@ export const useAcademicPeriods = () => {
             setIsLoading(false);
             setIsRefreshing(false);
         },
-        [authenticatedEthosFetch, pipeline],
+        [authenticatedEthosFetch, cardId, pipeline],
     );
 
     useEffect(() => {

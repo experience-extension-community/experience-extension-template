@@ -4,21 +4,31 @@
 import { authenticatedFetch } from '../utils/ethos/authenticatedFetch';
 import { normalizeError } from '../utils/ethos/errors';
 
+const ETHOS_INTEGRATION_HOST = 'https://integrate.elluciancloud.com';
+
 /**
  * Call the configured Data Connect pipeline that returns academic
  * periods (terms). Used by EthosFetchCard.
  */
-export const fetchAcademicPeriods = async ({ authenticatedEthosFetch, pipeline, signal }) => {
+export const fetchAcademicPeriods = async ({
+    authenticatedEthosFetch,
+    cardId,
+    pipeline,
+    signal,
+}) => {
+    if (!cardId) {
+        return { status: 'error', data: [], error: new Error('Missing cardId from useCardInfo()') };
+    }
     if (!pipeline) {
         return { status: 'error', data: [], error: new Error('No pipeline configured') };
     }
     try {
-        const url = `/api/data-connect/v1/pipelines/${encodeURIComponent(pipeline)}/run`;
+        const url = `${ETHOS_INTEGRATION_HOST}/api/${encodeURIComponent(cardId)}/${encodeURIComponent(pipeline)}`;
         const result = await authenticatedFetch(authenticatedEthosFetch, url, {
             signal,
             fetchOptions: {
                 method: 'GET',
-                headers: { Accept: 'application/vnd.hedtech.integration.v1+json' },
+                headers: { Accept: 'application/json' },
             },
         });
         return {
