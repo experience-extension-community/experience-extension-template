@@ -43,14 +43,14 @@ const styles = () => ({
         gap: spacing10,
     },
     categoryHeading: {
-        color: brandColors.polyPurple,
+        color: brandColors.primary,
         fontSize: '0.75rem',
         fontWeight: 700,
         textTransform: 'uppercase',
         letterSpacing: '0.06em',
         margin: 0,
         paddingBottom: 4,
-        borderBottom: `2px solid ${brandColors.cyberBlue}`,
+        borderBottom: `2px solid ${brandColors.secondary}`,
     },
     list: {
         listStyle: 'none',
@@ -65,7 +65,7 @@ const styles = () => ({
     link: {
         display: 'block',
         padding: `6px ${spacing10}`,
-        color: brandColors.cyberBlueAlt,
+        color: brandColors.secondaryDark,
         textDecoration: 'none',
         fontSize: '0.875rem',
         fontWeight: 500,
@@ -74,16 +74,16 @@ const styles = () => ({
         transition: 'background-color 120ms ease-out, color 120ms ease-out',
         '&:hover': {
             backgroundColor: brandColors.surfaceMuted,
-            color: brandColors.polyPurple,
+            color: brandColors.primary,
             textDecoration: 'underline',
         },
         '&:focus-visible': {
-            outline: `2px solid ${brandColors.polyPurple}`,
+            outline: `2px solid ${brandColors.focusRing}`,
             outlineOffset: 2,
         },
     },
     empty: {
-        color: brandColors.graphiteGray,
+        color: brandColors.textSecondary,
         fontStyle: 'italic',
         textAlign: 'center',
         marginTop: spacing30,
