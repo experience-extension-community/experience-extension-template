@@ -139,8 +139,8 @@ const styles = () => ({
         display: 'flex',
         alignItems: 'center',
         gap: spacing30,
-        padding: `${spacing20} ${spacing30}`,   // 4px / 8px — same as heading
-        minHeight: 32,                          // tighter than 44px
+        padding: `${spacing30} ${spacing30}`,   // 8px / 8px — more breathing room
+        minHeight: 40,                          // dashboard-card sized, not sidebar-tight
         color: 'var(--cc-link-color)',          // configurable preset
         fontFamily: BRAND_FONT_STACK,
         fontSize: '0.875rem',                   // 14px
@@ -156,7 +156,6 @@ const styles = () => ({
         },
         '&:hover $chevron': {
             color: 'var(--cc-hover-color)',
-            opacity: 1,
             transform: 'translateX(2px)',
         },
         '&:focus-visible': {
@@ -176,10 +175,9 @@ const styles = () => ({
         fontFamily: 'Material Symbols Outlined',
         fontSize: '1rem',
         lineHeight: 1,
-        color: brandColors.neutralLight,
-        opacity: 0.4,                            // very quiet by default
+        color: brandColors.neutralLight,        // visible at rest — affordance signal
         transition:
-            'color 120ms ease-out, opacity 120ms ease-out, transform 120ms ease-out',
+            'color 120ms ease-out, transform 120ms ease-out',
         userSelect: 'none',
     },
     empty: {
