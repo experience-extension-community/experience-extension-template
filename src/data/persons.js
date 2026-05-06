@@ -1,53 +1,60 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// Data-layer fetchers. No React. Each function takes the SDK's
-// `authenticatedEthosFetch` and returns a normalized result envelope
-// that hooks can reason about uniformly.
-//
-// DataConnect pipeline invocation URL is `/api/{pipelineName}` —
-// the Ellucian Experience SDK's `authenticatedEthosFetch` resolves
-// that against the tenant Ethos integration host. This is the same
-// path used by Ellucian's official sdk-samples and every working
-// FL Poly extension.
+// Pattern adapted byte-for-byte from FloridaPoly/exp-account-details-custom
+// (src/data/accountDetailsData.js).
 
-import { authenticatedFetch } from '../utils/ethos/authenticatedFetch';
-import { normalizeError } from '../utils/ethos/errors';
-
-const ETHOS_INTEGRATION_HOST = 'https://integrate.elluciancloud.com';
+const PIPELINE_NAME =
+    process.env.PIPELINE_GET_PERSONS || 'eec-template-persons-get';
 
 /**
- * Call the configured Data Connect pipeline that returns persons.
+ * Fetch the signed-in user's persons record from the configured pipeline.
  *
- * @param {object} args
- * @param {Function} args.authenticatedEthosFetch  bound from useData()
- * @param {string}  args.cardId     from useCardInfo()
- * @param {string}  args.pipeline   pipeline name (e.g. 'eec-template-persons-get')
- * @param {AbortSignal} [args.signal]
- * @returns {Promise<{status:'success'|'error', data:Array, error:Error|null}>}
+ * @param {object} params
+ * @param {Function} params.authenticatedEthosFetch  from useData()
+ * @param {string}   params.cardId                   from useCardInfo()
+ * @param {string}   [params.pipeline]               override pipeline name
+ * @returns {Promise<{status:'success'|'error', data:object|null, error?:object}>}
  */
-export const fetchPersons = async ({ authenticatedEthosFetch, cardId, pipeline, signal }) => {
-    if (!cardId) {
-        return { status: 'error', data: [], error: new Error('Missing cardId from useCardInfo()') };
+export async function fetchPersons({ authenticatedEthosFetch, cardId, pipeline }) {
+    const resource = pipeline || PIPELINE_NAME;
+    let resourcePath = resource;
+    if (cardId) {
+        const urlSearchParameters = new URLSearchParams({ cardId }).toString();
+        resourcePath = `${resource}?${urlSearchParameters}`;
     }
-    if (!pipeline) {
-        return { status: 'error', data: [], error: new Error('No pipeline configured') };
-    }
+
     try {
-        const url = `${ETHOS_INTEGRATION_HOST}/api/${encodeURIComponent(cardId)}/${encodeURIComponent(pipeline)}`;
-        const result = await authenticatedFetch(authenticatedEthosFetch, url, {
-            signal,
-            fetchOptions: {
-                method: 'GET',
-                headers: { Accept: 'application/json' },
-            },
-        });
+        const response = await authenticatedEthosFetch(resourcePath);
+
+        if (response && response.status === 200) {
+            const responseText = await response.text();
+            const responseObj = JSON.parse(responseText);
+
+            let payload;
+            if (responseObj.data?.[0]?.payload?.data !== undefined) {
+                payload = responseObj.data[0].payload.data;
+            } else if (responseObj.data !== undefined) {
+                payload = responseObj.data;
+            } else {
+                payload = responseObj;
+            }
+
+            return { data: payload, status: 'success' };
+        }
+
         return {
-            status: 'success',
-            data: Array.isArray(result.data) ? result.data : [result.data].filter(Boolean),
-            error: null,
+            status: 'error',
+            data: null,
+            error: { message: 'Server error', statusCode: response?.status },
         };
-    } catch (err) {
-        return { status: 'error', data: [], error: normalizeError(err) };
+    } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Unable to fetch persons:', error);
+        return {
+            status: 'error',
+            data: null,
+            error: { message: error.message, stack: error.stack },
+        };
     }
-};
+}
