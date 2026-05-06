@@ -52,7 +52,9 @@ const ConfigurableCard = (props) => {
     }, [setLoadingStatus]);
 
     const links = useMemo(() => {
-        const raw = cardInfo.configuration?.customConfiguration?.links;
+        // Persisted shape (matches sdk-samples MarkdownTemplate):
+        //     configuration.customConfiguration.client.links
+        const raw = cardInfo.configuration?.customConfiguration?.client?.links;
         if (!Array.isArray(raw)) return [];
         return raw.filter((l) => l && typeof l.url === 'string' && l.url.length > 0);
     }, [cardInfo.configuration]);
