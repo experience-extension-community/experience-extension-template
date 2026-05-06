@@ -22,6 +22,8 @@ import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useUserInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 
 const styles = () => ({
     root: {
@@ -39,6 +41,9 @@ function HelloUserCard({ classes }) {
     const intl = useIntl();
     const userInfo = useUserInfo() || {};
     const firstName = userInfo.firstName || 'there';
+
+    useTypekitFont();
+    useMaterialIconFonts();
 
     return (
         <div className={classes.root}>

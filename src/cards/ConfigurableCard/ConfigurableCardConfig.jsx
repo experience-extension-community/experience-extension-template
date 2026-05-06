@@ -30,6 +30,8 @@ import {
 import { useCardControl, useCardInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 
 const styles = () => ({
     root: {
@@ -68,6 +70,9 @@ function ConfigurableCardConfig({ classes }) {
     const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setCustomConfiguration, setIsCustomConfigurationValid } = useCardControl() || {};
+
+    useTypekitFont();
+    useMaterialIconFonts();
 
     const initialLinks = useMemo(() => {
         const raw = cardInfo.configuration?.customConfiguration?.links;

@@ -1,20 +1,15 @@
+// Copyright 2021-2025 Ellucian Company L.P. and its affiliates.
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2026 Experience Extension Community contributors
 //
-// withIntl HOC — class component using injectIntl. Ported byte-for-byte
-// from Florida Poly's exp-canvas-teachers and exp-account-details-custom
-// extensions. Reads `userInfo` from this.props (the Experience SDK
-// passes it down to the card wrapper) and renders the institutional
-// Typekit stylesheet inline inside <IntlProvider>.
-//
-// HOC composition: `withStyles(styles)(withIntl(Card))` — withStyles
-// outermost.
+// Ported byte-for-byte from FloridaPoly/experience-ethos-examples/
+// account-details-dataconnect/extension/src/i18n/ReactIntlProviderWrapper.jsx
+// (FL Poly's canonical curated reference, also used in the
+// FloridaPoly/exp-account-details-custom production extension).
 
 import React from 'react';
 import { injectIntl, IntlProvider } from 'react-intl';
 import PropTypes from 'prop-types';
-
-import { getMessages } from './intlUtility';
+import { getMessages } from '../i18n/intlUtility';
 
 export function withIntl(WrappedComponent) {
     let InjectedComponent;
@@ -24,24 +19,19 @@ export function withIntl(WrappedComponent) {
             super(props);
             InjectedComponent = injectIntl(WrappedComponent);
         }
-
         render() {
-            const { userInfo: { locale } = {} } = this.props;
+            const { userInfo: { locale } } = this.props;
 
             return (
                 <IntlProvider locale={locale} messages={getMessages(locale)}>
-                    <link rel="stylesheet" href="https://use.typekit.net/yld8vhe.css" />
                     <InjectedComponent {...this.props} />
                 </IntlProvider>
             );
         }
     }
-
     WithIntl.propTypes = {
-        userInfo: PropTypes.object,
+        userInfo: PropTypes.object
     };
-
-    WithIntl.displayName = `WithIntl(${WrappedComponent.displayName || WrappedComponent.name})`;
-
+    WithIntl.displayName = `WithIntl(${WrappedComponent.displayName})`;
     return WithIntl;
 }

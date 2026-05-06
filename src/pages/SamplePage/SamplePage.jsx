@@ -20,6 +20,9 @@ import {
     useUserInfo,
 } from '@ellucian/experience-extension-utils';
 
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+
 const styles = () => ({
     root: {
         padding: spacing30,
@@ -39,6 +42,9 @@ function SamplePage({ classes }) {
     const dashboardInfo = useDashboardInfo() || {};
     const extensionInfo = useExtensionInfo() || {};
     const { setPageTitle, setLoadingStatus } = useExtensionControl() || {};
+
+    useTypekitFont();
+    useMaterialIconFonts();
 
     useEffect(() => {
         if (typeof setPageTitle === 'function') {

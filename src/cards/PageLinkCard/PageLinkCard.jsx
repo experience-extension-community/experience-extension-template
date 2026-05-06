@@ -18,6 +18,8 @@ import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useCardControl, useExtensionControl } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 
 const styles = () => ({
     root: {
@@ -39,6 +41,9 @@ function PageLinkCard({ classes }) {
     const intl = useIntl();
     const { setLoadingStatus } = useExtensionControl() || {};
     const { navigateToPage } = useCardControl() || {};
+
+    useTypekitFont();
+    useMaterialIconFonts();
 
     useEffect(() => {
         if (typeof setLoadingStatus === 'function') {

@@ -21,6 +21,8 @@ import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useCardInfo, useExtensionControl } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 
 const styles = () => ({
     root: {
@@ -48,6 +50,9 @@ function EthosFetchCard({ classes }) {
     const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setLoadingStatus } = useExtensionControl() || {};
+
+    useTypekitFont();
+    useMaterialIconFonts();
 
     const pipeline =
         cardInfo.configuration?.client?.termsPipeline ||
