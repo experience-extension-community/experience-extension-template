@@ -2,21 +2,14 @@
 // Copyright 2026 Experience Extension Community contributors
 //
 // Custom configuration form for ConfigurableCard.
-//
-// Demonstrates the canonical Experience customConfiguration pattern:
-//   * Read existing config via useCardInfo
-//   * Persist updates via useCardControl().setCustomConfiguration
-//   * Gate save with useCardControl().setIsCustomConfigurationValid
-//
-// Persisted shape: { links: [{ label, url }, ...] }
-//
-// HOC: withStyles(styles)(withIntl(Form)).
+// EDS 8.x signature: withStyles(Component, styles, { name }), withIntl outermost.
 
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
 import {
+    Box,
     Button,
     IconButton,
     TextField,
@@ -30,12 +23,10 @@ import {
 import { useCardControl, useCardInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import { useTypekitFont } from '../../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 
 const styles = () => ({
     root: {
-        padding: spacing30,
+        padding: spacing20,
         display: 'flex',
         flexDirection: 'column',
         gap: spacing20,
@@ -66,13 +57,11 @@ const isValidUrl = (str) => {
     }
 };
 
-function ConfigurableCardConfig({ classes }) {
+const ConfigurableCardConfig = (props) => {
+    const { classes } = props;
     const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setCustomConfiguration, setIsCustomConfigurationValid } = useCardControl() || {};
-
-    useTypekitFont();
-    useMaterialIconFonts();
 
     const initialLinks = useMemo(() => {
         const raw = cardInfo.configuration?.customConfiguration?.links;
@@ -100,7 +89,7 @@ function ConfigurableCardConfig({ classes }) {
         setLinks((prev) => [...prev, { label: '', url: '' }]);
 
     return (
-        <div className={classes.root}>
+        <Box className={classes.root}>
             <Typography variant="h6">
                 {intl.formatMessage({
                     id: 'card.configurable.config.heading',
@@ -163,12 +152,14 @@ function ConfigurableCardConfig({ classes }) {
                     })}
                 </Button>
             </div>
-        </div>
+        </Box>
     );
-}
+};
 
 ConfigurableCardConfig.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(withIntl(ConfigurableCardConfig));
+export default withIntl(
+    withStyles(ConfigurableCardConfig, styles, { name: 'ConfigurableCardConfig' }),
+);

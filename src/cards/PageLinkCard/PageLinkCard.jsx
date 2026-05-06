@@ -2,28 +2,21 @@
 // Copyright 2026 Experience Extension Community contributors
 //
 // PageLinkCard — card-to-page navigation.
-//
-// Demonstrates useCardControl().navigateToPage. The card body itself
-// is trivial — the page does the work.
-//
-// HOC: withStyles(styles)(withIntl(Card)).
+// EDS 8.x signature: withStyles(Component, styles, { name }), withIntl outermost.
 
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import { Button, Typography } from '@ellucian/react-design-system/core';
+import { Box, Button, Typography } from '@ellucian/react-design-system/core';
 import { spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
-import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useCardControl, useExtensionControl } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import { useTypekitFont } from '../../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 
 const styles = () => ({
     root: {
-        padding: spacing30,
+        padding: spacing20,
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -37,13 +30,11 @@ const styles = () => ({
     },
 });
 
-function PageLinkCard({ classes }) {
+const PageLinkCard = (props) => {
+    const { classes } = props;
     const intl = useIntl();
     const { setLoadingStatus } = useExtensionControl() || {};
     const { navigateToPage } = useCardControl() || {};
-
-    useTypekitFont();
-    useMaterialIconFonts();
 
     useEffect(() => {
         if (typeof setLoadingStatus === 'function') {
@@ -58,8 +49,7 @@ function PageLinkCard({ classes }) {
     };
 
     return (
-        <div className={classes.root}>
-            <IconSprite />
+        <Box className={classes.root}>
             <Typography variant="h6">
                 {intl.formatMessage({
                     id: 'card.pageLink.title',
@@ -83,12 +73,12 @@ function PageLinkCard({ classes }) {
                     defaultMessage: 'Open page',
                 })}
             </Button>
-        </div>
+        </Box>
     );
-}
+};
 
 PageLinkCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(withIntl(PageLinkCard));
+export default withIntl(withStyles(PageLinkCard, styles, { name: 'PageLinkCard' }));
