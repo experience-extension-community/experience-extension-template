@@ -1,66 +1,75 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
+//
+// Pattern adapted byte-for-byte from FloridaPoly/exp-account-details-custom
+// (src/hooks/useAccountDetails.js).
 
-import { useCallback, useEffect, useState } from 'react';
-import { useCardInfo, useData } from '@ellucian/experience-extension-utils';
+import { useState, useEffect, useCallback } from 'react';
+import { useData, useCardInfo } from '@ellucian/experience-extension-utils';
 
 import { fetchAcademicPeriods } from '../data/academicPeriods';
 
 /**
  * Domain hook for the EthosFetchCard.
  *
- * Reads the pipeline name from the card configuration (extension-level
- * or card-level — see useExtensionConfig) and exposes the canonical
- * `{ data, isLoading, isRefreshing, isError, error, refresh }` shape.
+ * @returns {{
+ *   data: Array,
+ *   isLoading: boolean,
+ *   isRefreshing: boolean,
+ *   isError: boolean,
+ *   refresh: Function
+ * }}
  */
-export const useAcademicPeriods = () => {
-    const { authenticatedEthosFetch } = useData() || {};
-    const cardInfo = useCardInfo() || {};
-    const cardId = cardInfo.cardId;
+export function useAcademicPeriods() {
+    const { authenticatedEthosFetch } = useData();
+    const { cardId, configuration } = useCardInfo();
+
     const pipeline =
-        cardInfo.configuration?.client?.termsPipeline ||
-        cardInfo.configuration?.termsPipeline ||
-        process.env.PIPELINE_GET_TERMS;
+        configuration?.termsPipeline || process.env.PIPELINE_GET_TERMS;
 
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isError, setIsError] = useState(false);
-    const [error, setError] = useState(null);
 
-    const load = useCallback(
+    const loadData = useCallback(
         async (isRefresh = false) => {
             if (!authenticatedEthosFetch) return;
+
             if (isRefresh) setIsRefreshing(true);
             else setIsLoading(true);
             setIsError(false);
-            setError(null);
 
-            const controller = new AbortController();
-            const result = await fetchAcademicPeriods({
-                authenticatedEthosFetch,
-                cardId,
-                pipeline,
-                signal: controller.signal,
-            });
-
-            if (result.status === 'success') {
-                setData(result.data);
-            } else {
+            try {
+                const result = await fetchAcademicPeriods({
+                    authenticatedEthosFetch,
+                    cardId,
+                    pipeline,
+                });
+                if (result.status === 'success') {
+                    setData(Array.isArray(result.data) ? result.data : []);
+                } else {
+                    setIsError(true);
+                    setData([]);
+                }
+            } catch {
                 setIsError(true);
-                setError(result.error);
+                setData([]);
+            } finally {
+                setIsLoading(false);
+                setIsRefreshing(false);
             }
-            setIsLoading(false);
-            setIsRefreshing(false);
         },
         [authenticatedEthosFetch, cardId, pipeline],
     );
 
     useEffect(() => {
-        load(false);
-    }, [load]);
+        loadData(false);
+    }, [loadData]);
 
-    const refresh = useCallback(() => load(true), [load]);
+    const refresh = useCallback(() => {
+        loadData(true);
+    }, [loadData]);
 
-    return { data, isLoading, isRefreshing, isError, error, refresh };
-};
+    return { data, isLoading, isRefreshing, isError, refresh };
+}
