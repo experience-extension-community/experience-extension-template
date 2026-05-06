@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { Box, Button, Typography } from '@ellucian/react-design-system/core';
-import { spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
+import { spacing20 } from '@ellucian/react-design-system/core/styles/tokens';
 import { useCardControl, useExtensionControl } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';

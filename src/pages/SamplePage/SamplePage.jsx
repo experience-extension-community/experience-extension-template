@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { Box, Typography } from '@ellucian/react-design-system/core';
-import { spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
+import { spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
 import {
     useDashboardInfo,
     useExtensionControl,
