@@ -2,30 +2,21 @@
 // Copyright 2026 Experience Extension Community contributors
 //
 // ConfigurableCard — admin-configured content via customConfiguration.
-//
-// Reads `customConfiguration.links` (array of `{ label, url }`) from
-// the card config and renders each as a Path Button. Demonstrates the
-// READ side of the customConfiguration pattern; the WRITE side (form)
-// lives in ConfigurableCardConfig.jsx.
-//
-// HOC: withStyles(styles)(withIntl(Card)).
+// EDS 8.x signature: withStyles(Component, styles, { name }), withIntl outermost.
 
 import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import { Button, Typography } from '@ellucian/react-design-system/core';
-import { spacing10, spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
-import { IconSprite } from '@ellucian/ds-icons/lib';
+import { Box, Button, Typography } from '@ellucian/react-design-system/core';
+import { spacing10, spacing20 } from '@ellucian/react-design-system/core/styles/tokens';
 import { useCardInfo, useExtensionControl } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import { useTypekitFont } from '../../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 
 const styles = () => ({
     root: {
-        padding: spacing30,
+        padding: spacing20,
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -48,13 +39,11 @@ const styles = () => ({
     },
 });
 
-function ConfigurableCard({ classes }) {
+const ConfigurableCard = (props) => {
+    const { classes } = props;
     const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setLoadingStatus } = useExtensionControl() || {};
-
-    useTypekitFont();
-    useMaterialIconFonts();
 
     useEffect(() => {
         if (typeof setLoadingStatus === 'function') {
@@ -69,8 +58,7 @@ function ConfigurableCard({ classes }) {
     }, [cardInfo.configuration]);
 
     return (
-        <div className={classes.root}>
-            <IconSprite />
+        <Box className={classes.root}>
             <Typography variant="h6" className={classes.title}>
                 {intl.formatMessage({
                     id: 'card.configurable.title',
@@ -101,12 +89,12 @@ function ConfigurableCard({ classes }) {
                     ))}
                 </div>
             )}
-        </div>
+        </Box>
     );
-}
+};
 
 ConfigurableCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(withIntl(ConfigurableCard));
+export default withIntl(withStyles(ConfigurableCard, styles, { name: 'ConfigurableCard' }));

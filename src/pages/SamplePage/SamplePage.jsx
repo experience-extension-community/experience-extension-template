@@ -2,26 +2,19 @@
 // Copyright 2026 Experience Extension Community contributors
 //
 // SamplePage — minimal full-width page paired with PageLinkCard.
-//
-// Mirrors FL Poly's exp-events-studentlife page pattern: function
-// component, classes from withStyles, hooks for SDK access, no
-// react-intl. Uses plain HTML elements + EDS Typography.
+// EDS 8.x signature: withStyles(Component, styles, { name }).
 
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import { Typography } from '@ellucian/react-design-system/core';
+import { Box, Typography } from '@ellucian/react-design-system/core';
 import { spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
-import { IconSprite } from '@ellucian/ds-icons/lib';
 import {
     useDashboardInfo,
     useExtensionControl,
     useExtensionInfo,
     useUserInfo,
 } from '@ellucian/experience-extension-utils';
-
-import { useTypekitFont } from '../../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 
 const styles = () => ({
     root: {
@@ -37,14 +30,12 @@ const styles = () => ({
     },
 });
 
-function SamplePage({ classes }) {
+const SamplePage = (props) => {
+    const { classes } = props;
     const userInfo = useUserInfo() || {};
     const dashboardInfo = useDashboardInfo() || {};
     const extensionInfo = useExtensionInfo() || {};
     const { setPageTitle, setLoadingStatus } = useExtensionControl() || {};
-
-    useTypekitFont();
-    useMaterialIconFonts();
 
     useEffect(() => {
         if (typeof setPageTitle === 'function') {
@@ -56,8 +47,7 @@ function SamplePage({ classes }) {
     }, [setPageTitle, setLoadingStatus]);
 
     return (
-        <main className={classes.root}>
-            <IconSprite />
+        <Box component="main" className={classes.root}>
             <Typography variant="h4">Sample page</Typography>
 
             <Typography variant="body1" className={classes.section}>
@@ -78,12 +68,12 @@ function SamplePage({ classes }) {
                     Extension: {extensionInfo.name || '(unknown)'}
                 </Typography>
             </section>
-        </main>
+        </Box>
     );
-}
+};
 
 SamplePage.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(SamplePage);
+export default withStyles(SamplePage, styles, { name: 'SamplePage' });
