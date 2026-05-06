@@ -4,7 +4,7 @@
 // Ported byte-for-byte from FloridaPoly/experience-ethos-examples/
 // account-details-dataconnect/extension/src/i18n/intlUtility.js.
 
-/* eslint-disable global-require */
+/* eslint-disable global-require, no-unused-vars */
 import ENGLISH_TRANSLATION from '../i18n/en.json';
 
 export const getMessages = (userLocale) => {
