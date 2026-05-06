@@ -7,7 +7,7 @@
 //
 // EDS 8.x: withStyles(Component, styles, { name }) + withIntl outermost.
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
@@ -73,12 +73,33 @@ const styles = () => ({
         borderRadius: 4,
         '&:hover': { backgroundColor: brandColors.surfaceMuted },
     },
+    termRow: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: spacing20,
+    },
+    termCode: {
+        fontFamily:
+            'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+        fontSize: '0.6875rem',
+        fontWeight: 600,
+        color: brandColors.textSecondary,
+        backgroundColor: brandColors.surfaceMuted,
+        padding: '1px 6px',
+        borderRadius: 3,
+        letterSpacing: '0.02em',
+        flex: '0 0 auto',
+    },
     termTitle: {
+        flex: '1 1 auto',
         fontFamily: BRAND_FONT_STACK,
         fontSize: '0.875rem',
         fontWeight: 600,
         color: brandColors.textPrimary,
         lineHeight: 1.3,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
     },
     termMeta: {
         fontFamily: BRAND_FONT_STACK,
@@ -108,6 +129,20 @@ const EthosFetchCard = (props) => {
 
     const { data, isLoading, isRefreshing, isError, error, refresh } = useAcademicPeriods();
 
+    // Sort by code (string ascending), so e.g. 202601 → 202602 → 202608.
+    // Stable: terms missing a code fall to the bottom.
+    const sortedTerms = useMemo(() => {
+        if (!Array.isArray(data)) return [];
+        return [...data].sort((a, b) => {
+            const ca = (a?.code || '').toString();
+            const cb = (b?.code || '').toString();
+            if (!ca && !cb) return 0;
+            if (!ca) return 1;
+            if (!cb) return -1;
+            return ca.localeCompare(cb, undefined, { numeric: true, sensitivity: 'base' });
+        });
+    }, [data]);
+
     useEffect(() => {
         if (typeof setLoadingStatus === 'function') {
             setLoadingStatus(isLoading);
@@ -130,7 +165,7 @@ const EthosFetchCard = (props) => {
         );
     }
 
-    if (!data || data.length === 0) {
+    if (!sortedTerms || sortedTerms.length === 0) {
         return (
             <Box className={classes.root}>
                 <EmptyState
@@ -176,15 +211,20 @@ const EthosFetchCard = (props) => {
             </header>
 
             <ul className={classes.list}>
-                {data.map((term, idx) => {
+                {sortedTerms.map((term, idx) => {
                     const range = [formatDate(term.startOn, intl), formatDate(term.endOn, intl)]
                         .filter(Boolean)
                         .join(' – ');
                     return (
                         <li key={term.id || term.code || idx} className={classes.term}>
-                            <span className={classes.termTitle}>
-                                {term.title || term.code || '(unnamed term)'}
-                            </span>
+                            <div className={classes.termRow}>
+                                {term.code && (
+                                    <span className={classes.termCode}>{term.code}</span>
+                                )}
+                                <span className={classes.termTitle}>
+                                    {term.title || term.code || '(unnamed term)'}
+                                </span>
+                            </div>
                             {range && <span className={classes.termMeta}>{range}</span>}
                         </li>
                     );
