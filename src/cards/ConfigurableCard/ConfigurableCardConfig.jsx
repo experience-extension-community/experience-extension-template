@@ -320,14 +320,7 @@ const AppearancePreview = ({ classes, colors }) => {
                 className={classes.previewLink}
                 style={{ color: 'var(--cc-link-color)' }}
             >
-                <span>Course catalog</span>
-                <span
-                    aria-hidden="true"
-                    className={classes.previewChevron}
-                    style={{ color: brandColors.neutralLight }}
-                >
-                    chevron_right
-                </span>
+                Course catalog
             </div>
             <div
                 className={classes.previewLink}
@@ -336,14 +329,7 @@ const AppearancePreview = ({ classes, colors }) => {
                     background: brandColors.surface,
                 }}
             >
-                <span>Library (hover preview)</span>
-                <span
-                    aria-hidden="true"
-                    className={classes.previewChevron}
-                    style={{ color: 'var(--cc-hover-color)' }}
-                >
-                    chevron_right
-                </span>
+                Library (hover preview)
             </div>
         </div>
     );

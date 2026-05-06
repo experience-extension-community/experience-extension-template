@@ -1,6 +1,6 @@
 {
   "name": "experience-extension-template",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "private": true,
   "description": "Community template for Ellucian Experience extensions. Fork it, customize the branding tokens and configuration, and you have a publishable extension scaffolded against Experience SDK 8.1.2.",
   "license": "Apache-2.0",

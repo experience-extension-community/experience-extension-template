@@ -154,10 +154,6 @@ const styles = () => ({
             backgroundColor: brandColors.surfaceMuted,
             color: 'var(--cc-hover-color)',
         },
-        '&:hover $chevron': {
-            color: 'var(--cc-hover-color)',
-            transform: 'translateX(2px)',
-        },
         '&:focus-visible': {
             outline: `2px solid ${brandColors.focusRing}`,
             outlineOffset: -2,
@@ -169,17 +165,6 @@ const styles = () => ({
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
-    },
-    chevron: {
-        flex: '0 0 auto',
-        fontFamily: 'Material Symbols Outlined',
-        fontSize: '1.125rem',
-        fontVariationSettings: '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
-        lineHeight: 1,
-        color: brandColors.neutralLight,        // visible at rest — affordance signal
-        transition:
-            'color 120ms ease-out, transform 120ms ease-out',
-        userSelect: 'none',
     },
     empty: {
         margin: 'auto',
@@ -287,9 +272,6 @@ const ConfigurableCard = (props) => {
                                 >
                                     <span className={classes.label}>
                                         {link.label || link.url}
-                                    </span>
-                                    <span aria-hidden="true" className={classes.chevron}>
-                                        arrow_outward
                                     </span>
                                 </a>
                             </li>
