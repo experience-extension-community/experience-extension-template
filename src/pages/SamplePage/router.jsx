@@ -24,6 +24,9 @@ const RouterPage = (props) => (
             <Route exact path="/">
                 <SamplePage {...props} />
             </Route>
+            <Route path="/sample">
+                <SamplePage {...props} />
+            </Route>
         </Switch>
     </Router>
 );
