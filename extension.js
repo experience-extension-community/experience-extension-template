@@ -75,12 +75,17 @@ module.exports = {
         },
 
         // 4. PageLinkCard — card-to-page navigation.
+        // pageRoute wires this card to the extension's page; without it,
+        // the card's cardControl.navigateToPage cannot resolve a target.
         {
             type: 'PageLinkCard',
             source: './src/cards/PageLinkCard/PageLinkCard.jsx',
             title: 'Open sample page',
             displayCardType: 'Open sample page',
             description: 'Demonstrates navigateToPage().',
+            pageRoute: {
+                route: '/',
+            },
         },
     ],
 
