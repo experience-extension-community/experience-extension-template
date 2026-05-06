@@ -98,12 +98,41 @@ const styles = () => ({
         gap: spacing10,
     },
     term: {
+        listStyle: 'none',
+        margin: 0,
+        padding: 0,
+    },
+    termAction: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing10,
+        width: '100%',
+        padding: `${spacing20} ${spacing30}`,
+        margin: 0,
+        background: 'transparent',
+        border: 'none',
+        borderRadius: 4,
+        cursor: 'pointer',
+        textAlign: 'left',
+        fontFamily: 'inherit',
+        transition: 'background-color 120ms ease-out',
+        '&:hover': { backgroundColor: brandColors.surfaceMuted },
+        '&:hover $copyIcon': { color: brandColors.primary },
+        '&:focus-visible': {
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 1,
+            backgroundColor: brandColors.surfaceMuted,
+        },
+    },
+    termActionStatic: {
         display: 'flex',
         flexDirection: 'column',
         gap: spacing10,
         padding: `${spacing20} ${spacing30}`,
-        borderRadius: 4,
-        '&:hover': { backgroundColor: brandColors.surfaceMuted },
+    },
+    termActionCopied: {
+        backgroundColor: `${brandColors.success}14`, // ~8% tint
+        '&:hover': { backgroundColor: `${brandColors.success}22` },
     },
     termTitle: {
         fontFamily: BRAND_FONT_STACK,
@@ -120,31 +149,6 @@ const styles = () => ({
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: spacing30,
-        width: '100%',
-        padding: `${spacing10} ${spacing20}`,
-        margin: 0,
-        background: 'transparent',
-        border: 'none',
-        borderRadius: 4,
-        cursor: 'pointer',
-        textAlign: 'left',
-        fontFamily: 'inherit',
-        transition: 'background-color 120ms ease-out, color 120ms ease-out',
-        '&:hover': {
-            backgroundColor: brandColors.surfaceMuted,
-        },
-        '&:hover $copyIcon': {
-            color: brandColors.primary,
-        },
-        '&:focus-visible': {
-            outline: `2px solid ${brandColors.focusRing}`,
-            outlineOffset: 1,
-            backgroundColor: brandColors.surfaceMuted,
-        },
-    },
-    termMetaCopied: {
-        backgroundColor: `${brandColors.success}14`, // ~8% tint
-        '&:hover': { backgroundColor: `${brandColors.success}22` },
     },
     termDates: {
         fontFamily: BRAND_FONT_STACK,
@@ -336,8 +340,8 @@ const EthosFetchCard = (props) => {
                               },
                               { code: term.code || '' },
                           );
-                    const MetaTag = term.code ? 'button' : 'div';
-                    const metaProps = term.code
+                    const Wrapper = term.code ? 'button' : 'div';
+                    const wrapperProps = term.code
                         ? {
                               type: 'button',
                               onClick: () => copyCode(rowKey, term.code),
@@ -350,15 +354,16 @@ const EthosFetchCard = (props) => {
                         .join(' – ');
                     return (
                         <li key={rowKey} className={classes.term}>
-                            <span className={classes.termTitle}>
+                            <Wrapper
+                                {...wrapperProps}
+                                className={`${
+                                    term.code ? classes.termAction : classes.termActionStatic
+                                }${isCopied ? ` ${classes.termActionCopied}` : ''}`}
+                            >
+                                <span className={classes.termTitle}>
                                 {term.title || term.code || '(unnamed term)'}
                             </span>
-                            <MetaTag
-                                {...metaProps}
-                                className={`${classes.termMeta}${
-                                    isCopied ? ` ${classes.termMetaCopied}` : ''
-                                }`}
-                            >
+                            <span className={classes.termMeta}>
                                 <span className={classes.termDates}>{range || ' '}</span>
                                 {term.code && (
                                     <span className={classes.termCodeGroup}>
@@ -373,7 +378,8 @@ const EthosFetchCard = (props) => {
                                         </span>
                                     </span>
                                 )}
-                            </MetaTag>
+                            </span>
+                            </Wrapper>
                         </li>
                     );
                 })}
