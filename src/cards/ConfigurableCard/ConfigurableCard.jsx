@@ -3,17 +3,14 @@
 //
 // ConfigurableCard — admin-configured categorized links.
 //
-// Reads `cardInfo.configuration.customConfiguration.categories` and
-// renders each as a section with brand-colored heading + plain
-// hyperlink rows. Designed to read well at any density (5 to ~50
-// links) — the card scrolls when content exceeds its tile height.
+// Renders categories as section headings + tight list of links. Uses
+// the institution's brand font (loaded via useTypekitFont) and
+// Material Symbols Outlined icons (loaded via useMaterialIconFonts)
+// for chevron affordances on each link.
 //
-// No redundant title (SDK card chrome supplies "Configurable links"
-// already from extension.js's `displayCardType`).
-//
-// Colors come from `brandColors` (src/utils/branding/brandColors.js).
-// Replace those values to re-skin per institution; this card needs
-// no other edits.
+// Persistence (read side):
+//   cardInfo.configuration.customConfiguration.categories
+// (SDK lifts customConfiguration.client.categories to top-level on read)
 //
 // EDS 8.x: withStyles(Component, styles, { name }) + withIntl outermost.
 
@@ -27,6 +24,11 @@ import { useExtensionControl, useCardInfo } from '@ellucian/experience-extension
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+
+const BRAND_FONT_STACK =
+    '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
 const styles = () => ({
     root: {
@@ -34,56 +36,83 @@ const styles = () => ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing20,
+        gap: spacing30,
         overflowY: 'auto',
+        fontFamily: BRAND_FONT_STACK,
+        backgroundColor: brandColors.surface,
     },
     section: {
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing10,
+        gap: 4,
     },
     categoryHeading: {
         color: brandColors.primary,
+        fontFamily: BRAND_FONT_STACK,
         fontSize: '0.75rem',
         fontWeight: 700,
         textTransform: 'uppercase',
-        letterSpacing: '0.06em',
+        letterSpacing: '0.08em',
         margin: 0,
-        paddingBottom: 4,
+        marginBottom: 4,
+        paddingBottom: 6,
         borderBottom: `2px solid ${brandColors.secondary}`,
     },
     list: {
         listStyle: 'none',
         margin: 0,
         padding: 0,
-        display: 'flex',
-        flexDirection: 'column',
     },
     listItem: {
         margin: 0,
     },
     link: {
-        display: 'block',
-        padding: `6px ${spacing10}`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: spacing10,
+        padding: `${spacing10} ${spacing10}`,
         color: brandColors.secondaryDark,
         textDecoration: 'none',
-        fontSize: '0.875rem',
+        fontFamily: BRAND_FONT_STACK,
+        fontSize: '0.9375rem',
         fontWeight: 500,
         lineHeight: 1.4,
-        borderRadius: 3,
-        transition: 'background-color 120ms ease-out, color 120ms ease-out',
+        borderRadius: 4,
+        borderBottom: `1px solid ${brandColors.border}`,
+        transition: 'background-color 140ms ease-out, color 140ms ease-out, transform 140ms ease-out',
         '&:hover': {
             backgroundColor: brandColors.surfaceMuted,
             color: brandColors.primary,
-            textDecoration: 'underline',
+            transform: 'translateX(2px)',
+        },
+        '&:hover $chevron': {
+            opacity: 1,
+            transform: 'translateX(2px)',
         },
         '&:focus-visible': {
             outline: `2px solid ${brandColors.focusRing}`,
             outlineOffset: 2,
+            backgroundColor: brandColors.surfaceMuted,
         },
+    },
+    label: {
+        flex: '1 1 auto',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+    },
+    chevron: {
+        fontFamily: 'Material Symbols Outlined',
+        fontSize: '1.125rem',
+        lineHeight: 1,
+        opacity: 0.4,
+        transition: 'opacity 140ms ease-out, transform 140ms ease-out',
+        flex: '0 0 auto',
     },
     empty: {
         color: brandColors.textSecondary,
+        fontFamily: BRAND_FONT_STACK,
         fontStyle: 'italic',
         textAlign: 'center',
         marginTop: spacing30,
@@ -98,13 +127,16 @@ const ConfigurableCard = (props) => {
     const cardInfo = useCardInfo() || {};
     const { setLoadingStatus } = useExtensionControl() || {};
 
+    // Load brand font + Material Symbols icon font.
+    useTypekitFont();
+    useMaterialIconFonts();
+
     useEffect(() => {
         if (typeof setLoadingStatus === 'function') {
             setLoadingStatus(false);
         }
     }, [setLoadingStatus]);
 
-    // SDK lifts customConfiguration.client.categories to top-level on read.
     const categories = useMemo(() => {
         const raw = cardInfo.configuration?.customConfiguration?.categories;
         if (!Array.isArray(raw)) return [];
@@ -128,7 +160,8 @@ const ConfigurableCard = (props) => {
                 <Typography variant="body2" className={classes.empty}>
                     {intl.formatMessage({
                         id: 'card.configurable.empty',
-                        defaultMessage: 'No links configured. Open the card configuration to add some.',
+                        defaultMessage:
+                            'No links configured. Open the card configuration to add some.',
                     })}
                 </Typography>
             </Box>
@@ -154,7 +187,12 @@ const ConfigurableCard = (props) => {
                                     rel="noopener noreferrer"
                                     className={classes.link}
                                 >
-                                    {link.label || link.url}
+                                    <span className={classes.label}>
+                                        {link.label || link.url}
+                                    </span>
+                                    <span aria-hidden="true" className={classes.chevron}>
+                                        chevron_right
+                                    </span>
                                 </a>
                             </li>
                         ))}
