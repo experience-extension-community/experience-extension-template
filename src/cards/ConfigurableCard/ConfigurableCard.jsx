@@ -42,6 +42,7 @@ import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+import { normalizeColors, resolveColor } from './colorPresets';
 
 const BRAND_FONT_STACK =
     '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -88,10 +89,10 @@ const styles = () => ({
             backgroundColor: brandColors.surfaceMuted,
         },
         '&:hover $categoryName': {
-            color: brandColors.primary,
+            color: 'var(--cc-hover-color)',
         },
         '&:hover $expandIcon': {
-            color: brandColors.primary,
+            color: 'var(--cc-hover-color)',
         },
         '&:focus-visible': {
             outline: `2px solid ${brandColors.focusRing}`,
@@ -100,7 +101,7 @@ const styles = () => ({
     },
     categoryName: {
         flex: '1 1 auto',
-        color: brandColors.textSecondary,        // muted, not brand
+        color: 'var(--cc-category-color)',       // configurable preset
         fontFamily: BRAND_FONT_STACK,
         fontSize: '0.6875rem',                   // 11px
         fontWeight: 700,
@@ -140,7 +141,7 @@ const styles = () => ({
         gap: spacing30,
         padding: `${spacing20} ${spacing30}`,   // 4px / 8px — same as heading
         minHeight: 32,                          // tighter than 44px
-        color: brandColors.textPrimary,
+        color: 'var(--cc-link-color)',          // configurable preset
         fontFamily: BRAND_FONT_STACK,
         fontSize: '0.875rem',                   // 14px
         fontWeight: 500,
@@ -151,10 +152,10 @@ const styles = () => ({
             'background-color 120ms ease-out, color 120ms ease-out',
         '&:hover': {
             backgroundColor: brandColors.surfaceMuted,
-            color: brandColors.primary,
+            color: 'var(--cc-hover-color)',
         },
         '&:hover $chevron': {
-            color: brandColors.primary,
+            color: 'var(--cc-hover-color)',
             opacity: 1,
             transform: 'translateX(2px)',
         },
@@ -226,9 +227,20 @@ const ConfigurableCard = (props) => {
         [categories],
     );
 
+    const colorStyle = useMemo(() => {
+        const colors = normalizeColors(
+            cardInfo.configuration?.customConfiguration?.colors,
+        );
+        return {
+            '--cc-category-color': resolveColor(colors.category),
+            '--cc-link-color': resolveColor(colors.link),
+            '--cc-hover-color': resolveColor(colors.hover),
+        };
+    }, [cardInfo.configuration]);
+
     if (totalLinks === 0) {
         return (
-            <Box className={classes.root}>
+            <Box className={classes.root} style={colorStyle}>
                 <Typography variant="body2" className={classes.empty}>
                     {intl.formatMessage({
                         id: 'card.configurable.empty',
@@ -241,7 +253,7 @@ const ConfigurableCard = (props) => {
     }
 
     return (
-        <Box className={classes.root}>
+        <Box className={classes.root} style={colorStyle}>
             {categories.map((cat, catIdx) => (
                 <details
                     key={cat.id || catIdx}

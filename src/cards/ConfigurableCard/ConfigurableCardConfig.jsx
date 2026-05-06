@@ -25,11 +25,13 @@
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
 import {
     Box,
     Button,
     IconButton,
+    MenuItem,
     TextField,
     Typography,
 } from '@ellucian/react-design-system/core';
@@ -57,6 +59,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
+import { COLOR_PRESETS, normalizeColors } from './colorPresets';
 
 const styles = () => ({
     root: {
@@ -110,6 +113,24 @@ const styles = () => ({
     },
     addRow: {
         alignSelf: 'flex-start',
+    },
+    colorsSection: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing20,
+        padding: spacing30,
+        background: '#FFFFFF',
+        border: '1px solid #E2E5E9',
+        borderRadius: 4,
+    },
+    colorsRow: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: spacing30,
+    },
+    colorField: {
+        flex: '1 1 180px',
+        minWidth: 180,
     },
 });
 
@@ -331,10 +352,12 @@ const ConfigurableCardConfig = (props) => {
         cardInfo: { configuration: { customConfiguration } = {} } = {},
     } = props;
 
+    const intl = useIntl();
     const client = customConfiguration ? customConfiguration.client : undefined;
     const [categories, setCategories] = useState(() =>
         normalizeCategories(client?.categories),
     );
+    const [colors, setColors] = useState(() => normalizeColors(client?.colors));
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -350,16 +373,22 @@ const ConfigurableCardConfig = (props) => {
         updateCustomConfig();
         updateCustomConfigVerification();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [categories]);
+    }, [categories, colors]);
 
     const updateCustomConfig = () => {
         setCustomConfiguration({
             customConfiguration: {
                 client: {
                     categories,
+                    colors,
                 },
             },
         });
+    };
+
+    const handleColorChange = (key) => (e) => {
+        const next = e.target.value;
+        setColors((prev) => ({ ...prev, [key]: next }));
     };
 
     const updateCustomConfigVerification = () => {
@@ -400,9 +429,32 @@ const ConfigurableCardConfig = (props) => {
         });
     };
 
+    const colorFields = [
+        {
+            key: 'category',
+            labelId: 'card.configurable.color.field.category',
+            defaultLabel: 'Category heading color',
+        },
+        {
+            key: 'link',
+            labelId: 'card.configurable.color.field.link',
+            defaultLabel: 'Link text color',
+        },
+        {
+            key: 'hover',
+            labelId: 'card.configurable.color.field.hover',
+            defaultLabel: 'Hover accent',
+        },
+    ];
+
     return (
         <Box className={classes.root}>
-            <Typography variant="h6">Configure links</Typography>
+            <Typography variant="h6">
+                {intl.formatMessage({
+                    id: 'card.configurable.section.links',
+                    defaultMessage: 'Configure links',
+                })}
+            </Typography>
 
             <DndContext
                 sensors={sensors}
@@ -428,8 +480,51 @@ const ConfigurableCardConfig = (props) => {
             </DndContext>
 
             <Button color="primary" onClick={handleAddCategory} className={classes.addRow}>
-                Add category
+                {intl.formatMessage({
+                    id: 'card.configurable.action.addCategory',
+                    defaultMessage: 'Add category',
+                })}
             </Button>
+
+            <Typography variant="h6">
+                {intl.formatMessage({
+                    id: 'card.configurable.section.colors',
+                    defaultMessage: 'Colors',
+                })}
+            </Typography>
+            <div className={classes.colorsSection}>
+                <Typography variant="body2">
+                    {intl.formatMessage({
+                        id: 'card.configurable.section.colors.help',
+                        defaultMessage:
+                            'Pick brand presets that apply to every category and link in this card.',
+                    })}
+                </Typography>
+                <div className={classes.colorsRow}>
+                    {colorFields.map((field) => (
+                        <TextField
+                            key={field.key}
+                            select
+                            label={intl.formatMessage({
+                                id: field.labelId,
+                                defaultMessage: field.defaultLabel,
+                            })}
+                            value={colors[field.key]}
+                            onChange={handleColorChange(field.key)}
+                            className={classes.colorField}
+                        >
+                            {COLOR_PRESETS.map((preset) => (
+                                <MenuItem key={preset.key} value={preset.key}>
+                                    {intl.formatMessage({
+                                        id: preset.labelId,
+                                        defaultMessage: preset.defaultLabel,
+                                    })}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    ))}
+                </div>
+            </div>
         </Box>
     );
 };
