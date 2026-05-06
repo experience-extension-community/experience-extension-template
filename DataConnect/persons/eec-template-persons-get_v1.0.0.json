@@ -30,15 +30,15 @@
         "pushUndefined": true,
         "stopOnError": false,
         "draft": false,
-        "code": "function transform (message, context) {\n  const contextUser = context.get('__user');\n  const testPersonId = context.get('testPersonId');\n  const personId = (testPersonId && testPersonId.length > 0)\n    ? testPersonId\n    : (contextUser && contextUser.id) ? contextUser.id : '';\n  context.set('personId', personId);\n  return { payload: {} }, context;\n}\n"
+        "code": "function transform (message, context) {\n  const contextUser = context.get('user') || context.get('__user');\n  const testPersonId = context.get('testPersonId');\n  const personId = (testPersonId && testPersonId.length > 0)\n    ? testPersonId\n    : (contextUser && contextUser.id) ? contextUser.id : '';\n  context.set('personId', personId);\n  return { payload: {} };\n}\n"
       }
     },
     "Get person": {
       "class": "ethosProxyGet",
       "config": {
         "resource": "persons",
-        "id": "{{context.personId}}",
         "acceptVersions": ["12"],
+        "idFromContext": "$.personId",
         "cache": false,
         "ignoreErrors": false
       }
