@@ -77,7 +77,7 @@ const styles = () => ({
         padding: spacing40,
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing40,
+        gap: spacing30,
     },
     categoryDragging: {
         boxShadow: '0 4px 16px rgba(0,0,0,0.16)',
@@ -105,7 +105,7 @@ const styles = () => ({
         flex: '1 1 auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing40,
+        gap: spacing30,
     },
     dragHandle: {
         cursor: 'grab',
