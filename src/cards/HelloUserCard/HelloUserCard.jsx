@@ -1,22 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// HelloUserCard — DIAGNOSTIC STEP 2.
+// HelloUserCard — DIAGNOSTIC STEP 3.
 //
-// Mirrors FL Poly's exp-account-details-custom/src/cards/AccountDetails.jsx
-// shape EXACTLY. Differences from step 1a (which crashed):
+// Found the breaking change. EDS 8.x changed the withStyles signature:
 //
-//   * Use <Box> from EDS (not <div>)
-//   * Use `function Card(props)` + `const { classes } = props`
-//     (not destructured in arg list)
-//   * `styles` defined AFTER the component function, AFTER propTypes
-//   * Add withIntl HOC — exported as withStyles(styles)(withIntl(Card))
-//   * Use useIntl() for the greeting message
+//   EDS 7.x (FL Poly's stack):
+//       withStyles(styles, options)(Component)
 //
-// Hypothesis: EDS's withStyles HOC needs to wrap a class component
-// (which withIntl produces); wrapping a plain function component
-// breaks. FL Poly always uses withStyles(...)(withIntl(...)) — never
-// withStyles directly on a function component.
+//   EDS 8.x (our stack, and Ellucian's sdk-samples):
+//       withStyles(Component, styles, { name: 'CardName' })
+//
+// Source: Ellucian's official sdk-samples — same SDK 8.1.2 / React 19 /
+// Node 24 stack as ours. See PropsCard.jsx and LoadingStateCard.jsx in
+// https://github.com/ellucian-developer/experience-sdk-sample-extensions
+//
+// HOC composition order in 8.x: withIntl(withStyles(...)) — withIntl
+// OUTERMOST (the inverse of 7.x).
+//
+// All FL Poly references (exp-account-details-custom,
+// custom-simple-links, exp-canvas-teachers, exp-events-studentlife,
+// experience-ethos-examples) are on EDS 7.x — their withStyles call
+// pattern doesn't apply to our 8.x stack.
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -28,7 +33,13 @@ import { useUserInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
-function HelloUserCard(props) {
+const styles = () => ({
+    root: {
+        padding: spacing20,
+    },
+});
+
+const HelloUserCard = (props) => {
     const { classes } = props;
     const intl = useIntl();
     const { firstName } = useUserInfo() || {};
@@ -43,16 +54,13 @@ function HelloUserCard(props) {
             </Typography>
         </Box>
     );
-}
+};
 
 HelloUserCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-const styles = () => ({
-    root: {
-        padding: spacing20,
-    },
-});
-
-export default withStyles(styles)(withIntl(HelloUserCard));
+// EDS 8.x signature: withStyles(Component, styles, { name }).
+// HOC composition: withIntl outermost (matches Ellucian sdk-samples'
+// LoadingStateCard pattern).
+export default withIntl(withStyles(HelloUserCard, styles, { name: 'HelloUserCard' }));
