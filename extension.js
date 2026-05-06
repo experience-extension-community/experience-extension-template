@@ -75,12 +75,19 @@ module.exports = {
         },
 
         // 4. PageLinkCard — card-to-page navigation.
+        // pageRoute binds this card to the extension's page URL
+        // (`/page/.../PageLinkCard/`) that the dashboard publishes.
+        // Required in SDK 8: without it the dashboard 404s the URL
+        // even though the upload tool lists it.
         {
             type: 'PageLinkCard',
             source: './src/cards/PageLinkCard/PageLinkCard.jsx',
             title: 'Open sample page',
             displayCardType: 'Open sample page',
             description: 'Demonstrates navigateToPage().',
+            pageRoute: {
+                route: '/',
+            },
         },
     ],
 
