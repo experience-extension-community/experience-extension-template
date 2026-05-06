@@ -7,7 +7,7 @@
 //
 // EDS 8.x: withStyles(Component, styles, { name }) + withIntl outermost.
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
@@ -116,13 +116,27 @@ const styles = () => ({
         whiteSpace: 'nowrap',
     },
     termMeta: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: spacing30,
+    },
+    termDates: {
         fontFamily: BRAND_FONT_STACK,
         fontSize: '0.75rem',
         color: brandColors.textSecondary,
         fontVariantNumeric: 'tabular-nums',
-        display: 'flex',
-        alignItems: 'baseline',
-        gap: spacing20,
+        flex: '1 1 auto',
+        minWidth: 0,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+    },
+    termCodeGroup: {
+        flex: '0 0 auto',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: spacing10,
     },
     termCode: {
         fontFamily:
@@ -132,8 +146,37 @@ const styles = () => ({
         color: brandColors.textPrimary,
         letterSpacing: '0.02em',
     },
-    termDates: {
-        fontFamily: BRAND_FONT_STACK,
+    copyButton: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 22,
+        height: 22,
+        padding: 0,
+        background: 'transparent',
+        border: 'none',
+        borderRadius: 4,
+        cursor: 'pointer',
+        color: brandColors.textMuted,
+        transition: 'color 120ms ease-out, background-color 120ms ease-out',
+        '&:hover': {
+            color: brandColors.primary,
+            backgroundColor: brandColors.surfaceMuted,
+        },
+        '&:focus-visible': {
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 1,
+        },
+    },
+    copyButtonCopied: {
+        color: brandColors.success,
+        '&:hover': { color: brandColors.success },
+    },
+    copyIcon: {
+        fontFamily: 'Material Symbols Outlined',
+        fontSize: '1rem',
+        fontVariationSettings: '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
+        lineHeight: 1,
     },
     refreshing: {
         marginTop: spacing20,
@@ -156,6 +199,23 @@ const EthosFetchCard = (props) => {
     useMaterialIconFonts();
 
     const { data, isLoading, isRefreshing, isError, error, refresh } = useAcademicPeriods();
+
+    // Per-row "just copied" indicator. Holds the term id of the row whose
+    // code was most recently copied; auto-clears after 1.5s.
+    const [copiedId, setCopiedId] = useState(null);
+    const copyCode = useCallback((id, code) => {
+        if (!code) return;
+        if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(code).catch(() => {
+                /* clipboard blocked — silently noop, copied UI still flashes */
+            });
+        }
+        setCopiedId(id);
+        setTimeout(
+            () => setCopiedId((prev) => (prev === id ? null : prev)),
+            1500,
+        );
+    }, []);
 
     // Sort:
     //   1. By category — 'term' first, 'subterm' second, anything else,
@@ -258,20 +318,59 @@ const EthosFetchCard = (props) => {
 
             <ul className={classes.list}>
                 {sortedTerms.map((term, idx) => {
+                    const rowKey = term.id || term.code || idx;
+                    const isCopied = copiedId === rowKey;
                     const range = [formatDate(term.startOn, intl), formatDate(term.endOn, intl)]
                         .filter(Boolean)
                         .join(' – ');
                     return (
-                        <li key={term.id || term.code || idx} className={classes.term}>
+                        <li key={rowKey} className={classes.term}>
                             <span className={classes.termTitle}>
                                 {term.title || term.code || '(unnamed term)'}
                             </span>
                             <span className={classes.termMeta}>
+                                <span className={classes.termDates}>{range || ' '}</span>
                                 {term.code && (
-                                    <span className={classes.termCode}>{term.code}</span>
+                                    <span className={classes.termCodeGroup}>
+                                        <span className={classes.termCode}>{term.code}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => copyCode(rowKey, term.code)}
+                                            aria-label={
+                                                isCopied
+                                                    ? intl.formatMessage({
+                                                          id: 'common.copied',
+                                                          defaultMessage: 'Copied',
+                                                      })
+                                                    : intl.formatMessage(
+                                                          {
+                                                              id: 'card.ethosFetch.copyCode',
+                                                              defaultMessage: 'Copy code {code}',
+                                                          },
+                                                          { code: term.code },
+                                                      )
+                                            }
+                                            title={
+                                                isCopied
+                                                    ? intl.formatMessage({
+                                                          id: 'common.copied',
+                                                          defaultMessage: 'Copied',
+                                                      })
+                                                    : intl.formatMessage({
+                                                          id: 'common.copy',
+                                                          defaultMessage: 'Copy',
+                                                      })
+                                            }
+                                            className={`${classes.copyButton}${
+                                                isCopied ? ` ${classes.copyButtonCopied}` : ''
+                                            }`}
+                                        >
+                                            <span aria-hidden="true" className={classes.copyIcon}>
+                                                {isCopied ? 'check' : 'content_copy'}
+                                            </span>
+                                        </button>
+                                    </span>
                                 )}
-                                {term.code && range && <span aria-hidden="true">·</span>}
-                                {range && <span className={classes.termDates}>{range}</span>}
                             </span>
                         </li>
                     );
