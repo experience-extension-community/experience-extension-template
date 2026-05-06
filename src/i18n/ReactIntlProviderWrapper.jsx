@@ -1,55 +1,37 @@
+// Copyright 2021-2025 Ellucian Company L.P. and its affiliates.
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2026 Experience Extension Community contributors
 //
-// withIntl HOC — pure functional wrapper that provides the
-// react-intl IntlProvider context. Reads `userInfo` from props (the
-// Experience SDK passes it down to wrapped cards/pages) and resolves
-// the locale; falls back to en-US if not present.
-//
-// Notes vs FL Poly's older pattern:
-//
-//   * FL Poly's withIntl is a class component that internally calls
-//     `injectIntl(WrappedComponent)` to inject `intl` as a prop.
-//     That works under react-intl 5.x. Under react-intl 7.x (this
-//     template), `injectIntl` interacts differently with EDS 8.x's
-//     `withStyles` HOC and produces a module-load crash.
-//
-//   * This template's cards use the `useIntl()` hook directly inside
-//     their bodies for messages, so the prop injection is unnecessary.
-//     Dropping `injectIntl` removes the failure mode.
-//
-//   * The brand-font and Material Symbols stylesheets are loaded
-//     inline by each card (see the `<link>` tags after `<IconSprite />`
-//     in every card render — matches FL Poly canvas-teachers'
-//     pattern). They are NOT injected from this wrapper, to keep the
-//     wrapper minimal and non-invasive.
+// Ported byte-for-byte from FloridaPoly/experience-ethos-examples/
+// account-details-dataconnect/extension/src/i18n/ReactIntlProviderWrapper.jsx
+// (FL Poly's canonical curated reference, also used in the
+// FloridaPoly/exp-account-details-custom production extension).
 
 import React from 'react';
+import { injectIntl, IntlProvider } from 'react-intl';
 import PropTypes from 'prop-types';
-import { IntlProvider } from 'react-intl';
-
-import { getMessages } from './intlUtility';
-
-const DEFAULT_LOCALE = 'en-US';
+import { getMessages } from '../i18n/intlUtility';
 
 export function withIntl(WrappedComponent) {
-    function WithIntl(props) {
-        const { userInfo } = props;
-        const locale = (userInfo && userInfo.locale) || DEFAULT_LOCALE;
-        return (
-            <IntlProvider locale={locale} messages={getMessages(locale)}>
-                <WrappedComponent {...props} />
-            </IntlProvider>
-        );
+    let InjectedComponent;
+
+    class WithIntl extends React.Component {
+        constructor(props) {
+            super(props);
+            InjectedComponent = injectIntl(WrappedComponent);
+        }
+        render() {
+            const { userInfo: { locale } } = this.props;
+
+            return (
+                <IntlProvider locale={locale} messages={getMessages(locale)}>
+                    <InjectedComponent {...this.props} />
+                </IntlProvider>
+            );
+        }
     }
-
-    WithIntl.displayName = `WithIntl(${
-        WrappedComponent.displayName || WrappedComponent.name || 'Component'
-    })`;
-
     WithIntl.propTypes = {
-        userInfo: PropTypes.object,
+        userInfo: PropTypes.object
     };
-
+    WithIntl.displayName = `WithIntl(${WrappedComponent.displayName})`;
     return WithIntl;
 }

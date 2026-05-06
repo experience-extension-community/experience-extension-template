@@ -1,24 +1,71 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// MINIMUM VIABLE CARD.
+// HelloUserCard — minimum-viable greeting card.
 //
-// One function component. No HOCs. No SDK hooks. No useStyles, no
-// withStyles, no withIntl, no useUserInfo, no useExtensionControl.
-// No PropTypes. No useTypekitFont. Nothing.
-//
-// Just a Typography element with literal text. If this doesn't load
-// in the SDK dev shell, the issue is environmental (the manifest,
-// package.json, or Ellucian's runtime), not in our component code.
-//
-// Once this works, build up: add withStyles → add withIntl → add
-// hooks → etc., one piece at a time, testing after each.
+// Mirrors FL Poly's exp-account-details-custom and exp-canvas-teachers
+// pattern exactly:
+//   * function component, classes injected via withStyles HOC
+//   * <div className={classes.root}> outer wrapper (NOT <Card>)
+//   * IconSprite at the top so Path icons render inside
+//   * useUserInfo() hook for the signed-in user's name
+//   * react-intl for messages (useIntl + withIntl HOC)
+//   * HOC composition: withStyles(styles)(withIntl(Card))
 
 import React from 'react';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { Typography } from '@ellucian/react-design-system/core';
+import { spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
+import { IconSprite } from '@ellucian/ds-icons/lib';
+import { useUserInfo } from '@ellucian/experience-extension-utils';
 
-const HelloUserCard = () => (
-    <Typography variant="body1">Hello, World!</Typography>
-);
+import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 
-export default HelloUserCard;
+const styles = () => ({
+    root: {
+        padding: spacing30,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    greeting: {
+        marginBottom: spacing20,
+    },
+});
+
+function HelloUserCard({ classes }) {
+    const intl = useIntl();
+    const userInfo = useUserInfo() || {};
+    const firstName = userInfo.firstName || 'there';
+
+    useTypekitFont();
+    useMaterialIconFonts();
+
+    return (
+        <div className={classes.root}>
+            <IconSprite />
+            <Typography variant="h6" className={classes.greeting}>
+                {intl.formatMessage(
+                    { id: 'card.helloUser.title', defaultMessage: 'Hello, {firstName}' },
+                    { firstName },
+                )}
+            </Typography>
+            <Typography variant="body2">
+                {intl.formatMessage({
+                    id: 'card.helloUser.subtitle',
+                    defaultMessage: 'Welcome to the community Experience extension template.',
+                })}
+            </Typography>
+        </div>
+    );
+}
+
+HelloUserCard.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(withIntl(HelloUserCard));

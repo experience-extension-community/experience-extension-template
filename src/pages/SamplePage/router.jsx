@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// The page entry point referenced by `page.source` in extension.js.
-// Uses HashRouter so it works inside the Experience iframe shell.
-//
-// Add additional routes here as the extension grows; the
-// PageLinkCard's pageRoute defaults to `/`.
+// HashRouter entry referenced by extension.js's `page.source`. The
+// page itself uses default English text — no react-intl wrapper at
+// this iteration.
 
+import React from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 
 import SamplePage from './SamplePage';
-import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
 const Router = () => (
     <HashRouter>
@@ -20,4 +18,4 @@ const Router = () => (
     </HashRouter>
 );
 
-export default withIntl(Router);
+export default Router;

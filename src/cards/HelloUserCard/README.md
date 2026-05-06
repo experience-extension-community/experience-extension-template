@@ -1,28 +1,39 @@
 # HelloUserCard
 
-The minimum viable Experience card. Copy this folder as the starting
-point for a brand-new card.
+The minimum viable Experience card. **Use this as your starting point**
+when adding a new card. It's also the only card in the manifest that
+carries a `template:` block (the catalog showcase entry).
 
-Demonstrates:
+## What it demonstrates
 
-- `useUserInfo()` — read the signed-in user's name
-- `useExtensionControl().setLoadingStatus(false)` — dismiss the SDK loading spinner once mounted
-- `withStyles` HOC from `@ellucian/react-design-system/core/styles` — class-name injection via `classes` prop
-- Path tokens (`spacing20`, `spacing30`) imported directly from `@ellucian/react-design-system/core/styles/tokens`
-- `brandColors.polyPurple` literal hex value imported from `src/utils/branding/brandColors.js`
-- `IconSprite` from `@ellucian/ds-icons/lib`
-- `<Icon>` for a Material Symbols Outlined glyph
-- `useTypekitFont()` — load the brand font on mount (the icon stylesheet is loaded inline by `withIntl`)
-- `react-intl` — every user-facing string flows through `intl.formatMessage`
-- `withIntl(...)` HOC — wraps the card in IntlProvider; the SDK passes `userInfo` as a prop to this wrapper
+- `function Card({ classes }) { ... }` shape — class-name injection
+  via `withStyles` HOC, accessed from props
+- `useUserInfo()` hook for the signed-in user's name
+- `<div className={classes.root}>` outer wrapper (NOT `<Card>` —
+  Experience supplies the card chrome itself; wrapping in another
+  Card is redundant)
+- `<IconSprite />` from `@ellucian/ds-icons/lib` rendered once near
+  the top so Path icons render
+- `Typography` + `spacing20`/`spacing30` design tokens
+- HOC composition: `withStyles(styles)(HelloUserCard)`
 
-HOC composition order is the FL Poly canonical:
+## Pattern matches
 
-```jsx
-export default withStyles(styles)(withIntl(HelloUserCard));
-```
+Mirrors Florida Poly's working extension cards:
+- `exp-account-details-custom/src/cards/AccountDetails.jsx` (hooks for SDK access)
+- `custom-simple-links/src/cards/FavoriteLinks/FavoriteLinksCard.jsx` (withStyles + literal strings)
+- Ellucian official `sdk-samples/extension.js` shape
 
-withStyles outermost.
+## What it does NOT use
 
-No data fetching. No configuration. No tests of state machines —
-just rendering.
+Intentionally omitted to keep the starting point as simple as possible:
+
+- `withIntl` / `useIntl` / `injectIntl` — literal English strings only.
+  Add localization later if needed (see `src/i18n/` for the wiring).
+- `useTypekitFont`, `useMaterialIconFonts` — brand fonts not loaded.
+  Add them if you need Typekit / Material Symbols Outlined glyphs.
+- `useExtensionControl().setLoadingStatus` — not needed for cards
+  with no async data.
+- Custom configuration / pipeline.
+
+Add these one at a time as your card needs them.

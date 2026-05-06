@@ -4,38 +4,56 @@
 // Custom configuration form for ConfigurableCard.
 //
 // Demonstrates the canonical Experience customConfiguration pattern:
-//   * Read existing configuration via useCardInfo
+//   * Read existing config via useCardInfo
 //   * Persist updates via useCardControl().setCustomConfiguration
 //   * Gate save with useCardControl().setIsCustomConfigurationValid
 //
-// The shape persisted is `{ links: [{ label, url }, ...] }`.
+// Persisted shape: { links: [{ label, url }, ...] }
+//
+// HOC: withStyles(styles)(withIntl(Form)).
 
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { withStyles } from '@ellucian/react-design-system/core/styles';
 import {
     Button,
     IconButton,
     TextField,
     Typography,
 } from '@ellucian/react-design-system/core';
-import { withStyles } from '@ellucian/react-design-system/core/styles';
-import { spacing10, spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
+import {
+    spacing10,
+    spacing20,
+    spacing30,
+} from '@ellucian/react-design-system/core/styles/tokens';
 import { useCardControl, useCardInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import Icon from '../../components/Icon';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 
 const styles = () => ({
-    root: { display: 'flex', flexDirection: 'column', gap: spacing20 },
-    row: { display: 'flex', alignItems: 'flex-start', gap: spacing10 },
+    root: {
+        padding: spacing30,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing20,
+    },
+    row: {
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: spacing10,
+    },
     fieldsCol: {
         flex: '1 1 auto',
         display: 'flex',
         flexDirection: 'column',
         gap: spacing10,
     },
-    addRow: { marginTop: spacing30 },
+    addRow: {
+        marginTop: spacing30,
+    },
 });
 
 const isValidUrl = (str) => {
@@ -48,11 +66,13 @@ const isValidUrl = (str) => {
     }
 };
 
-function ConfigurableCardConfig(props) {
-    const { classes } = props;
+function ConfigurableCardConfig({ classes }) {
     const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setCustomConfiguration, setIsCustomConfigurationValid } = useCardControl() || {};
+
+    useTypekitFont();
+    useMaterialIconFonts();
 
     const initialLinks = useMemo(() => {
         const raw = cardInfo.configuration?.customConfiguration?.links;
@@ -74,8 +94,10 @@ function ConfigurableCardConfig(props) {
     const updateLink = (index, key, value) => {
         setLinks((prev) => prev.map((l, i) => (i === index ? { ...l, [key]: value } : l)));
     };
-    const removeLink = (index) => setLinks((prev) => prev.filter((_l, i) => i !== index));
-    const addLink = () => setLinks((prev) => [...prev, { label: '', url: '' }]);
+    const removeLink = (index) =>
+        setLinks((prev) => prev.filter((_l, i) => i !== index));
+    const addLink = () =>
+        setLinks((prev) => [...prev, { label: '', url: '' }]);
 
     return (
         <div className={classes.root}>
@@ -127,7 +149,7 @@ function ConfigurableCardConfig(props) {
                             onClick={() => removeLink(idx)}
                             disabled={links.length === 1}
                         >
-                            <Icon name="delete" size={20} />
+                            <span aria-hidden="true">×</span>
                         </IconButton>
                     </div>
                 );
