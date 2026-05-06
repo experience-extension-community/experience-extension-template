@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// ConfigurableCard — admin-configured categorized links.
+// ConfigurableCard — categorized links optimised for dashboard tile UX.
 //
-// Renders categories as section headings + tight list of links. Uses
-// the institution's brand font (loaded via useTypekitFont) and
-// Material Symbols Outlined icons (loaded via useMaterialIconFonts)
-// for chevron affordances on each link.
+// Design intent:
+//   * Looks at home next to other Path-styled cards on a dashboard
+//   * Scannable in 1-2 seconds (clear category hierarchy)
+//   * Easy to click — full-row hit targets, ~44px tall
+//   * Restrained brand presence — primary color only on category
+//     headings + on hover. Links default to readable secondaryDark.
+//   * Scrolls cleanly for many links / many categories
 //
 // Persistence (read side):
 //   cardInfo.configuration.customConfiguration.categories
-// (SDK lifts customConfiguration.client.categories to top-level on read)
+// (SDK lifts customConfiguration.client.categories on read)
 //
 // EDS 8.x: withStyles(Component, styles, { name }) + withIntl outermost.
 
@@ -19,7 +22,12 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { Box, Typography } from '@ellucian/react-design-system/core';
-import { spacing10, spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
+import {
+    spacing20,
+    spacing30,
+    spacing40,
+    spacing50,
+} from '@ellucian/react-design-system/core/styles/tokens';
 import { useExtensionControl, useCardInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
@@ -32,31 +40,40 @@ const BRAND_FONT_STACK =
 
 const styles = () => ({
     root: {
-        padding: spacing20,
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing30,
+        gap: spacing50,
+        padding: spacing40,
         overflowY: 'auto',
         fontFamily: BRAND_FONT_STACK,
         backgroundColor: brandColors.surface,
+
+        // Tasteful native scrollbar tinting (only Webkit).
+        '&::-webkit-scrollbar': { width: 8 },
+        '&::-webkit-scrollbar-track': { backgroundColor: 'transparent' },
+        '&::-webkit-scrollbar-thumb': {
+            backgroundColor: brandColors.border,
+            borderRadius: 4,
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: brandColors.neutralLight,
+        },
     },
     section: {
         display: 'flex',
         flexDirection: 'column',
-        gap: 4,
     },
     categoryHeading: {
+        margin: 0,
+        marginBottom: spacing30,
         color: brandColors.primary,
         fontFamily: BRAND_FONT_STACK,
-        fontSize: '0.75rem',
+        fontSize: '0.8125rem',     // 13px
         fontWeight: 700,
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
-        margin: 0,
-        marginBottom: 4,
-        paddingBottom: 6,
-        borderBottom: `2px solid ${brandColors.secondary}`,
+        lineHeight: 1.3,
     },
     list: {
         listStyle: 'none',
@@ -65,34 +82,37 @@ const styles = () => ({
     },
     listItem: {
         margin: 0,
+        borderBottom: `1px solid ${brandColors.border}`,
+        '&:last-child': {
+            borderBottom: 'none',
+        },
     },
     link: {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: spacing10,
-        padding: `${spacing10} ${spacing10}`,
+        gap: spacing30,
+        padding: `${spacing30} ${spacing20}`,    // 8px / 4px
+        minHeight: 44,                            // WCAG 2.5.5 target size
         color: brandColors.secondaryDark,
-        textDecoration: 'none',
         fontFamily: BRAND_FONT_STACK,
-        fontSize: '0.9375rem',
+        fontSize: '0.9375rem',                    // 15px
         fontWeight: 500,
-        lineHeight: 1.4,
-        borderRadius: 4,
-        borderBottom: `1px solid ${brandColors.border}`,
-        transition: 'background-color 140ms ease-out, color 140ms ease-out, transform 140ms ease-out',
+        lineHeight: 1.35,
+        textDecoration: 'none',
+        borderRadius: 3,
+        transition:
+            'background-color 120ms ease-out, color 120ms ease-out',
         '&:hover': {
             backgroundColor: brandColors.surfaceMuted,
             color: brandColors.primary,
-            transform: 'translateX(2px)',
         },
         '&:hover $chevron': {
+            color: brandColors.primary,
             opacity: 1,
-            transform: 'translateX(2px)',
         },
         '&:focus-visible': {
             outline: `2px solid ${brandColors.focusRing}`,
-            outlineOffset: 2,
+            outlineOffset: -2,
             backgroundColor: brandColors.surfaceMuted,
         },
     },
@@ -103,19 +123,23 @@ const styles = () => ({
         whiteSpace: 'nowrap',
     },
     chevron: {
-        fontFamily: 'Material Symbols Outlined',
-        fontSize: '1.125rem',
-        lineHeight: 1,
-        opacity: 0.4,
-        transition: 'opacity 140ms ease-out, transform 140ms ease-out',
         flex: '0 0 auto',
+        fontFamily: 'Material Symbols Outlined',
+        fontSize: '1.125rem',          // 18px
+        lineHeight: 1,
+        color: brandColors.neutralLight,
+        opacity: 0.7,
+        transition: 'color 120ms ease-out, opacity 120ms ease-out',
+        userSelect: 'none',
     },
     empty: {
+        margin: 'auto',
+        padding: spacing50,
+        textAlign: 'center',
         color: brandColors.textSecondary,
         fontFamily: BRAND_FONT_STACK,
+        fontSize: '0.875rem',
         fontStyle: 'italic',
-        textAlign: 'center',
-        marginTop: spacing30,
     },
 });
 
@@ -127,7 +151,6 @@ const ConfigurableCard = (props) => {
     const cardInfo = useCardInfo() || {};
     const { setLoadingStatus } = useExtensionControl() || {};
 
-    // Load brand font + Material Symbols icon font.
     useTypekitFont();
     useMaterialIconFonts();
 
