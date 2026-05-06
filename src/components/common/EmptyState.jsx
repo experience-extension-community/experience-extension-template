@@ -52,4 +52,4 @@ EmptyState.propTypes = {
     icon: PropTypes.string,
 };
 
-export default withStyles(styles)(EmptyState);
+export default withStyles(EmptyState, styles, { name: 'EmptyState' });

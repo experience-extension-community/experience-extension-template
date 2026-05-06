@@ -70,4 +70,4 @@ ErrorState.propTypes = {
     fallbackMessage: PropTypes.string,
 };
 
-export default withStyles(styles)(ErrorState);
+export default withStyles(ErrorState, styles, { name: 'ErrorState' });
