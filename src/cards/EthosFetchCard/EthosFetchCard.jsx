@@ -120,6 +120,31 @@ const styles = () => ({
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: spacing30,
+        width: '100%',
+        padding: `${spacing10} ${spacing20}`,
+        margin: 0,
+        background: 'transparent',
+        border: 'none',
+        borderRadius: 4,
+        cursor: 'pointer',
+        textAlign: 'left',
+        fontFamily: 'inherit',
+        transition: 'background-color 120ms ease-out, color 120ms ease-out',
+        '&:hover': {
+            backgroundColor: brandColors.surfaceMuted,
+        },
+        '&:hover $copyIcon': {
+            color: brandColors.primary,
+        },
+        '&:focus-visible': {
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 1,
+            backgroundColor: brandColors.surfaceMuted,
+        },
+    },
+    termMetaCopied: {
+        backgroundColor: `${brandColors.success}14`, // ~8% tint
+        '&:hover': { backgroundColor: `${brandColors.success}22` },
     },
     termDates: {
         fontFamily: BRAND_FONT_STACK,
@@ -136,7 +161,7 @@ const styles = () => ({
         flex: '0 0 auto',
         display: 'inline-flex',
         alignItems: 'center',
-        gap: spacing10,
+        gap: spacing20,
     },
     termCode: {
         fontFamily:
@@ -146,37 +171,16 @@ const styles = () => ({
         color: brandColors.textPrimary,
         letterSpacing: '0.02em',
     },
-    copyButton: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 22,
-        height: 22,
-        padding: 0,
-        background: 'transparent',
-        border: 'none',
-        borderRadius: 4,
-        cursor: 'pointer',
-        color: brandColors.textMuted,
-        transition: 'color 120ms ease-out, background-color 120ms ease-out',
-        '&:hover': {
-            color: brandColors.primary,
-            backgroundColor: brandColors.surfaceMuted,
-        },
-        '&:focus-visible': {
-            outline: `2px solid ${brandColors.focusRing}`,
-            outlineOffset: 1,
-        },
-    },
-    copyButtonCopied: {
-        color: brandColors.success,
-        '&:hover': { color: brandColors.success },
-    },
     copyIcon: {
         fontFamily: 'Material Symbols Outlined',
-        fontSize: '1rem',
+        fontSize: '1.25rem',                     // 20px — clearly visible
         fontVariationSettings: '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
         lineHeight: 1,
+        color: brandColors.textMuted,
+        transition: 'color 120ms ease-out',
+    },
+    copyIconCopied: {
+        color: brandColors.success,
     },
     refreshing: {
         marginTop: spacing20,
@@ -320,6 +324,27 @@ const EthosFetchCard = (props) => {
                 {sortedTerms.map((term, idx) => {
                     const rowKey = term.id || term.code || idx;
                     const isCopied = copiedId === rowKey;
+                    const copyableLabel = isCopied
+                        ? intl.formatMessage({
+                              id: 'common.copied',
+                              defaultMessage: 'Copied',
+                          })
+                        : intl.formatMessage(
+                              {
+                                  id: 'card.ethosFetch.copyCode',
+                                  defaultMessage: 'Copy code {code}',
+                              },
+                              { code: term.code || '' },
+                          );
+                    const MetaTag = term.code ? 'button' : 'div';
+                    const metaProps = term.code
+                        ? {
+                              type: 'button',
+                              onClick: () => copyCode(rowKey, term.code),
+                              'aria-label': copyableLabel,
+                              title: copyableLabel,
+                          }
+                        : {};
                     const range = [formatDate(term.startOn, intl), formatDate(term.endOn, intl)]
                         .filter(Boolean)
                         .join(' – ');
@@ -328,50 +353,27 @@ const EthosFetchCard = (props) => {
                             <span className={classes.termTitle}>
                                 {term.title || term.code || '(unnamed term)'}
                             </span>
-                            <span className={classes.termMeta}>
+                            <MetaTag
+                                {...metaProps}
+                                className={`${classes.termMeta}${
+                                    isCopied ? ` ${classes.termMetaCopied}` : ''
+                                }`}
+                            >
                                 <span className={classes.termDates}>{range || ' '}</span>
                                 {term.code && (
                                     <span className={classes.termCodeGroup}>
                                         <span className={classes.termCode}>{term.code}</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => copyCode(rowKey, term.code)}
-                                            aria-label={
-                                                isCopied
-                                                    ? intl.formatMessage({
-                                                          id: 'common.copied',
-                                                          defaultMessage: 'Copied',
-                                                      })
-                                                    : intl.formatMessage(
-                                                          {
-                                                              id: 'card.ethosFetch.copyCode',
-                                                              defaultMessage: 'Copy code {code}',
-                                                          },
-                                                          { code: term.code },
-                                                      )
-                                            }
-                                            title={
-                                                isCopied
-                                                    ? intl.formatMessage({
-                                                          id: 'common.copied',
-                                                          defaultMessage: 'Copied',
-                                                      })
-                                                    : intl.formatMessage({
-                                                          id: 'common.copy',
-                                                          defaultMessage: 'Copy',
-                                                      })
-                                            }
-                                            className={`${classes.copyButton}${
-                                                isCopied ? ` ${classes.copyButtonCopied}` : ''
+                                        <span
+                                            aria-hidden="true"
+                                            className={`${classes.copyIcon}${
+                                                isCopied ? ` ${classes.copyIconCopied}` : ''
                                             }`}
                                         >
-                                            <span aria-hidden="true" className={classes.copyIcon}>
-                                                {isCopied ? 'check' : 'content_copy'}
-                                            </span>
-                                        </button>
+                                            {isCopied ? 'check' : 'content_copy'}
+                                        </span>
                                     </span>
                                 )}
-                            </span>
+                            </MetaTag>
                         </li>
                     );
                 })}
