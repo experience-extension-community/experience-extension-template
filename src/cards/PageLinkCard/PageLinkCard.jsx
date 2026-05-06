@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { Box, Button, Typography } from '@ellucian/react-design-system/core';
 import { spacing20 } from '@ellucian/react-design-system/core/styles/tokens';
-import { useCardControl, useExtensionControl } from '@ellucian/experience-extension-utils';
+import { useExtensionControl } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
@@ -31,10 +31,9 @@ const styles = () => ({
 });
 
 const PageLinkCard = (props) => {
-    const { classes } = props;
+    const { classes, cardControl: { navigateToPage } = {} } = props;
     const intl = useIntl();
     const { setLoadingStatus } = useExtensionControl() || {};
-    const { navigateToPage } = useCardControl() || {};
 
     useEffect(() => {
         if (typeof setLoadingStatus === 'function') {
@@ -79,6 +78,7 @@ const PageLinkCard = (props) => {
 
 PageLinkCard.propTypes = {
     classes: PropTypes.object.isRequired,
+    cardControl: PropTypes.object,
 };
 
 export default withIntl(withStyles(PageLinkCard, styles, { name: 'PageLinkCard' }));
