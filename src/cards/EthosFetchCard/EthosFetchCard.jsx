@@ -158,18 +158,20 @@ const EthosFetchCard = (props) => {
     const { data, isLoading, isRefreshing, isError, error, refresh } = useAcademicPeriods();
 
     // Sort:
-    //   1. By category — 'term' first, 'subterm' second, 'year' last,
-    //      anything unrecognized after that.
+    //   1. By category — 'term' first, 'subterm' second, anything else,
+    //      and 'year' ALWAYS last regardless of what else exists.
     //   2. Within category, titles that start with a letter come before
     //      titles that start with a digit (e.g. "Spring 2026" before
     //      "2027-2028").
     //   3. Within each partition, natural locale-aware alpha by title.
     const sortedTerms = useMemo(() => {
         if (!Array.isArray(data)) return [];
-        const CATEGORY_RANK = { term: 0, subterm: 1, year: 2 };
+        const CATEGORY_RANK = { term: 0, subterm: 1 };
         const rankOfCategory = (cat) => {
             const key = String(cat || '').toLowerCase();
-            return CATEGORY_RANK[key] !== undefined ? CATEGORY_RANK[key] : 99;
+            if (key === 'year') return 999;             // always last
+            if (CATEGORY_RANK[key] !== undefined) return CATEGORY_RANK[key];
+            return 50;                                   // unknown — between subterm and year
         };
         const startsWithDigit = (s) => /^\d/.test(String(s || '').trim());
         return [...data].sort((a, b) => {
