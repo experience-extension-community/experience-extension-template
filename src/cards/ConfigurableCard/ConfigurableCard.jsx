@@ -173,7 +173,8 @@ const styles = () => ({
     chevron: {
         flex: '0 0 auto',
         fontFamily: 'Material Symbols Outlined',
-        fontSize: '1rem',
+        fontSize: '1.125rem',
+        fontVariationSettings: '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
         lineHeight: 1,
         color: brandColors.neutralLight,        // visible at rest — affordance signal
         transition:
@@ -288,7 +289,7 @@ const ConfigurableCard = (props) => {
                                         {link.label || link.url}
                                     </span>
                                     <span aria-hidden="true" className={classes.chevron}>
-                                        chevron_right
+                                        arrow_outward
                                     </span>
                                 </a>
                             </li>
