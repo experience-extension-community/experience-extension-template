@@ -5,19 +5,21 @@
 //
 // Reads `customConfiguration.links` (array of `{ label, url }`) from
 // the card config and renders each as a Path Button. Demonstrates the
-// READ side of the customConfiguration pattern. The WRITE side
-// (the form) lives in ConfigurableCardConfig.jsx.
+// READ side of the customConfiguration pattern; the WRITE side (form)
+// lives in ConfigurableCardConfig.jsx.
 //
-// Mirrors FL Poly's custom-simple-links approach: literal strings
-// (no react-intl), withStyles HOC only, plain <div> wrapper.
+// HOC: withStyles(styles)(withIntl(Card)).
 
 import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { Button, Typography } from '@ellucian/react-design-system/core';
 import { spacing10, spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
 import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useCardInfo, useExtensionControl } from '@ellucian/experience-extension-utils';
+
+import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
 const styles = () => ({
     root: {
@@ -45,6 +47,7 @@ const styles = () => ({
 });
 
 function ConfigurableCard({ classes }) {
+    const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setLoadingStatus } = useExtensionControl() || {};
 
@@ -64,12 +67,18 @@ function ConfigurableCard({ classes }) {
         <div className={classes.root}>
             <IconSprite />
             <Typography variant="h6" className={classes.title}>
-                Configurable links
+                {intl.formatMessage({
+                    id: 'card.configurable.title',
+                    defaultMessage: 'Configurable links',
+                })}
             </Typography>
 
             {links.length === 0 ? (
                 <Typography variant="body2" className={classes.empty}>
-                    No links configured. Open card configuration to add some.
+                    {intl.formatMessage({
+                        id: 'card.configurable.empty.description',
+                        defaultMessage: 'Open the card configuration to add some.',
+                    })}
                 </Typography>
             ) : (
                 <div className={classes.list}>
@@ -95,4 +104,4 @@ ConfigurableCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(ConfigurableCard);
+export default withStyles(styles)(withIntl(ConfigurableCard));

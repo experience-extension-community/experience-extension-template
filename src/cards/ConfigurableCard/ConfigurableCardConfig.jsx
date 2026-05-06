@@ -10,12 +10,11 @@
 //
 // Persisted shape: { links: [{ label, url }, ...] }
 //
-// Mirrors account-details + custom-simple-links convention: hooks
-// for SDK access, withStyles for layout, no withIntl, plain
-// <div className={classes.root}> wrapper.
+// HOC: withStyles(styles)(withIntl(Form)).
 
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
 import {
     Button,
@@ -29,6 +28,8 @@ import {
     spacing30,
 } from '@ellucian/react-design-system/core/styles/tokens';
 import { useCardControl, useCardInfo } from '@ellucian/experience-extension-utils';
+
+import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
 const styles = () => ({
     root: {
@@ -64,6 +65,7 @@ const isValidUrl = (str) => {
 };
 
 function ConfigurableCardConfig({ classes }) {
+    const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setCustomConfiguration, setIsCustomConfigurationValid } = useCardControl() || {};
 
@@ -94,7 +96,12 @@ function ConfigurableCardConfig({ classes }) {
 
     return (
         <div className={classes.root}>
-            <Typography variant="h6">Configure links</Typography>
+            <Typography variant="h6">
+                {intl.formatMessage({
+                    id: 'card.configurable.config.heading',
+                    defaultMessage: 'Configure links',
+                })}
+            </Typography>
 
             {links.map((link, idx) => {
                 const urlInvalid = link.url.length > 0 && !isValidUrl(link.url);
@@ -102,22 +109,38 @@ function ConfigurableCardConfig({ classes }) {
                     <div key={idx} className={classes.row}>
                         <div className={classes.fieldsCol}>
                             <TextField
-                                label="Label"
+                                label={intl.formatMessage({
+                                    id: 'card.configurable.config.label',
+                                    defaultMessage: 'Label',
+                                })}
                                 value={link.label}
                                 onChange={(e) => updateLink(idx, 'label', e.target.value)}
                                 fullWidth
                             />
                             <TextField
-                                label="URL"
+                                label={intl.formatMessage({
+                                    id: 'card.configurable.config.url',
+                                    defaultMessage: 'URL',
+                                })}
                                 value={link.url}
                                 onChange={(e) => updateLink(idx, 'url', e.target.value)}
                                 error={urlInvalid}
-                                helperText={urlInvalid ? 'Enter a valid URL.' : undefined}
+                                helperText={
+                                    urlInvalid
+                                        ? intl.formatMessage({
+                                              id: 'card.configurable.config.invalidUrl',
+                                              defaultMessage: 'Enter a valid URL.',
+                                          })
+                                        : undefined
+                                }
                                 fullWidth
                             />
                         </div>
                         <IconButton
-                            aria-label="Remove"
+                            aria-label={intl.formatMessage({
+                                id: 'card.configurable.config.remove',
+                                defaultMessage: 'Remove',
+                            })}
                             onClick={() => removeLink(idx)}
                             disabled={links.length === 1}
                         >
@@ -129,7 +152,10 @@ function ConfigurableCardConfig({ classes }) {
 
             <div className={classes.addRow}>
                 <Button color="secondary" onClick={addLink}>
-                    Add link
+                    {intl.formatMessage({
+                        id: 'card.configurable.config.add',
+                        defaultMessage: 'Add link',
+                    })}
                 </Button>
             </div>
         </div>
@@ -140,4 +166,4 @@ ConfigurableCardConfig.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(ConfigurableCardConfig);
+export default withStyles(styles)(withIntl(ConfigurableCardConfig));

@@ -3,26 +3,24 @@
 //
 // EthosFetchCard — Data Connect / Ethos data lifecycle (placeholder).
 //
-// Demonstrates:
-//   * Pipeline name read from card configuration with env-var fallback
-//   * useExtensionControl().setLoadingStatus to drive the SDK shimmer
-//   * Three render branches: loading / error / data
+// Demonstrates pipeline name read from card configuration with
+// env-var fallback, plus the canonical card structure (function +
+// classes from props + react-intl). Real data fetch wiring is in
+// `src/hooks/useAcademicPeriods.js` — wire it in once this iteration
+// is verified loading.
 //
-// This iteration shows a static placeholder. Once the card pattern is
-// confirmed working, swap the placeholder body for a real Data
-// Connect call via authenticatedEthosFetch (see useAcademicPeriods
-// in src/hooks/ for the wiring).
+// HOC: withStyles(styles)(withIntl(Card)).
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { Button, Typography } from '@ellucian/react-design-system/core';
 import { spacing10, spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
 import { IconSprite } from '@ellucian/ds-icons/lib';
-import {
-    useCardInfo,
-    useExtensionControl,
-} from '@ellucian/experience-extension-utils';
+import { useCardInfo, useExtensionControl } from '@ellucian/experience-extension-utils';
+
+import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
 const styles = () => ({
     root: {
@@ -39,7 +37,7 @@ const styles = () => ({
     },
     pipeline: {
         marginTop: spacing10,
-        color: '#5B5E65', // colorTextSecondary
+        color: '#5B5E65',
         fontFamily: 'monospace',
         fontSize: '0.8rem',
         wordBreak: 'break-all',
@@ -47,6 +45,7 @@ const styles = () => ({
 });
 
 function EthosFetchCard({ classes }) {
+    const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setLoadingStatus } = useExtensionControl() || {};
 
@@ -55,7 +54,7 @@ function EthosFetchCard({ classes }) {
         process.env.PIPELINE_GET_TERMS ||
         '(no pipeline configured)';
 
-    const [isLoading, setIsLoading] = useState(false); // Stub state — set true when wiring real fetch
+    const [isLoading] = useState(false);
 
     useEffect(() => {
         if (typeof setLoadingStatus === 'function') {
@@ -67,9 +66,17 @@ function EthosFetchCard({ classes }) {
         <div className={classes.root}>
             <IconSprite />
             <header className={classes.header}>
-                <Typography variant="h6">Active terms</Typography>
-                <Button size="small" color="secondary" onClick={() => setIsLoading(false)}>
-                    Refresh
+                <Typography variant="h6">
+                    {intl.formatMessage({
+                        id: 'card.ethosFetch.title',
+                        defaultMessage: 'Active terms',
+                    })}
+                </Typography>
+                <Button size="small" color="secondary" onClick={() => {}}>
+                    {intl.formatMessage({
+                        id: 'card.ethosFetch.cta.refresh',
+                        defaultMessage: 'Refresh',
+                    })}
                 </Button>
             </header>
             <Typography variant="body2">
@@ -86,4 +93,4 @@ EthosFetchCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(EthosFetchCard);
+export default withStyles(styles)(withIntl(EthosFetchCard));

@@ -4,20 +4,20 @@
 // PageLinkCard — card-to-page navigation.
 //
 // Demonstrates useCardControl().navigateToPage. The card body itself
-// is trivial — the page does the work. Page is declared in
-// extension.js; the route registered there is what navigateToPage()
-// targets.
+// is trivial — the page does the work.
 //
-// Mirrors account-details + custom-simple-links convention: hooks
-// for SDK access, withStyles only, no withIntl, <div> wrapper.
+// HOC: withStyles(styles)(withIntl(Card)).
 
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { Button, Typography } from '@ellucian/react-design-system/core';
 import { spacing20, spacing30 } from '@ellucian/react-design-system/core/styles/tokens';
 import { IconSprite } from '@ellucian/ds-icons/lib';
 import { useCardControl, useExtensionControl } from '@ellucian/experience-extension-utils';
+
+import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 
 const styles = () => ({
     root: {
@@ -36,6 +36,7 @@ const styles = () => ({
 });
 
 function PageLinkCard({ classes }) {
+    const intl = useIntl();
     const { setLoadingStatus } = useExtensionControl() || {};
     const { navigateToPage } = useCardControl() || {};
 
@@ -54,9 +55,17 @@ function PageLinkCard({ classes }) {
     return (
         <div className={classes.root}>
             <IconSprite />
-            <Typography variant="h6">Open the sample page</Typography>
+            <Typography variant="h6">
+                {intl.formatMessage({
+                    id: 'card.pageLink.title',
+                    defaultMessage: 'Open the sample page',
+                })}
+            </Typography>
             <Typography variant="body2" className={classes.description}>
-                Demonstrates page navigation from a card.
+                {intl.formatMessage({
+                    id: 'card.pageLink.description',
+                    defaultMessage: 'Demonstrates page navigation from a card.',
+                })}
             </Typography>
             <Button
                 color="primary"
@@ -64,7 +73,10 @@ function PageLinkCard({ classes }) {
                 disabled={typeof navigateToPage !== 'function'}
                 className={classes.cta}
             >
-                Open page
+                {intl.formatMessage({
+                    id: 'card.pageLink.cta',
+                    defaultMessage: 'Open page',
+                })}
             </Button>
         </div>
     );
@@ -74,4 +86,4 @@ PageLinkCard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(PageLinkCard);
+export default withStyles(styles)(withIntl(PageLinkCard));
