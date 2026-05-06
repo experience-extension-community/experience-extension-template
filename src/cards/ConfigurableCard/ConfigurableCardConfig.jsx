@@ -2,50 +2,28 @@
 // Copyright 2026 Experience Extension Community contributors
 //
 // Custom configuration form for ConfigurableCard.
-// EDS 8.x signature: withStyles(Component, styles, { name }), withIntl outermost.
+//
+// Mirrors Ellucian sdk-samples' MarkdownTemplateConfig.jsx EXACTLY
+// (same SDK 8.1.2 stack as ours):
+//   * cardControl + cardInfo are read from PROPS, not hooks
+//     (the SDK passes them down as props to config forms)
+//   * setCustomConfiguration takes the shape:
+//         { customConfiguration: { client: {...payload} } }
+//     NOT just the payload directly
+//   * setIsCustomConfigurationValid takes TWO args: (isValid, errorCount)
+//   * No withStyles HOC — just withIntl
+//
+// Persisted shape: { customConfiguration: { client: { links: [{label, url}] } } }
 
-import React, { useEffect, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { withStyles } from '@ellucian/react-design-system/core/styles';
+import React, { useEffect, useState } from 'react';
 import {
-    Box,
     Button,
     IconButton,
     TextField,
     Typography,
 } from '@ellucian/react-design-system/core';
-import {
-    spacing10,
-    spacing20,
-    spacing30,
-} from '@ellucian/react-design-system/core/styles/tokens';
-import { useCardControl, useCardInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-
-const styles = () => ({
-    root: {
-        padding: spacing20,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: spacing20,
-    },
-    row: {
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: spacing10,
-    },
-    fieldsCol: {
-        flex: '1 1 auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: spacing10,
-    },
-    addRow: {
-        marginTop: spacing30,
-    },
-});
 
 const isValidUrl = (str) => {
     if (!str) return false;
@@ -58,30 +36,53 @@ const isValidUrl = (str) => {
 };
 
 const ConfigurableCardConfig = (props) => {
-    const { classes } = props;
-    const intl = useIntl();
-    const cardInfo = useCardInfo() || {};
-    const { setCustomConfiguration, setIsCustomConfigurationValid } = useCardControl() || {};
+    const {
+        cardControl: { setCustomConfiguration, setIsCustomConfigurationValid },
+        cardInfo: { configuration: { customConfiguration } = {} } = {},
+    } = props;
 
-    const initialLinks = useMemo(() => {
-        const raw = cardInfo.configuration?.customConfiguration?.links;
-        return Array.isArray(raw) && raw.length > 0 ? raw : [{ label: '', url: '' }];
-    }, [cardInfo.configuration]);
+    const client = customConfiguration ? customConfiguration.client : undefined;
+    const [links, setLinks] = useState(
+        client && Array.isArray(client.links) && client.links.length > 0
+            ? client.links
+            : [{ label: '', url: '' }],
+    );
 
-    const [links, setLinks] = useState(initialLinks);
-
+    // Initial validation on mount — catches required-field errors that
+    // wouldn't otherwise surface until the user interacts.
     useEffect(() => {
-        const allValid = links.every((l) => typeof l.url === 'string' && isValidUrl(l.url));
-        if (typeof setIsCustomConfigurationValid === 'function') {
-            setIsCustomConfigurationValid(allValid);
-        }
-        if (typeof setCustomConfiguration === 'function') {
-            setCustomConfiguration({ links });
-        }
-    }, [links, setCustomConfiguration, setIsCustomConfigurationValid]);
+        updateCustomConfigVerification();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Save on every change.
+    useEffect(() => {
+        updateCustomConfig();
+        updateCustomConfigVerification();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [links]);
+
+    const updateCustomConfig = () => {
+        setCustomConfiguration({
+            customConfiguration: {
+                client: {
+                    links,
+                },
+            },
+        });
+    };
+
+    const updateCustomConfigVerification = () => {
+        const errorCount = links.filter(
+            (l) => !l || typeof l.url !== 'string' || !isValidUrl(l.url),
+        ).length;
+        setIsCustomConfigurationValid(errorCount === 0, errorCount);
+    };
 
     const updateLink = (index, key, value) => {
-        setLinks((prev) => prev.map((l, i) => (i === index ? { ...l, [key]: value } : l)));
+        setLinks((prev) =>
+            prev.map((l, i) => (i === index ? { ...l, [key]: value } : l)),
+        );
     };
     const removeLink = (index) =>
         setLinks((prev) => prev.filter((_l, i) => i !== index));
@@ -89,52 +90,49 @@ const ConfigurableCardConfig = (props) => {
         setLinks((prev) => [...prev, { label: '', url: '' }]);
 
     return (
-        <Box className={classes.root}>
-            <Typography variant="h6">
-                {intl.formatMessage({
-                    id: 'card.configurable.config.heading',
-                    defaultMessage: 'Configure links',
-                })}
+        <React.Fragment>
+            <Typography variant="h6" style={{ marginBottom: 16 }}>
+                Configure links
             </Typography>
 
             {links.map((link, idx) => {
                 const urlInvalid = link.url.length > 0 && !isValidUrl(link.url);
                 return (
-                    <div key={idx} className={classes.row}>
-                        <div className={classes.fieldsCol}>
+                    <div
+                        key={idx}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: 8,
+                            marginBottom: 16,
+                        }}
+                    >
+                        <div
+                            style={{
+                                flex: '1 1 auto',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 8,
+                            }}
+                        >
                             <TextField
-                                label={intl.formatMessage({
-                                    id: 'card.configurable.config.label',
-                                    defaultMessage: 'Label',
-                                })}
-                                value={link.label}
+                                label="Label"
+                                value={link.label || ''}
                                 onChange={(e) => updateLink(idx, 'label', e.target.value)}
                                 fullWidth
                             />
                             <TextField
-                                label={intl.formatMessage({
-                                    id: 'card.configurable.config.url',
-                                    defaultMessage: 'URL',
-                                })}
-                                value={link.url}
+                                label="URL"
+                                value={link.url || ''}
                                 onChange={(e) => updateLink(idx, 'url', e.target.value)}
                                 error={urlInvalid}
-                                helperText={
-                                    urlInvalid
-                                        ? intl.formatMessage({
-                                              id: 'card.configurable.config.invalidUrl',
-                                              defaultMessage: 'Enter a valid URL.',
-                                          })
-                                        : undefined
-                                }
+                                helperText={urlInvalid ? 'Enter a valid URL.' : undefined}
                                 fullWidth
+                                required
                             />
                         </div>
                         <IconButton
-                            aria-label={intl.formatMessage({
-                                id: 'card.configurable.config.remove',
-                                defaultMessage: 'Remove',
-                            })}
+                            aria-label="Remove"
                             onClick={() => removeLink(idx)}
                             disabled={links.length === 1}
                         >
@@ -144,22 +142,11 @@ const ConfigurableCardConfig = (props) => {
                 );
             })}
 
-            <div className={classes.addRow}>
-                <Button color="secondary" onClick={addLink}>
-                    {intl.formatMessage({
-                        id: 'card.configurable.config.add',
-                        defaultMessage: 'Add link',
-                    })}
-                </Button>
-            </div>
-        </Box>
+            <Button color="secondary" onClick={addLink} style={{ marginTop: 8 }}>
+                Add link
+            </Button>
+        </React.Fragment>
     );
 };
 
-ConfigurableCardConfig.propTypes = {
-    classes: PropTypes.object.isRequired,
-};
-
-export default withIntl(
-    withStyles(ConfigurableCardConfig, styles, { name: 'ConfigurableCardConfig' }),
-);
+export default withIntl(ConfigurableCardConfig);
