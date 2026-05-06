@@ -140,7 +140,7 @@ const styles = () => ({
         display: 'flex',
         alignItems: 'center',
         gap: spacing30,
-        padding: `${spacing10} ${spacing30}`,   // 2px / 8px — tight
+        padding: `${spacing10} ${spacing40}`,   // 2px / 8px — tight
         minHeight: 28,
         color: 'var(--cc-link-color)',          // configurable preset
         fontFamily: BRAND_FONT_STACK,
