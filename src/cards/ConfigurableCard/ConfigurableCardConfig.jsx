@@ -31,11 +31,11 @@ import {
     Box,
     Button,
     IconButton,
-    MenuItem,
     TextField,
     Typography,
 } from '@ellucian/react-design-system/core';
 import {
+    spacing10,
     spacing20,
     spacing30,
     spacing40,
@@ -59,7 +59,8 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import { COLOR_PRESETS, normalizeColors } from './colorPresets';
+import { brandColors } from '../../utils/branding/brandColors';
+import { COLOR_PRESETS, normalizeColors, resolveColor } from './colorPresets';
 
 const styles = () => ({
     root: {
@@ -114,23 +115,99 @@ const styles = () => ({
     addRow: {
         alignSelf: 'flex-start',
     },
-    colorsSection: {
+    sectionTitle: {
+        marginTop: spacing20,
+    },
+    appearancePanel: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing30,
+        padding: spacing40,
+        background: '#FFFFFF',
+        border: `1px solid ${brandColors.border}`,
+        borderRadius: 6,
+    },
+    appearanceHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: spacing30,
+    },
+    preview: {
+        padding: `${spacing30} ${spacing40}`,
+        background: brandColors.surfaceMuted,
+        borderRadius: 6,
+        border: `1px solid ${brandColors.border}`,
+    },
+    previewHeading: {
+        fontSize: '0.6875rem',
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+        marginBottom: spacing20,
+    },
+    previewLink: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: `${spacing20} ${spacing30}`,
+        fontSize: '0.875rem',
+        fontWeight: 500,
+        borderRadius: 4,
+        marginBottom: spacing10,
+    },
+    previewChevron: {
+        fontFamily: 'Material Symbols Outlined',
+        fontSize: '1rem',
+    },
+    swatchField: {
         display: 'flex',
         flexDirection: 'column',
         gap: spacing20,
-        padding: spacing30,
-        background: '#FFFFFF',
-        border: '1px solid #E2E5E9',
-        borderRadius: 4,
     },
-    colorsRow: {
+    swatchLabel: {
+        fontSize: '0.8125rem',
+        fontWeight: 600,
+        color: brandColors.textPrimary,
+    },
+    swatchRow: {
         display: 'flex',
         flexWrap: 'wrap',
-        gap: spacing30,
+        gap: spacing20,
     },
-    colorField: {
-        flex: '1 1 180px',
-        minWidth: 180,
+    swatchButton: {
+        position: 'relative',
+        width: 36,
+        height: 36,
+        padding: 0,
+        border: `2px solid ${brandColors.border}`,
+        borderRadius: '50%',
+        background: 'transparent',
+        cursor: 'pointer',
+        transition: 'border-color 120ms ease-out, transform 120ms ease-out',
+        '&:hover': {
+            transform: 'scale(1.08)',
+        },
+        '&:focus-visible': {
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 2,
+        },
+    },
+    swatchButtonSelected: {
+        borderColor: brandColors.textPrimary,
+    },
+    swatchDot: {
+        position: 'absolute',
+        top: 3,
+        left: 3,
+        right: 3,
+        bottom: 3,
+        borderRadius: '50%',
+    },
+    swatchSelectedLabel: {
+        fontSize: '0.75rem',
+        color: brandColors.textSecondary,
+        fontStyle: 'italic',
     },
 });
 
@@ -162,6 +239,111 @@ const normalizeCategories = (raw) => {
               }))
             : [{ id: newId('link'), label: '', url: '' }],
     }));
+};
+
+// ─── Appearance: swatch picker + live preview ─────────────────────────────
+
+const SwatchPicker = ({ classes, label, value, onChange, intl }) => (
+    <div className={classes.swatchField}>
+        <span className={classes.swatchLabel}>{label}</span>
+        <div className={classes.swatchRow} role="radiogroup" aria-label={label}>
+            {COLOR_PRESETS.map((preset) => {
+                const selected = preset.key === value;
+                const presetLabel = intl.formatMessage({
+                    id: preset.labelId,
+                    defaultMessage: preset.defaultLabel,
+                });
+                return (
+                    <button
+                        key={preset.key}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        aria-label={presetLabel}
+                        title={presetLabel}
+                        className={`${classes.swatchButton}${
+                            selected ? ` ${classes.swatchButtonSelected}` : ''
+                        }`}
+                        onClick={() => onChange(preset.key)}
+                    >
+                        <span
+                            className={classes.swatchDot}
+                            style={{ background: resolveColor(preset.key) }}
+                        />
+                    </button>
+                );
+            })}
+            <span className={classes.swatchSelectedLabel}>
+                {intl.formatMessage({
+                    id: COLOR_PRESETS.find((p) => p.key === value)?.labelId
+                        || 'card.configurable.color.muted',
+                    defaultMessage:
+                        COLOR_PRESETS.find((p) => p.key === value)?.defaultLabel
+                        || 'Muted gray',
+                })}
+            </span>
+        </div>
+    </div>
+);
+
+SwatchPicker.propTypes = {
+    classes: PropTypes.object.isRequired,
+    label: PropTypes.string.isRequired,
+    value: PropTypes.string.isRequired,
+    onChange: PropTypes.func.isRequired,
+    intl: PropTypes.object.isRequired,
+};
+
+const AppearancePreview = ({ classes, colors }) => {
+    const previewStyle = {
+        '--cc-category-color': resolveColor(colors.category),
+        '--cc-link-color': resolveColor(colors.link),
+        '--cc-hover-color': resolveColor(colors.hover),
+    };
+    return (
+        <div className={classes.preview} style={previewStyle}>
+            <div
+                className={classes.previewHeading}
+                style={{ color: 'var(--cc-category-color)' }}
+            >
+                Academics
+            </div>
+            <div
+                className={classes.previewLink}
+                style={{ color: 'var(--cc-link-color)' }}
+            >
+                <span>Course catalog</span>
+                <span
+                    aria-hidden="true"
+                    className={classes.previewChevron}
+                    style={{ color: brandColors.neutralLight }}
+                >
+                    chevron_right
+                </span>
+            </div>
+            <div
+                className={classes.previewLink}
+                style={{
+                    color: 'var(--cc-hover-color)',
+                    background: brandColors.surface,
+                }}
+            >
+                <span>Library (hover preview)</span>
+                <span
+                    aria-hidden="true"
+                    className={classes.previewChevron}
+                    style={{ color: 'var(--cc-hover-color)' }}
+                >
+                    chevron_right
+                </span>
+            </div>
+        </div>
+    );
+};
+
+AppearancePreview.propTypes = {
+    classes: PropTypes.object.isRequired,
+    colors: PropTypes.object.isRequired,
 };
 
 // ─── Sortable link row (inside a category) ────────────────────────────────
@@ -386,8 +568,7 @@ const ConfigurableCardConfig = (props) => {
         });
     };
 
-    const handleColorChange = (key) => (e) => {
-        const next = e.target.value;
+    const handleColorChange = (key) => (next) => {
         setColors((prev) => ({ ...prev, [key]: next }));
     };
 
@@ -451,6 +632,36 @@ const ConfigurableCardConfig = (props) => {
         <Box className={classes.root}>
             <Typography variant="h6">
                 {intl.formatMessage({
+                    id: 'card.configurable.section.appearance',
+                    defaultMessage: 'Appearance',
+                })}
+            </Typography>
+            <div className={classes.appearancePanel}>
+                <Typography variant="body2">
+                    {intl.formatMessage({
+                        id: 'card.configurable.section.colors.help',
+                        defaultMessage:
+                            'Pick brand presets that apply to every category and link in this card.',
+                    })}
+                </Typography>
+                <AppearancePreview classes={classes} colors={colors} />
+                {colorFields.map((field) => (
+                    <SwatchPicker
+                        key={field.key}
+                        classes={classes}
+                        intl={intl}
+                        label={intl.formatMessage({
+                            id: field.labelId,
+                            defaultMessage: field.defaultLabel,
+                        })}
+                        value={colors[field.key]}
+                        onChange={handleColorChange(field.key)}
+                    />
+                ))}
+            </div>
+
+            <Typography variant="h6" className={classes.sectionTitle}>
+                {intl.formatMessage({
                     id: 'card.configurable.section.links',
                     defaultMessage: 'Configure links',
                 })}
@@ -485,46 +696,6 @@ const ConfigurableCardConfig = (props) => {
                     defaultMessage: 'Add category',
                 })}
             </Button>
-
-            <Typography variant="h6">
-                {intl.formatMessage({
-                    id: 'card.configurable.section.colors',
-                    defaultMessage: 'Colors',
-                })}
-            </Typography>
-            <div className={classes.colorsSection}>
-                <Typography variant="body2">
-                    {intl.formatMessage({
-                        id: 'card.configurable.section.colors.help',
-                        defaultMessage:
-                            'Pick brand presets that apply to every category and link in this card.',
-                    })}
-                </Typography>
-                <div className={classes.colorsRow}>
-                    {colorFields.map((field) => (
-                        <TextField
-                            key={field.key}
-                            select
-                            label={intl.formatMessage({
-                                id: field.labelId,
-                                defaultMessage: field.defaultLabel,
-                            })}
-                            value={colors[field.key]}
-                            onChange={handleColorChange(field.key)}
-                            className={classes.colorField}
-                        >
-                            {COLOR_PRESETS.map((preset) => (
-                                <MenuItem key={preset.key} value={preset.key}>
-                                    {intl.formatMessage({
-                                        id: preset.labelId,
-                                        defaultMessage: preset.defaultLabel,
-                                    })}
-                                </MenuItem>
-                            ))}
-                        </TextField>
-                    ))}
-                </div>
-            </div>
         </Box>
     );
 };

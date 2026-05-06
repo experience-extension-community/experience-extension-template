@@ -23,7 +23,7 @@
     "card.configurable.config.remove": "Remove",
     "card.configurable.config.invalidUrl": "Enter a valid URL.",
     "card.configurable.section.links": "Configure links",
-    "card.configurable.section.colors": "Colors",
+    "card.configurable.section.appearance": "Appearance",
     "card.configurable.section.colors.help": "Pick brand presets that apply to every category and link in this card.",
     "card.configurable.action.addCategory": "Add category",
     "card.configurable.color.field.category": "Category heading color",
