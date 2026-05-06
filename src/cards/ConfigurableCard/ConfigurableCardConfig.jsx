@@ -77,7 +77,7 @@ const styles = () => ({
         padding: spacing40,
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing30,
+        gap: spacing20,
     },
     categoryDragging: {
         boxShadow: '0 4px 16px rgba(0,0,0,0.16)',
