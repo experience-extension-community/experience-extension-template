@@ -30,7 +30,6 @@ import { withStyles } from '@ellucian/react-design-system/core/styles';
 import {
     Box,
     Button,
-    TextField,
     Typography,
 } from '@ellucian/react-design-system/core';
 import {
@@ -73,10 +72,10 @@ const styles = () => ({
         background: '#FFFFFF',
         border: `1px solid ${brandColors.border}`,
         borderRadius: 6,
-        padding: spacing40,
+        padding: spacing30,
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing30,
+        gap: spacing20,
     },
     categoryDragging: {
         boxShadow: '0 4px 16px rgba(0,0,0,0.16)',
@@ -90,11 +89,10 @@ const styles = () => ({
         flex: '1 1 auto',
     },
     linksList: {
-        // Left-indented to show links live UNDER the category
-        paddingLeft: spacing50,
+        paddingLeft: spacing40,
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing20,
+        gap: spacing10,
     },
     linkRow: {
         display: 'flex',
@@ -109,15 +107,41 @@ const styles = () => ({
         display: 'flex',
         flexDirection: 'row',
         gap: spacing20,
-        flexWrap: 'wrap',
     },
-    linkLabelField: {
+    inlineInput: {
+        flex: '1 1 auto',
+        height: 32,
+        padding: `0 ${spacing30}`,
+        fontSize: '0.875rem',
+        fontFamily: 'inherit',
+        color: brandColors.textPrimary,
+        background: '#FFFFFF',
+        border: `1px solid ${brandColors.border}`,
+        borderRadius: 4,
+        outline: 'none',
+        transition: 'border-color 120ms ease-out, box-shadow 120ms ease-out',
+        '&::placeholder': {
+            color: brandColors.textMuted,
+        },
+        '&:focus': {
+            borderColor: brandColors.focusRing,
+            boxShadow: `0 0 0 3px ${brandColors.focusRing}33`,
+        },
+    },
+    inlineInputError: {
+        borderColor: brandColors.danger,
+        '&:focus': {
+            borderColor: brandColors.danger,
+            boxShadow: `0 0 0 3px ${brandColors.danger}33`,
+        },
+    },
+    inlineLabelField: {
         flex: '0 1 35%',
-        minWidth: 140,
+        minWidth: 120,
     },
-    linkUrlField: {
+    inlineUrlField: {
         flex: '1 1 60%',
-        minWidth: 180,
+        minWidth: 160,
     },
     dragHandle: {
         flex: '0 0 auto',
@@ -179,7 +203,7 @@ const styles = () => ({
         lineHeight: 1,
     },
     addLinkRow: {
-        paddingLeft: spacing50,
+        paddingLeft: spacing40,
     },
     addRow: {
         alignSelf: 'flex-start',
@@ -433,22 +457,25 @@ const SortableLinkRow = ({ link, classes, onChange, onRemove, canRemove }) => {
                 </span>
             </button>
             <div className={classes.linkFields}>
-                <TextField
-                    label="Label"
+                <input
+                    type="text"
+                    aria-label="Link label"
+                    placeholder="Label"
                     value={link.label}
                     onChange={(e) => onChange(link.id, 'label', e.target.value)}
-                    size="small"
-                    className={classes.linkLabelField}
+                    className={`${classes.inlineInput} ${classes.inlineLabelField}`}
                 />
-                <TextField
-                    label="URL"
+                <input
+                    type="url"
+                    aria-label="Link URL"
+                    aria-invalid={urlInvalid}
+                    placeholder="https://..."
                     value={link.url}
                     onChange={(e) => onChange(link.id, 'url', e.target.value)}
-                    error={urlInvalid}
-                    helperText={urlInvalid ? 'Enter a valid URL.' : undefined}
-                    size="small"
+                    className={`${classes.inlineInput} ${classes.inlineUrlField}${
+                        urlInvalid ? ` ${classes.inlineInputError}` : ''
+                    }`}
                     required
-                    className={classes.linkUrlField}
                 />
             </div>
             <button
@@ -535,14 +562,13 @@ const SortableCategoryCard = ({ category, classes, sensors, onPatch, onRemove, c
                         drag_indicator
                     </span>
                 </button>
-                <TextField
-                    label="Category name"
+                <input
+                    type="text"
+                    aria-label="Category name"
+                    placeholder="Category name"
                     value={category.name}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    className={classes.categoryName}
-                    size="small"
-                    fullWidth
-                    placeholder="Leave blank for an unlabelled group"
+                    className={`${classes.inlineInput} ${classes.categoryName}`}
                 />
                 <button
                     type="button"
