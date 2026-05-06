@@ -1,21 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// ConfigurableCard — categorized links optimised for dashboard tile UX
-// with COLLAPSIBLE category sections.
+// ConfigurableCard — categorized links, dashboard-tile UX with
+// collapsible category sections.
 //
-// Design intent:
-//   * Each category collapses/expands via native <details>/<summary>
-//     (free keyboard + screen-reader support, no JS expand state).
-//   * Default state: all categories expanded. Users click any
-//     category heading to collapse it. Sticks until card unmount.
-//   * Link count shown next to category name as a density signal.
-//   * 20 links across 4 categories: collapse the irrelevant ones,
-//     scroll the rest. No accordion exclusivity — multiple sections
-//     can be expanded simultaneously.
+// Design references (modern dashboard nav patterns):
+//   * Linear & Vercel sidebar: tight rows (32px), no row dividers,
+//     hover bg as the only row affordance, headings are quiet
+//   * Notion sidebar: 11px uppercase muted-gray category headers
+//   * Stripe Dashboard: chevron at very low opacity, full on hover
+//   * Tailwind Catalyst Sidebar: 14px link text, 11px section headers
 //
-// Persistence (read side):
-//   cardInfo.configuration.customConfiguration.categories
+// What this card adopts from those:
+//   * No 1px borders between link rows — whitespace + hover bg
+//   * 32px link row (down from 44px in earlier iteration)
+//   * Category heading is small + muted (11px, textSecondary color),
+//     uppercase, NOT brand-primary — heading earns no extra weight,
+//     it's a quiet wayfinder
+//   * Hover on heading shifts text to brand primary (the hover IS
+//     the brand moment)
+//   * Chevron on each link: opacity 0.4 by default, 1.0 + 2px right
+//     nudge on hover
+//   * Sections separated by 16px gap, no underlines
 //
 // EDS 8.x: withStyles(Component, styles, { name }) + withIntl outermost.
 
@@ -36,6 +42,7 @@ import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+import { normalizeColors, resolveColor } from './colorPresets';
 
 const BRAND_FONT_STACK =
     '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -45,81 +52,79 @@ const styles = () => ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing40,
-        padding: spacing40,
+        gap: spacing40,                       // 16px between sections
+        padding: `${spacing30} ${spacing30}`, // 8px around — tight container padding
         overflowY: 'auto',
         fontFamily: BRAND_FONT_STACK,
         backgroundColor: brandColors.surface,
 
-        '&::-webkit-scrollbar': { width: 8 },
+        '&::-webkit-scrollbar': { width: 6 },
         '&::-webkit-scrollbar-track': { backgroundColor: 'transparent' },
         '&::-webkit-scrollbar-thumb': {
             backgroundColor: brandColors.border,
-            borderRadius: 4,
+            borderRadius: 3,
         },
         '&::-webkit-scrollbar-thumb:hover': {
             backgroundColor: brandColors.neutralLight,
         },
     },
     section: {
-        // <details> element styling
         '&[open] $expandIcon': {
             transform: 'rotate(180deg)',
         },
     },
     categoryHeading: {
-        // <summary> element styling
         listStyle: 'none',
         cursor: 'pointer',
         userSelect: 'none',
         display: 'flex',
         alignItems: 'center',
         gap: spacing30,
-        padding: `${spacing30} 0`,
-        borderBottom: `2px solid ${brandColors.secondary}`,
-        marginBottom: spacing20,
-        transition: 'color 120ms ease-out',
-        '&::-webkit-details-marker': {
-            display: 'none',
+        padding: `${spacing20} ${spacing30}`,    // 4px / 8px — quiet
+        marginBottom: 2,
+        borderRadius: 4,
+        transition: 'background-color 120ms ease-out',
+        '&::-webkit-details-marker': { display: 'none' },
+        '&:hover': {
+            backgroundColor: brandColors.surfaceMuted,
         },
         '&:hover $categoryName': {
-            color: brandColors.primaryDark,
+            color: 'var(--cc-hover-color)',
         },
         '&:hover $expandIcon': {
-            color: brandColors.primary,
+            color: 'var(--cc-hover-color)',
         },
         '&:focus-visible': {
             outline: `2px solid ${brandColors.focusRing}`,
-            outlineOffset: 2,
-            borderRadius: 3,
+            outlineOffset: 1,
         },
     },
     categoryName: {
         flex: '1 1 auto',
-        color: brandColors.primary,
+        color: 'var(--cc-category-color)',       // configurable preset
         fontFamily: BRAND_FONT_STACK,
-        fontSize: '0.8125rem',     // 13px
+        fontSize: '0.6875rem',                   // 11px
         fontWeight: 700,
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
-        lineHeight: 1.3,
+        lineHeight: 1.4,
         transition: 'color 120ms ease-out',
     },
     categoryCount: {
         flex: '0 0 auto',
-        color: brandColors.textSecondary,
+        color: brandColors.textMuted,
         fontFamily: BRAND_FONT_STACK,
-        fontSize: '0.75rem',
+        fontSize: '0.625rem',                    // 10px
         fontWeight: 500,
-        // Numeric pill — gives a quick density read.
+        fontVariantNumeric: 'tabular-nums',      // even number widths
     },
     expandIcon: {
         flex: '0 0 auto',
         fontFamily: 'Material Symbols Outlined',
-        fontSize: '1.25rem',
+        fontSize: '1rem',
         lineHeight: 1,
-        color: brandColors.neutralDark,
-        transition: 'transform 200ms ease-out, color 120ms ease-out',
+        color: brandColors.textMuted,
+        transition: 'transform 220ms ease-out, color 120ms ease-out',
         userSelect: 'none',
     },
     list: {
@@ -129,32 +134,30 @@ const styles = () => ({
     },
     listItem: {
         margin: 0,
-        borderBottom: `1px solid ${brandColors.border}`,
-        '&:last-child': {
-            borderBottom: 'none',
-        },
     },
     link: {
         display: 'flex',
         alignItems: 'center',
         gap: spacing30,
-        padding: `${spacing30} ${spacing20}`,
-        minHeight: 44,
-        color: brandColors.secondaryDark,
+        padding: `${spacing20} ${spacing30}`,   // 4px / 8px — same as heading
+        minHeight: 32,                          // tighter than 44px
+        color: 'var(--cc-link-color)',          // configurable preset
         fontFamily: BRAND_FONT_STACK,
-        fontSize: '0.9375rem',
+        fontSize: '0.875rem',                   // 14px
         fontWeight: 500,
-        lineHeight: 1.35,
+        lineHeight: 1.4,
         textDecoration: 'none',
-        borderRadius: 3,
-        transition: 'background-color 120ms ease-out, color 120ms ease-out',
+        borderRadius: 4,
+        transition:
+            'background-color 120ms ease-out, color 120ms ease-out',
         '&:hover': {
             backgroundColor: brandColors.surfaceMuted,
-            color: brandColors.primary,
+            color: 'var(--cc-hover-color)',
         },
         '&:hover $chevron': {
-            color: brandColors.primary,
+            color: 'var(--cc-hover-color)',
             opacity: 1,
+            transform: 'translateX(2px)',
         },
         '&:focus-visible': {
             outline: `2px solid ${brandColors.focusRing}`,
@@ -171,11 +174,12 @@ const styles = () => ({
     chevron: {
         flex: '0 0 auto',
         fontFamily: 'Material Symbols Outlined',
-        fontSize: '1.125rem',
+        fontSize: '1rem',
         lineHeight: 1,
         color: brandColors.neutralLight,
-        opacity: 0.7,
-        transition: 'color 120ms ease-out, opacity 120ms ease-out',
+        opacity: 0.4,                            // very quiet by default
+        transition:
+            'color 120ms ease-out, opacity 120ms ease-out, transform 120ms ease-out',
         userSelect: 'none',
     },
     empty: {
@@ -223,9 +227,20 @@ const ConfigurableCard = (props) => {
         [categories],
     );
 
+    const colorStyle = useMemo(() => {
+        const colors = normalizeColors(
+            cardInfo.configuration?.customConfiguration?.colors,
+        );
+        return {
+            '--cc-category-color': resolveColor(colors.category),
+            '--cc-link-color': resolveColor(colors.link),
+            '--cc-hover-color': resolveColor(colors.hover),
+        };
+    }, [cardInfo.configuration]);
+
     if (totalLinks === 0) {
         return (
-            <Box className={classes.root}>
+            <Box className={classes.root} style={colorStyle}>
                 <Typography variant="body2" className={classes.empty}>
                     {intl.formatMessage({
                         id: 'card.configurable.empty',
@@ -238,7 +253,7 @@ const ConfigurableCard = (props) => {
     }
 
     return (
-        <Box className={classes.root}>
+        <Box className={classes.root} style={colorStyle}>
             {categories.map((cat, catIdx) => (
                 <details
                     key={cat.id || catIdx}
