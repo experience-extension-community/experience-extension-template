@@ -68,16 +68,16 @@ const styles = () => ({
         padding: spacing40,
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing30,
+        gap: spacing40,
     },
     categoryCard: {
         background: '#FFFFFF',
         border: '1px solid #E2E5E9',
         borderRadius: 4,
-        padding: spacing30,
+        padding: spacing40,
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing30,
+        gap: spacing40,
     },
     categoryDragging: {
         boxShadow: '0 4px 16px rgba(0,0,0,0.16)',
@@ -85,7 +85,7 @@ const styles = () => ({
     categoryHeader: {
         display: 'flex',
         alignItems: 'center',
-        gap: spacing20,
+        gap: spacing30,
     },
     categoryName: {
         flex: '1 1 auto',
@@ -93,8 +93,8 @@ const styles = () => ({
     linkRow: {
         display: 'flex',
         alignItems: 'flex-start',
-        gap: spacing20,
-        padding: spacing20,
+        gap: spacing30,
+        padding: spacing30,
         background: '#F8F8F8',
         borderRadius: 4,
     },
@@ -105,7 +105,7 @@ const styles = () => ({
         flex: '1 1 auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing20,
+        gap: spacing40,
     },
     dragHandle: {
         cursor: 'grab',
