@@ -84,12 +84,38 @@ const styles = () => ({
         display: 'flex',
         alignItems: 'center',
         gap: spacing20,
+        paddingBottom: spacing20,
+        borderBottom: `1px solid ${brandColors.border}`,
     },
     categoryName: {
         flex: '1 1 auto',
+        height: 36,
+        fontFamily: 'inherit',
+        fontSize: '0.9375rem',
+        fontWeight: 700,
+        color: brandColors.textPrimary,
+        background: 'transparent',
+        border: 'none',
+        outline: 'none',
+        padding: `0 ${spacing20}`,
+        borderRadius: 4,
+        transition: 'background-color 120ms ease-out, box-shadow 120ms ease-out',
+        '&::placeholder': {
+            color: brandColors.textMuted,
+            fontWeight: 500,
+        },
+        '&:hover': {
+            background: brandColors.surfaceMuted,
+        },
+        '&:focus': {
+            background: brandColors.surfaceMuted,
+            boxShadow: `0 0 0 3px ${brandColors.focusRing}33`,
+        },
     },
     linksList: {
-        paddingLeft: spacing40,
+        marginLeft: spacing30,
+        paddingLeft: spacing30,
+        borderLeft: `2px solid ${brandColors.border}`,
         display: 'flex',
         flexDirection: 'column',
         gap: spacing10,
@@ -203,7 +229,7 @@ const styles = () => ({
         lineHeight: 1,
     },
     addLinkRow: {
-        paddingLeft: spacing40,
+        paddingLeft: `calc(${spacing30} + ${spacing30} + 2px)`,
     },
     addRow: {
         alignSelf: 'flex-start',
@@ -568,7 +594,7 @@ const SortableCategoryCard = ({ category, classes, sensors, onPatch, onRemove, c
                     placeholder="Category name"
                     value={category.name}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    className={`${classes.inlineInput} ${classes.categoryName}`}
+                    className={classes.categoryName}
                 />
                 <button
                     type="button"
