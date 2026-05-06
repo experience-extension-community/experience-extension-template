@@ -41,30 +41,33 @@ const styles = () => ({
         fontFamily: BRAND_FONT_STACK,
         backgroundColor: brandColors.surface,
     },
-    actionRow: {
-        display: 'flex',
-        justifyContent: 'flex-end',
-        marginBottom: spacing10,
-    },
     refreshButton: {
+        position: 'absolute',
+        top: spacing20,
+        right: spacing20,
+        zIndex: 1,
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: 26,
-        height: 26,
+        width: 24,
+        height: 24,
         padding: 0,
         background: 'transparent',
         border: 'none',
         borderRadius: 4,
         cursor: 'pointer',
         color: brandColors.textMuted,
-        transition: 'color 120ms ease-out, background-color 120ms ease-out',
+        opacity: 0,
+        transition:
+            'color 120ms ease-out, background-color 120ms ease-out, opacity 150ms ease-out',
+        '$root:hover &, &:focus-visible, &:disabled': {
+            opacity: 1,
+        },
         '&:hover:not(:disabled)': {
             color: brandColors.primary,
             backgroundColor: brandColors.surfaceMuted,
         },
         '&:disabled': {
-            opacity: 0.5,
             cursor: 'wait',
         },
         '&:focus-visible': {
@@ -102,25 +105,7 @@ const styles = () => ({
         borderRadius: 4,
         '&:hover': { backgroundColor: brandColors.surfaceMuted },
     },
-    termRow: {
-        display: 'flex',
-        alignItems: 'baseline',
-        gap: spacing20,
-    },
-    termCode: {
-        fontFamily:
-            'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-        fontSize: '0.6875rem',
-        fontWeight: 600,
-        color: brandColors.textSecondary,
-        backgroundColor: brandColors.surfaceMuted,
-        padding: '1px 6px',
-        borderRadius: 3,
-        letterSpacing: '0.02em',
-        flex: '0 0 auto',
-    },
     termTitle: {
-        flex: '1 1 auto',
         fontFamily: BRAND_FONT_STACK,
         fontSize: '0.875rem',
         fontWeight: 600,
@@ -135,6 +120,20 @@ const styles = () => ({
         fontSize: '0.75rem',
         color: brandColors.textSecondary,
         fontVariantNumeric: 'tabular-nums',
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: spacing20,
+    },
+    termCode: {
+        fontFamily:
+            'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+        fontSize: '0.6875rem',
+        fontWeight: 500,
+        color: brandColors.textMuted,
+        letterSpacing: '0.02em',
+    },
+    termDates: {
+        fontFamily: BRAND_FONT_STACK,
     },
     refreshing: {
         marginTop: spacing20,
@@ -214,31 +213,29 @@ const EthosFetchCard = (props) => {
 
     return (
         <Box className={classes.root}>
-            <div className={classes.actionRow}>
-                <button
-                    type="button"
-                    onClick={refresh}
-                    disabled={isRefreshing}
-                    aria-label={intl.formatMessage({
-                        id: 'card.ethosFetch.cta.refresh',
-                        defaultMessage: 'Refresh',
-                    })}
-                    title={intl.formatMessage({
-                        id: 'card.ethosFetch.cta.refresh',
-                        defaultMessage: 'Refresh',
-                    })}
-                    className={classes.refreshButton}
+            <button
+                type="button"
+                onClick={refresh}
+                disabled={isRefreshing}
+                aria-label={intl.formatMessage({
+                    id: 'card.ethosFetch.cta.refresh',
+                    defaultMessage: 'Refresh',
+                })}
+                title={intl.formatMessage({
+                    id: 'card.ethosFetch.cta.refresh',
+                    defaultMessage: 'Refresh',
+                })}
+                className={classes.refreshButton}
+            >
+                <span
+                    aria-hidden="true"
+                    className={`${classes.refreshIcon}${
+                        isRefreshing ? ` ${classes.refreshButtonSpinning}` : ''
+                    }`}
                 >
-                    <span
-                        aria-hidden="true"
-                        className={`${classes.refreshIcon}${
-                            isRefreshing ? ` ${classes.refreshButtonSpinning}` : ''
-                        }`}
-                    >
-                        refresh
-                    </span>
-                </button>
-            </div>
+                    refresh
+                </span>
+            </button>
 
             <ul className={classes.list}>
                 {sortedTerms.map((term, idx) => {
@@ -247,15 +244,16 @@ const EthosFetchCard = (props) => {
                         .join(' – ');
                     return (
                         <li key={term.id || term.code || idx} className={classes.term}>
-                            <div className={classes.termRow}>
+                            <span className={classes.termTitle}>
+                                {term.title || term.code || '(unnamed term)'}
+                            </span>
+                            <span className={classes.termMeta}>
                                 {term.code && (
                                     <span className={classes.termCode}>{term.code}</span>
                                 )}
-                                <span className={classes.termTitle}>
-                                    {term.title || term.code || '(unnamed term)'}
-                                </span>
-                            </div>
-                            {range && <span className={classes.termMeta}>{range}</span>}
+                                {term.code && range && <span aria-hidden="true">·</span>}
+                                {range && <span className={classes.termDates}>{range}</span>}
+                            </span>
                         </li>
                     );
                 })}
