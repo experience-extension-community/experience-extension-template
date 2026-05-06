@@ -91,7 +91,7 @@ module.exports = {
 
     page: {
         source: './src/pages/SamplePage/router.jsx',
-        title: 'Sample page',
+        title: { 'en-US': 'Sample page' },
         fullWidth: true,
     },
 };
