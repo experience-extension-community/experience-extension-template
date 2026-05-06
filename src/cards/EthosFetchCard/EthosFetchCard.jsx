@@ -127,7 +127,7 @@ const styles = () => ({
     termCode: {
         fontFamily:
             'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-        fontSize: '0.75rem',
+        fontSize: '0.875rem',                    // 14px — matches body text for WCAG legibility
         fontWeight: 600,
         color: brandColors.textPrimary,
         letterSpacing: '0.02em',
