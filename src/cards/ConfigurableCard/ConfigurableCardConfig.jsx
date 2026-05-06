@@ -60,6 +60,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
+import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 import { COLOR_PRESETS, normalizeColors, resolveColor } from './colorPresets';
 
 const styles = () => ({
@@ -111,6 +112,13 @@ const styles = () => ({
         userSelect: 'none',
         touchAction: 'none',
         '&:active': { cursor: 'grabbing' },
+    },
+    iconGlyph: {
+        fontFamily: 'Material Symbols Outlined',
+        fontSize: '1.25rem',
+        fontVariationSettings: '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
+        lineHeight: 1,
+        color: brandColors.neutralDark,
     },
     addRow: {
         alignSelf: 'flex-start',
@@ -373,7 +381,9 @@ const SortableLinkRow = ({ link, classes, onChange, onRemove, canRemove }) => {
                 {...attributes}
                 {...listeners}
             >
-                <span aria-hidden="true">≡</span>
+                <span aria-hidden="true" className={classes.iconGlyph}>
+                    drag_indicator
+                </span>
             </IconButton>
             <div className={classes.linkFields}>
                 <TextField
@@ -398,7 +408,9 @@ const SortableLinkRow = ({ link, classes, onChange, onRemove, canRemove }) => {
                 disabled={!canRemove}
                 size="small"
             >
-                <span aria-hidden="true">×</span>
+                <span aria-hidden="true" className={classes.iconGlyph}>
+                    close
+                </span>
             </IconButton>
         </div>
     );
@@ -468,7 +480,9 @@ const SortableCategoryCard = ({ category, classes, sensors, onPatch, onRemove, c
                     {...attributes}
                     {...listeners}
                 >
-                    <span aria-hidden="true">≡</span>
+                    <span aria-hidden="true" className={classes.iconGlyph}>
+                        drag_indicator
+                    </span>
                 </IconButton>
                 <TextField
                     label="Category name"
@@ -483,7 +497,9 @@ const SortableCategoryCard = ({ category, classes, sensors, onPatch, onRemove, c
                     onClick={() => onRemove(category.id)}
                     disabled={!canRemove}
                 >
-                    <span aria-hidden="true">×</span>
+                    <span aria-hidden="true" className={classes.iconGlyph}>
+                        close
+                    </span>
                 </IconButton>
             </div>
 
@@ -535,6 +551,7 @@ const ConfigurableCardConfig = (props) => {
     } = props;
 
     const intl = useIntl();
+    useMaterialIconFonts();
     const client = customConfiguration ? customConfiguration.client : undefined;
     const [categories, setCategories] = useState(() =>
         normalizeCategories(client?.categories),
