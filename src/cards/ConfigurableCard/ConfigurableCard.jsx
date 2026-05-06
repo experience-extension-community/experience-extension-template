@@ -52,9 +52,13 @@ const ConfigurableCard = (props) => {
     }, [setLoadingStatus]);
 
     const links = useMemo(() => {
-        // Persisted shape (matches sdk-samples MarkdownTemplate):
-        //     configuration.customConfiguration.client.links
-        const raw = cardInfo.configuration?.customConfiguration?.client?.links;
+        // SDK asymmetry (matches custom-simple-links/QuickLinks):
+        // FORM writes via setCustomConfiguration({ customConfiguration:
+        //   { client: { links: [...] } } }) — wrapped in `.client`.
+        // CARD reads at cardInfo.configuration.customConfiguration.links —
+        //   directly, NOT through `.client`. The SDK lifts client.X
+        //   to customConfiguration.X automatically on read.
+        const raw = cardInfo.configuration?.customConfiguration?.links;
         if (!Array.isArray(raw)) return [];
         return raw.filter((l) => l && typeof l.url === 'string' && l.url.length > 0);
     }, [cardInfo.configuration]);
