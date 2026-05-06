@@ -31,6 +31,7 @@ import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { Box, Typography } from '@ellucian/react-design-system/core';
 import {
+    spacing10,
     spacing20,
     spacing30,
     spacing40,
@@ -139,8 +140,8 @@ const styles = () => ({
         display: 'flex',
         alignItems: 'center',
         gap: spacing30,
-        padding: `${spacing30} ${spacing30}`,   // 8px / 8px — more breathing room
-        minHeight: 40,                          // dashboard-card sized, not sidebar-tight
+        padding: `${spacing10} ${spacing30}`,   // 2px / 8px — tight
+        minHeight: 28,
         color: 'var(--cc-link-color)',          // configurable preset
         fontFamily: BRAND_FONT_STACK,
         fontSize: '0.875rem',                   // 14px
