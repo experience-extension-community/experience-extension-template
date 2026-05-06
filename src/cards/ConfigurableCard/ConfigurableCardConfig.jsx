@@ -30,7 +30,6 @@ import { withStyles } from '@ellucian/react-design-system/core/styles';
 import {
     Box,
     Button,
-    IconButton,
     TextField,
     Typography,
 } from '@ellucian/react-design-system/core';
@@ -72,12 +71,12 @@ const styles = () => ({
     },
     categoryCard: {
         background: '#FFFFFF',
-        border: '1px solid #E2E5E9',
-        borderRadius: 4,
+        border: `1px solid ${brandColors.border}`,
+        borderRadius: 6,
         padding: spacing40,
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing20,
+        gap: spacing30,
     },
     categoryDragging: {
         boxShadow: '0 4px 16px rgba(0,0,0,0.16)',
@@ -85,40 +84,102 @@ const styles = () => ({
     categoryHeader: {
         display: 'flex',
         alignItems: 'center',
-        gap: spacing30,
+        gap: spacing20,
     },
     categoryName: {
         flex: '1 1 auto',
     },
+    linksList: {
+        // Left-indented to show links live UNDER the category
+        paddingLeft: spacing50,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing20,
+    },
     linkRow: {
         display: 'flex',
-        alignItems: 'flex-start',
-        gap: spacing30,
-        padding: spacing30,
-        background: '#F8F8F8',
-        borderRadius: 4,
+        alignItems: 'center',
+        gap: spacing20,
     },
     linkRowDragging: {
-        boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+        opacity: 0.85,
     },
     linkFields: {
         flex: '1 1 auto',
         display: 'flex',
-        flexDirection: 'column',
-        gap: spacing30,
+        flexDirection: 'row',
+        gap: spacing20,
+        flexWrap: 'wrap',
+    },
+    linkLabelField: {
+        flex: '0 1 35%',
+        minWidth: 140,
+    },
+    linkUrlField: {
+        flex: '1 1 60%',
+        minWidth: 180,
     },
     dragHandle: {
+        flex: '0 0 auto',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 28,
+        height: 28,
+        padding: 0,
+        background: 'transparent',
+        border: 'none',
+        borderRadius: 4,
         cursor: 'grab',
         userSelect: 'none',
         touchAction: 'none',
+        color: brandColors.textMuted,
+        transition: 'color 120ms ease-out, background-color 120ms ease-out',
+        '&:hover': {
+            color: brandColors.textPrimary,
+            backgroundColor: brandColors.surfaceMuted,
+        },
         '&:active': { cursor: 'grabbing' },
+        '&:focus-visible': {
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 1,
+        },
+    },
+    removeButton: {
+        flex: '0 0 auto',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 28,
+        height: 28,
+        padding: 0,
+        background: 'transparent',
+        border: 'none',
+        borderRadius: 4,
+        cursor: 'pointer',
+        color: brandColors.textMuted,
+        transition: 'color 120ms ease-out, background-color 120ms ease-out',
+        '&:hover:not(:disabled)': {
+            color: brandColors.danger,
+            backgroundColor: brandColors.surfaceMuted,
+        },
+        '&:disabled': {
+            opacity: 0.35,
+            cursor: 'not-allowed',
+        },
+        '&:focus-visible': {
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 1,
+        },
     },
     iconGlyph: {
         fontFamily: 'Material Symbols Outlined',
-        fontSize: '1.25rem',
+        fontSize: '1.125rem',
         fontVariationSettings: '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
         lineHeight: 1,
-        color: brandColors.neutralDark,
+    },
+    addLinkRow: {
+        paddingLeft: spacing50,
     },
     addRow: {
         alignSelf: 'flex-start',
@@ -360,23 +421,24 @@ const SortableLinkRow = ({ link, classes, onChange, onRemove, canRemove }) => {
             style={style}
             className={`${classes.linkRow}${isDragging ? ` ${classes.linkRowDragging}` : ''}`}
         >
-            <IconButton
+            <button
+                type="button"
                 aria-label="Drag link"
                 className={classes.dragHandle}
-                size="small"
                 {...attributes}
                 {...listeners}
             >
                 <span aria-hidden="true" className={classes.iconGlyph}>
                     drag_indicator
                 </span>
-            </IconButton>
+            </button>
             <div className={classes.linkFields}>
                 <TextField
                     label="Label"
                     value={link.label}
                     onChange={(e) => onChange(link.id, 'label', e.target.value)}
-                    fullWidth
+                    size="small"
+                    className={classes.linkLabelField}
                 />
                 <TextField
                     label="URL"
@@ -384,20 +446,22 @@ const SortableLinkRow = ({ link, classes, onChange, onRemove, canRemove }) => {
                     onChange={(e) => onChange(link.id, 'url', e.target.value)}
                     error={urlInvalid}
                     helperText={urlInvalid ? 'Enter a valid URL.' : undefined}
-                    fullWidth
+                    size="small"
                     required
+                    className={classes.linkUrlField}
                 />
             </div>
-            <IconButton
+            <button
+                type="button"
                 aria-label="Remove link"
                 onClick={() => onRemove(link.id)}
                 disabled={!canRemove}
-                size="small"
+                className={classes.removeButton}
             >
                 <span aria-hidden="true" className={classes.iconGlyph}>
                     close
                 </span>
-            </IconButton>
+            </button>
         </div>
     );
 };
@@ -460,7 +524,8 @@ const SortableCategoryCard = ({ category, classes, sensors, onPatch, onRemove, c
             className={`${classes.categoryCard}${isDragging ? ` ${classes.categoryDragging}` : ''}`}
         >
             <div className={classes.categoryHeader}>
-                <IconButton
+                <button
+                    type="button"
                     aria-label="Drag category"
                     className={classes.dragHandle}
                     {...attributes}
@@ -469,51 +534,58 @@ const SortableCategoryCard = ({ category, classes, sensors, onPatch, onRemove, c
                     <span aria-hidden="true" className={classes.iconGlyph}>
                         drag_indicator
                     </span>
-                </IconButton>
+                </button>
                 <TextField
                     label="Category name"
                     value={category.name}
                     onChange={(e) => handleNameChange(e.target.value)}
                     className={classes.categoryName}
+                    size="small"
                     fullWidth
                     placeholder="Leave blank for an unlabelled group"
                 />
-                <IconButton
+                <button
+                    type="button"
                     aria-label="Remove category"
                     onClick={() => onRemove(category.id)}
                     disabled={!canRemove}
+                    className={classes.removeButton}
                 >
                     <span aria-hidden="true" className={classes.iconGlyph}>
                         close
                     </span>
-                </IconButton>
+                </button>
             </div>
 
-            <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleLinkDragEnd}
-            >
-                <SortableContext
-                    items={category.links.map((l) => l.id)}
-                    strategy={verticalListSortingStrategy}
+            <div className={classes.linksList}>
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleLinkDragEnd}
                 >
-                    {category.links.map((link) => (
-                        <SortableLinkRow
-                            key={link.id}
-                            link={link}
-                            classes={classes}
-                            onChange={handleLinkChange}
-                            onRemove={handleLinkRemove}
-                            canRemove={category.links.length > 1}
-                        />
-                    ))}
-                </SortableContext>
-            </DndContext>
+                    <SortableContext
+                        items={category.links.map((l) => l.id)}
+                        strategy={verticalListSortingStrategy}
+                    >
+                        {category.links.map((link) => (
+                            <SortableLinkRow
+                                key={link.id}
+                                link={link}
+                                classes={classes}
+                                onChange={handleLinkChange}
+                                onRemove={handleLinkRemove}
+                                canRemove={category.links.length > 1}
+                            />
+                        ))}
+                    </SortableContext>
+                </DndContext>
+            </div>
 
-            <Button color="secondary" size="small" onClick={handleAddLink} className={classes.addRow}>
-                Add link
-            </Button>
+            <div className={classes.addLinkRow}>
+                <Button color="secondary" size="small" onClick={handleAddLink}>
+                    Add link
+                </Button>
+            </div>
         </div>
     );
 };
