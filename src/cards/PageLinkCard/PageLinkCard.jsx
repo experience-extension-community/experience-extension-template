@@ -43,7 +43,7 @@ const PageLinkCard = (props) => {
 
     const open = () => {
         if (typeof navigateToPage === 'function') {
-            navigateToPage({ route: '/sample' });
+            navigateToPage();
         }
     };
 
