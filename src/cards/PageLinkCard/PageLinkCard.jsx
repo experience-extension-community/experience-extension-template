@@ -3,18 +3,27 @@
 //
 // Sample Pages — multi-section page launcher.
 //
-// Renders one link row per extension sub-page, each wired to
-// navigateToPage(). Lets a user jump straight to /hooks, /terms,
-// or /links from the dashboard. The hub at "/" remains accessible
-// via the back link on each sub-page.
+// Each row navigates to a sub-page of the extension page. The
+// Hooks & properties row is special: it opens a small choice
+// dialog asking whether to view the PAGE-context hooks (handled by
+// HooksPage at /hooks) or this card's CARD-context hooks (rendered
+// inline in DebugHooksDialog without leaving the dashboard).
 //
 // cardType remains 'PageLinkCard' for backwards compatibility.
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
-import { Box, Typography } from '@ellucian/react-design-system/core';
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Typography,
+} from '@ellucian/react-design-system/core';
 import {
     spacing10,
     spacing20,
@@ -26,14 +35,16 @@ import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
-import DebugTrigger from '../../components/common/DebugTrigger';
+import DebugHooksDialog from '../../components/common/DebugHooksDialog';
 
 const BRAND_FONT_STACK =
     '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
+const HOOKS_ROUTE = '/hooks';
+
 const PAGES = [
     {
-        route: '/hooks',
+        route: HOOKS_ROUTE,
         icon: 'data_object',
         labelId: 'card.pageLink.hooks',
         defaultLabel: 'Hooks & properties',
@@ -127,12 +138,20 @@ const styles = () => ({
         transition:
             'opacity 120ms ease-out, transform 120ms ease-out',
     },
+    choiceBody: {
+        fontFamily: BRAND_FONT_STACK,
+        color: brandColors.textSecondary,
+        fontSize: '0.875rem',
+        lineHeight: 1.5,
+    },
 });
 
 const PageLinkCard = (props) => {
     const { classes, cardControl: { navigateToPage } = {} } = props;
     const intl = useIntl();
     const { setLoadingStatus } = useExtensionControl() || {};
+    const [hooksChoiceOpen, setHooksChoiceOpen] = useState(false);
+    const [cardHooksOpen, setCardHooksOpen] = useState(false);
 
     useTypekitFont();
     useMaterialIconFonts();
@@ -143,13 +162,29 @@ const PageLinkCard = (props) => {
         }
     }, [setLoadingStatus]);
 
-    const goto = (route) => {
-        if (typeof navigateToPage === 'function') {
-            navigateToPage({ route });
+    const navAvailable = typeof navigateToPage === 'function';
+
+    const handleRowClick = (page) => {
+        if (page.route === HOOKS_ROUTE) {
+            setHooksChoiceOpen(true);
+            return;
+        }
+        if (navAvailable) {
+            navigateToPage({ route: page.route });
         }
     };
 
-    const disabled = typeof navigateToPage !== 'function';
+    const showCardHooks = () => {
+        setHooksChoiceOpen(false);
+        setCardHooksOpen(true);
+    };
+
+    const showPageHooks = () => {
+        setHooksChoiceOpen(false);
+        if (navAvailable) {
+            navigateToPage({ route: HOOKS_ROUTE });
+        }
+    };
 
     return (
         <Box className={classes.root}>
@@ -160,30 +195,85 @@ const PageLinkCard = (props) => {
                 })}
             </Typography>
             <Box className={classes.list}>
-                {PAGES.map((page) => (
-                    <button
-                        key={page.route}
-                        type="button"
-                        className={classes.linkRow}
-                        onClick={() => goto(page.route)}
-                        disabled={disabled}
-                    >
-                        <span aria-hidden="true" className={classes.icon}>
-                            {page.icon}
-                        </span>
-                        <span className={classes.label}>
-                            {intl.formatMessage({
-                                id: page.labelId,
-                                defaultMessage: page.defaultLabel,
-                            })}
-                        </span>
-                        <span aria-hidden="true" className={classes.arrow}>
-                            arrow_forward
-                        </span>
-                    </button>
-                ))}
+                {PAGES.map((page) => {
+                    // Hooks row works even without navigateToPage (it can
+                    // open the card-hooks dialog locally). Other rows
+                    // require navigation.
+                    const rowDisabled =
+                        page.route !== HOOKS_ROUTE && !navAvailable;
+                    return (
+                        <button
+                            key={page.route}
+                            type="button"
+                            className={classes.linkRow}
+                            onClick={() => handleRowClick(page)}
+                            disabled={rowDisabled}
+                        >
+                            <span aria-hidden="true" className={classes.icon}>
+                                {page.icon}
+                            </span>
+                            <span className={classes.label}>
+                                {intl.formatMessage({
+                                    id: page.labelId,
+                                    defaultMessage: page.defaultLabel,
+                                })}
+                            </span>
+                            <span aria-hidden="true" className={classes.arrow}>
+                                arrow_forward
+                            </span>
+                        </button>
+                    );
+                })}
             </Box>
-            <DebugTrigger cardProps={props} />
+
+            <Dialog
+                open={hooksChoiceOpen}
+                onClose={() => setHooksChoiceOpen(false)}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle>
+                    {intl.formatMessage({
+                        id: 'card.pageLink.choice.title',
+                        defaultMessage: 'Hooks & properties',
+                    })}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography className={classes.choiceBody}>
+                        {intl.formatMessage({
+                            id: 'card.pageLink.choice.body',
+                            defaultMessage:
+                                'View this card\'s card-context hooks (useCardInfo, useCardControl, etc.) here, or open the page to see the page-context hooks (usePageInfo, usePageControl, etc.).',
+                        })}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={showCardHooks}>
+                        {intl.formatMessage({
+                            id: 'card.pageLink.choice.card',
+                            defaultMessage: 'Card hooks',
+                        })}
+                    </Button>
+                    <Button
+                        onClick={showPageHooks}
+                        color="primary"
+                        disabled={!navAvailable}
+                    >
+                        {intl.formatMessage({
+                            id: 'card.pageLink.choice.page',
+                            defaultMessage: 'Page hooks',
+                        })}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {cardHooksOpen && (
+                <DebugHooksDialog
+                    open={cardHooksOpen}
+                    onClose={() => setCardHooksOpen(false)}
+                    cardProps={props}
+                />
+            )}
         </Box>
     );
 };

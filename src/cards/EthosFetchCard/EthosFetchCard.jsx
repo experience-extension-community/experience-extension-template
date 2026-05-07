@@ -23,7 +23,6 @@ import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import LoadingState from '../../components/common/LoadingState';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
-import DebugTrigger from '../../components/common/DebugTrigger';
 import { brandColors } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
@@ -381,12 +380,7 @@ const EthosFetchCard = (props) => {
         );
     }
 
-    return (
-        <Box className={classes.root}>
-            {body}
-            <DebugTrigger cardProps={props} />
-        </Box>
-    );
+    return <Box className={classes.root}>{body}</Box>;
 };
 
 EthosFetchCard.propTypes = {

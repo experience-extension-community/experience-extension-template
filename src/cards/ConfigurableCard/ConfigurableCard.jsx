@@ -22,7 +22,6 @@ import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
-import DebugTrigger from '../../components/common/DebugTrigger';
 import { normalizeColors, resolveColor } from './colorPresets';
 
 const BRAND_FONT_STACK =
@@ -264,7 +263,6 @@ const ConfigurableCard = (props) => {
                     ))
                 )}
             </Box>
-            <DebugTrigger cardProps={props} />
         </Box>
     );
 };
