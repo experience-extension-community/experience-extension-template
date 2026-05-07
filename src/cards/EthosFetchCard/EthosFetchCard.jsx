@@ -231,6 +231,15 @@ const formatDate = (iso, intl) => {
     return intl.formatDate(d, { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
+// Extracts the leading run of digits from a title (e.g. "2024-2025" → 2024).
+// Used to sort digit-leading titles deterministically by their year value.
+const extractLeadingNumber = (s) => {
+    const m = String(s || '').trim().match(/^(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
+};
+
+const startsWithDigit = (s) => /^\d/.test(String(s || '').trim());
+
 const EthosFetchCard = (props) => {
     const { classes } = props;
     const intl = useIntl();
@@ -257,6 +266,15 @@ const EthosFetchCard = (props) => {
         );
     }, []);
 
+    // Sort:
+    //   1. By category — 'term' first, 'subterm' second, anything else,
+    //      and 'year' ALWAYS last regardless of what else exists.
+    //   2. Within category: alpha titles first, digit-leading titles second.
+    //   3. Within the digit-leading group: sort by leading number
+    //      DESCENDING (newest year first). Without this the year category
+    //      is sorted by full-string localeCompare which puts hyphenated
+    //      ranges out of intuitive order.
+    //   4. Within the alpha group: locale-aware natural alphabetical.
     const sortedTerms = useMemo(() => {
         if (!Array.isArray(data)) return [];
         const CATEGORY_RANK = { term: 0, subterm: 1 };
@@ -266,18 +284,28 @@ const EthosFetchCard = (props) => {
             if (CATEGORY_RANK[key] !== undefined) return CATEGORY_RANK[key];
             return 50;
         };
-        const startsWithDigit = (s) => /^\d/.test(String(s || '').trim());
         return [...data].sort((a, b) => {
             const cr = rankOfCategory(a?.category) - rankOfCategory(b?.category);
             if (cr !== 0) return cr;
-            const aDigit = startsWithDigit(a?.title);
-            const bDigit = startsWithDigit(b?.title);
+
+            const aTitle = String(a?.title || '');
+            const bTitle = String(b?.title || '');
+            const aDigit = startsWithDigit(aTitle);
+            const bDigit = startsWithDigit(bTitle);
             if (aDigit !== bDigit) return aDigit ? 1 : -1;
-            return String(a?.title || '').localeCompare(
-                String(b?.title || ''),
-                undefined,
-                { numeric: true, sensitivity: 'base' },
-            );
+
+            if (aDigit) {
+                const aNum = extractLeadingNumber(aTitle);
+                const bNum = extractLeadingNumber(bTitle);
+                if (aNum !== null && bNum !== null && aNum !== bNum) {
+                    return bNum - aNum; // newest year first
+                }
+            }
+
+            return aTitle.localeCompare(bTitle, undefined, {
+                numeric: true,
+                sensitivity: 'base',
+            });
         });
     }, [data]);
 
