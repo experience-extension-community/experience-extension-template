@@ -15,10 +15,6 @@ module.exports = {
     name: 'experience-extension-template',
     publisher: process.env.PUBLISHER || 'ExperienceExtensionCommunity',
 
-    // Shared by every card and the page. Both cards that fetch from
-    // the academic-periods pipeline (EthosFetchCard on the dashboard,
-    // TermsPage on the page) and the page launcher (Sample Pages /
-    // PageLinkCard) read these values via useCardInfo().configuration.
     configuration: {
         client: [
             {
@@ -59,17 +55,24 @@ module.exports = {
         },
 
         // 2. EthosFetchCard — Data Connect pipeline-driven card.
-        // Inherits termsPipeline + ethosApiKey from the extension-level
-        // configuration block above.
+        // Body click opens the page-sized version of the same data.
+        // excludeClickSelectors keeps the per-row term-code copy buttons
+        // working as copy-to-clipboard rather than navigation.
         {
             type: 'EthosFetchCard',
             source: './src/cards/EthosFetchCard/EthosFetchCard.jsx',
             title: 'Active terms',
             displayCardType: 'Active terms',
             description: 'Demonstrates a Data Connect pipeline-driven card.',
+            pageRoute: {
+                route: '/terms',
+                excludeClickSelectors: ['button'],
+            },
         },
 
         // 3. ConfigurableCard — admin-driven content via customConfiguration form.
+        // Body click opens the page-sized links view. excludeClickSelectors
+        // keeps the link rows + collapsible category summaries working.
         {
             type: 'ConfigurableCard',
             source: './src/cards/ConfigurableCard/ConfigurableCard.jsx',
@@ -79,13 +82,13 @@ module.exports = {
             customConfiguration: {
                 source: './src/cards/ConfigurableCard/ConfigurableCardConfig.jsx',
             },
+            pageRoute: {
+                route: '/links',
+                excludeClickSelectors: ['a', 'button', 'summary', 'details'],
+            },
         },
 
         // 4. Sample Pages — multi-section page launcher.
-        // cardType remains 'PageLinkCard' for backwards compatibility
-        // with any tenant-side configuration already in place.
-        // Inherits termsPipeline + ethosApiKey from extension level so
-        // TermsPage's fetch is authorized under this card's cardId.
         {
             type: 'PageLinkCard',
             source: './src/cards/PageLinkCard/PageLinkCard.jsx',

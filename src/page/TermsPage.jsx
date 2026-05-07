@@ -3,15 +3,10 @@
 //
 // TermsPage — page-sized view of the academic-periods pipeline.
 // Reuses useAcademicPeriods (same data source as EthosFetchCard).
-//
-// IMPORTANT: For this page to load data, PageLinkCard's tenant
-// configuration must include the same `termsPipeline` and
-// `ethosApiKey` as EthosFetchCard. The page is scoped to
-// PageLinkCard's cardId; without that authorization the pipeline
-// returns 400. See PageLinkCard's configuration block in
-// extension.js.
+// The Code column is a copy-to-clipboard button with a transient
+// "copied" state, mirroring the dashboard card's behavior.
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useIntl } from 'react-intl';
@@ -100,12 +95,56 @@ const styles = () => ({
         borderBottom: `1px solid ${brandColors.border}`,
         verticalAlign: 'top',
     },
+    codeButton: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: spacing20,
+        padding: `${spacing20} ${spacing30}`,
+        margin: 0,
+        background: 'transparent',
+        border: `1px solid transparent`,
+        borderRadius: 4,
+        cursor: 'pointer',
+        fontFamily: 'inherit',
+        color: brandColors.textPrimary,
+        transition:
+            'background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out',
+        '&:hover': {
+            backgroundColor: brandColors.surfaceMuted,
+            borderColor: brandColors.border,
+        },
+        '&:hover $copyIcon': { color: brandColors.primary },
+        '&:focus-visible': {
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 1,
+            backgroundColor: brandColors.surfaceMuted,
+        },
+    },
+    codeButtonCopied: {
+        backgroundColor: `${brandColors.success}14`,
+        borderColor: `${brandColors.success}55`,
+        '&:hover': {
+            backgroundColor: `${brandColors.success}22`,
+            borderColor: `${brandColors.success}77`,
+        },
+    },
     code: {
         fontFamily:
             'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
         fontSize: '0.875rem',
         fontWeight: 600,
         letterSpacing: '0.02em',
+    },
+    copyIcon: {
+        fontFamily: 'Material Symbols Outlined',
+        fontSize: '1rem',
+        fontVariationSettings: '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
+        lineHeight: 1,
+        color: brandColors.textMuted,
+        transition: 'color 120ms ease-out',
+    },
+    copyIconCopied: {
+        color: brandColors.success,
     },
     muted: {
         color: brandColors.textSecondary,
@@ -140,6 +179,21 @@ const TermsPage = (props) => {
     }
 
     const { data, isLoading, isRefreshing, isError, refresh } = useAcademicPeriods();
+
+    const [copiedId, setCopiedId] = useState(null);
+    const copyCode = useCallback((id, code) => {
+        if (!code) return;
+        if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(code).catch(() => {
+                /* clipboard blocked — silently noop */
+            });
+        }
+        setCopiedId(id);
+        setTimeout(
+            () => setCopiedId((prev) => (prev === id ? null : prev)),
+            1500,
+        );
+    }, []);
 
     const sortedTerms = useMemo(() => {
         if (!Array.isArray(data)) return [];
@@ -196,33 +250,62 @@ const TermsPage = (props) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedTerms.map((term, idx) => (
-                                <tr key={term.id || term.code || idx}>
-                                    <td className={classes.td}>
-                                        {term.title || '(unnamed)'}
-                                    </td>
-                                    <td className={classes.td}>
-                                        <span className={classes.code}>
-                                            {term.code || '—'}
-                                        </span>
-                                    </td>
-                                    <td className={classes.td}>
-                                        {term.category ? (
-                                            <span className={classes.chip}>
-                                                {term.category}
-                                            </span>
-                                        ) : (
-                                            <span className={classes.muted}>—</span>
-                                        )}
-                                    </td>
-                                    <td className={classes.td}>
-                                        {formatDate(term.startOn, intl) || '—'}
-                                    </td>
-                                    <td className={classes.td}>
-                                        {formatDate(term.endOn, intl) || '—'}
-                                    </td>
-                                </tr>
-                            ))}
+                            {sortedTerms.map((term, idx) => {
+                                const rowKey = term.id || term.code || idx;
+                                const isCopied = copiedId === rowKey;
+                                const copyLabel = isCopied
+                                    ? 'Copied'
+                                    : `Copy code ${term.code || ''}`;
+                                return (
+                                    <tr key={rowKey}>
+                                        <td className={classes.td}>
+                                            {term.title || '(unnamed)'}
+                                        </td>
+                                        <td className={classes.td}>
+                                            {term.code ? (
+                                                <button
+                                                    type="button"
+                                                    className={`${classes.codeButton}${
+                                                        isCopied ? ` ${classes.codeButtonCopied}` : ''
+                                                    }`}
+                                                    onClick={() => copyCode(rowKey, term.code)}
+                                                    aria-label={copyLabel}
+                                                    title={copyLabel}
+                                                >
+                                                    <span className={classes.code}>
+                                                        {term.code}
+                                                    </span>
+                                                    <span
+                                                        aria-hidden="true"
+                                                        className={`${classes.copyIcon}${
+                                                            isCopied ? ` ${classes.copyIconCopied}` : ''
+                                                        }`}
+                                                    >
+                                                        {isCopied ? 'check' : 'content_copy'}
+                                                    </span>
+                                                </button>
+                                            ) : (
+                                                <span className={classes.muted}>—</span>
+                                            )}
+                                        </td>
+                                        <td className={classes.td}>
+                                            {term.category ? (
+                                                <span className={classes.chip}>
+                                                    {term.category}
+                                                </span>
+                                            ) : (
+                                                <span className={classes.muted}>—</span>
+                                            )}
+                                        </td>
+                                        <td className={classes.td}>
+                                            {formatDate(term.startOn, intl) || '—'}
+                                        </td>
+                                        <td className={classes.td}>
+                                            {formatDate(term.endOn, intl) || '—'}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </>
