@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// PageLinkCard — card-to-page navigation.
+// Sample Pages — multi-section page launcher.
 //
 // Renders one link row per extension sub-page, each wired to
 // navigateToPage(). Lets a user jump straight to /hooks, /terms,
 // or /links from the dashboard. The hub at "/" remains accessible
 // via the back link on each sub-page.
 //
-// Configuration is mirrored from EthosFetchCard so the page-side
-// fetch (TermsPage → academic-periods pipeline) is authorized for
-// PageLinkCard's cardId. Without the matching server-side
-// `ethosApiKey`, page fetches return 400.
+// cardType remains 'PageLinkCard' for backwards compatibility.
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
@@ -65,13 +62,6 @@ const styles = () => ({
         gap: spacing20,
         fontFamily: BRAND_FONT_STACK,
         backgroundColor: brandColors.surface,
-    },
-    title: {
-        fontFamily: BRAND_FONT_STACK,
-        fontSize: '1rem',
-        fontWeight: 700,
-        color: brandColors.textPrimary,
-        margin: 0,
     },
     description: {
         fontFamily: BRAND_FONT_STACK,
@@ -198,12 +188,6 @@ const PageLinkCard = (props) => {
 
     return (
         <Box className={classes.root}>
-            <Typography className={classes.title}>
-                {intl.formatMessage({
-                    id: 'card.pageLink.title',
-                    defaultMessage: 'Extension page',
-                })}
-            </Typography>
             <Typography className={classes.description}>
                 {intl.formatMessage({
                     id: 'card.pageLink.description',
