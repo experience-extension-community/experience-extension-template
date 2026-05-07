@@ -8,7 +8,7 @@ Those dependencies install from CDN tarballs (per the SDK 8.1.2
 upgrade docs). Symptoms: 404, certificate error, or `ENOTFOUND`.
 
 - Confirm the version strings in `package.json` match the latest
-  `experience-update-docs.md`.
+  [SDK_UPDATES.md](SDK_UPDATES.md).
 - Confirm corporate proxy / firewall allows `cdn.elluciancloud.com`.
 - Delete `package-lock.json` and `node_modules`, then re-run `npm install`.
 
@@ -22,16 +22,18 @@ recently upgraded the package version.
 
 - Open DevTools → Network. Look for a request to
   `https://use.typekit.net/<kit-id>.css`.
-- If the request 404s, your kit ID is wrong (set in `tokens.js` or
-  the `TYPEKIT_KIT_ID` env var).
-- If the request is missing entirely, confirm `loadBrandFont()` is
-  called in your card / page mount effect.
+- If the request 404s, your kit ID is wrong (set in `brandColors.js`
+  or the `TYPEKIT_KIT_ID` env var).
+- If the request is missing entirely, confirm `useTypekitFont()` is
+  called in your card / page mount, or `ensureTypekitFont()` runs in
+  `src/page/router.jsx`.
 
 ## Material Symbols Outlined glyphs render as text
 
 Same root cause as above for the icon font. Look for a request to
 `https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined…`.
-If absent, confirm `loadIconFont()` is called once after mount.
+If absent, confirm `useMaterialIconFonts()` is called in your card,
+or `loadMaterialSymbolsCSS()` runs in `src/page/router.jsx`.
 
 ## Tests fail with `useThemeInfo is not a function`
 
@@ -66,6 +68,23 @@ test / lint locally:
 Local-only commands (`npm install`, `npm test`, `npm run lint`,
 `npm run build-prod`) work without the token. Only the deploy
 commands (`deploy-dev`, `deploy-prod`, `watch-and-upload`) need it.
+
+## Page-side fetch returns 400 ("cardId not configured for pipeline")
+
+If `TermsPage` or any other page that calls `authenticatedEthosFetch`
+returns 400, the most common cause is that the launching card's
+cardId isn't authorized for the pipeline. Symptoms in DevTools:
+
+```
+GET .../api/<pipeline>?cardId=<orgId>|<publisher>|<extension>|PageLinkCard
+→ 400
+```
+
+Fix: `extension.js` declares `configuration` at the **extension
+level** so every card (including PageLinkCard) inherits the
+`termsPipeline` + `ethosApiKey` values. Make sure an admin has
+saved that extension-level configuration in Experience Manager;
+until saved, the cardId isn't registered with the pipeline.
 
 ## CI's reusable workflow fails to resolve
 

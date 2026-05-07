@@ -15,18 +15,19 @@ adopting an extension built from this template.
 
 1. **Fork or "Use this template"**, into your institution's GitHub org.
 2. **Replace placeholders** — work top-to-bottom through `REPLACE_THESE.md`.
-3. **Configure secrets** — copy `.env.example` to `.env.local` and fill
-   in your tenant URLs and Ethos API key.
+3. **Configure secrets** — `cp sample.env .env` and fill in your tenant
+   URLs, Ethos API key, and `EXPERIENCE_EXTENSION_UPLOAD_TOKEN`.
 4. **Run the extension locally** — `npm install && npm start`. Confirm
-   the sample card renders inside Experience.
-5. **Re-skin** — open `src/utils/branding/tokens.js`, replace colors,
-   typography, asset URLs, and the Typekit kit ID with your institution's
-   values. Reload the dev server and verify.
-6. **Replace the sample** — adapt the card and page in `src/cards/` and
-   `src/pages/` to your real use case.
+   the sample cards render inside Experience.
+5. **Re-skin** — open `src/utils/branding/brandColors.js`, replace
+   colors, typography, asset URLs, and the Typekit kit ID with your
+   institution's values. Reload the dev server and verify.
+6. **Replace the sample** — adapt the cards in `src/cards/` and the
+   page module in `src/page/` to your real use case.
 7. **Wire up CI** — push the repo, ensure GitHub Actions ran successfully.
-8. **Upload to Experience** — run `npm run build`, then upload the produced
-   bundle through Experience's admin UI.
+8. **Upload to Experience** — run `npm run build-prod`, then upload the
+   produced bundle through Experience's admin UI (or use
+   `npm run deploy-prod` to build + upload in one step).
 
 ## References
 

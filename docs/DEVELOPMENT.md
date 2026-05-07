@@ -7,7 +7,10 @@ Day-to-day local development workflow.
 | Script | What it does |
 |--------|--------------|
 | `npm start` | Runs the Experience extension dev server. |
-| `npm run build` | Produces an uploadable bundle in `dist/`. |
+| `npm run build-dev` | Build a development bundle in `dist/`. |
+| `npm run build-prod` | Build a production bundle in `dist/`. |
+| `npm run deploy-dev` / `deploy-prod` | Build and upload to your tenant. |
+| `npm run watch-and-upload` | Hot-reload with continuous upload. |
 | `npm run lint` | ESLint 9 flat config across `**/*.{js,jsx}`. |
 | `npm run lint:fix` | Auto-fixes lint issues where possible. |
 | `npm run format` | Prettier write. |
@@ -21,19 +24,22 @@ Day-to-day local development workflow.
 
 ```
 src/
-├── extension.js         # SDK manifest — wires cards and pages
-├── cards/               # one folder per card
-├── pages/               # one folder per page
-├── components/          # in-extension shared UI primitives
-├── hooks/               # custom React hooks
+├── cards/                # one folder per card
+├── page/                 # single page module with Home + sub-pages + router
+├── components/           # in-extension shared UI primitives
+├── hooks/                # custom React hooks
+├── data/                 # pure async fetchers + sort/transform helpers
 ├── utils/
-│   ├── branding/        # tokens, theme resolver, icons, font loader
-│   ├── ethos/           # authenticated fetch + error normalization
-│   ├── a11y/            # announcer, keyboard helpers, IDs
-│   ├── format/          # Intl-based date/number formatting
-│   └── sdk/             # shared PropTypes for SDK-injected props
-└── i18n/                # translation files, one per locale
+│   ├── branding/         # tokens, theme resolver, icons, font loader
+│   ├── ethos/            # authenticated fetch + error normalization
+│   ├── a11y/             # announcer, keyboard helpers, IDs
+│   ├── format/           # Intl-based date/number formatting
+│   └── sdk/              # shared PropTypes for SDK-injected props
+└── i18n/                 # translation files, one per locale
 ```
+
+`extension.js` (the SDK manifest) lives at the **repo root**, not
+in `src/`.
 
 ## Conventions
 
@@ -46,6 +52,9 @@ src/
 - Tests for every component (render + jest-axe), every hook, every util.
 - Prefer Path Design System components; only build a custom one when
   Path doesn't cover the case.
+- Pure derivation logic (sorts, transforms) lives in `src/data/` next
+  to its fetcher, NOT in components. The card and the page should
+  consume the same hook and never re-sort.
 
 ## Mocking the SDK in tests
 
