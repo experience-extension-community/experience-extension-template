@@ -28,10 +28,7 @@ import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
 import EmptyState from '../components/common/EmptyState';
-import { brandColors } from '../utils/branding/brandColors';
-
-const BRAND_FONT_STACK =
-    '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+import { brandColors, BRAND_FONT_STACK } from '../utils/branding/brandColors';
 
 const styles = () => ({
     root: {

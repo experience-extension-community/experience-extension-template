@@ -20,13 +20,27 @@ recently upgraded the package version.
 
 ## Brand font isn't loading
 
-- Open DevTools → Network. Look for a request to
-  `https://use.typekit.net/<kit-id>.css`.
-- If the request 404s, your kit ID is wrong (set in `brandColors.js`
-  or the `TYPEKIT_KIT_ID` env var).
-- If the request is missing entirely, confirm `useTypekitFont()` is
-  called in your card / page mount, or `ensureTypekitFont()` runs in
-  `src/page/router.jsx`.
+Four failure modes:
+
+1. **Kit CSS request never fires.** Open DevTools → Network. If
+   there's no request to `https://use.typekit.net/<kit-id>.css`,
+   confirm `useTypekitFont()` is called in your card / page mount
+   or `ensureTypekitFont()` runs in `src/page/router.jsx`.
+2. **Kit CSS request 404s.** Your `brandFont.kitId` in
+   `src/utils/branding/brandColors.js` is wrong. Open your kit at
+   <https://fonts.adobe.com/> and copy the slug from its embed
+   code's `use.typekit.net/<slug>.css` URL.
+3. **Kit CSS loads but the font still doesn't apply.** Your
+   `brandFont.webFontName` doesn't match any font in the kit.
+   Open the kit's settings and copy the *web font name* (not the
+   display name) for the primary font — it's usually kebab-case
+   like `proxima-nova` or `new-science`. Update
+   `brandFont.webFontName` to match.
+4. **Kit ID is intentionally empty.** `brandFont.kitId: ''`
+   disables Typekit entirely; components use the fallback stack.
+   This is a feature, not a bug.
+
+See [`BRANDING.md`](BRANDING.md) for the full setup walkthrough.
 
 ## Material Symbols Outlined glyphs render as text
 

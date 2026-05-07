@@ -29,10 +29,12 @@ here is set via Experience-managed configuration instead.
 
 See `sample.env` for the canonical list.
 
-## C. Branding tokens (compile-time)
+## C. Branding (compile-time)
 
-Static institutional values in `src/utils/branding/brandColors.js`. See
-[BRANDING.md](BRANDING.md).
+Static institutional values — colors, the Typekit kit ID, the web
+font name, asset URLs — live in `src/utils/branding/brandColors.js`.
+Not configurable via env or admin UI; edit the file and rebuild.
+See [`BRANDING.md`](BRANDING.md).
 
 ## Configuration reference table
 
@@ -47,7 +49,8 @@ their `README.md`. Fill it in as your extension grows.
 | `PUBLISHER` | env | string | no | `ExperienceExtensionCommunity` | Public publisher slug. |
 | `PIPELINE_GET_TERMS` | env | string | no | `eec-template-academic-periods-get` | Default for `termsPipeline` at build time. |
 | `ETHOS_API_KEY` | env | string | yes (local dev) | — | Ethos API key for local dev. |
-| `TYPEKIT_KIT_ID` | env or `brandColors.js` | string | no | `yld8vhe` | Adobe Typekit kit ID. |
+| `brandFont.kitId` | code (`brandColors.js`) | string | no | `yld8vhe` | Adobe Typekit (Adobe Fonts) kit ID. See [`BRANDING.md`](BRANDING.md). |
+| `brandFont.webFontName` | code (`brandColors.js`) | string | no | `new-science` | Web font name for the primary font in the kit. Must match what Adobe shows for the kit. |
 
 If it's not in this table, it doesn't exist. If it's in code, it must
 be in this table.

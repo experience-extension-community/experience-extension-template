@@ -17,10 +17,7 @@ import {
 } from '@ellucian/react-design-system/core/styles/tokens';
 import { usePageControl } from '@ellucian/experience-extension-utils';
 
-import { brandColors } from '../utils/branding/brandColors';
-
-const BRAND_FONT_STACK =
-    '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+import { brandColors, BRAND_FONT_STACK } from '../utils/branding/brandColors';
 
 const styles = () => ({
     root: {
