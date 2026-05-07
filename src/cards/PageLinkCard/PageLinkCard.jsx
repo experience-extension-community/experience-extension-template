@@ -43,7 +43,7 @@ const PageLinkCard = (props) => {
 
     const open = () => {
         if (typeof navigateToPage === 'function') {
-            navigateToPage({route: '/sample'})
+            navigateToPage({ route: '/' });
         }
     };
 
@@ -52,13 +52,14 @@ const PageLinkCard = (props) => {
             <Typography variant="h6">
                 {intl.formatMessage({
                     id: 'card.pageLink.title',
-                    defaultMessage: 'Open the sample page',
+                    defaultMessage: 'Open the extension page',
                 })}
             </Typography>
             <Typography variant="body2" className={classes.description}>
                 {intl.formatMessage({
                     id: 'card.pageLink.description',
-                    defaultMessage: 'Demonstrates page navigation from a card.',
+                    defaultMessage:
+                        'Hub with three sub-pages: hooks reference, active terms, and configured links.',
                 })}
             </Typography>
             <Button

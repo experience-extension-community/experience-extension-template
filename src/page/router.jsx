@@ -6,15 +6,16 @@ import PropTypes from 'prop-types';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
 import Home from './Home';
-import SamplePage from './SamplePage/SamplePage';
+import HooksPage from './HooksPage';
+import TermsPage from './TermsPage';
+import LinksPage from './LinksPage';
 
 import { loadMaterialSymbolsCSS } from '../utils/branding/loadMaterialSymbols';
 
 const RouterPage = (props) => {
-
     useEffect(() => {
         loadMaterialSymbolsCSS();
-    }, [])
+    }, []);
 
     return (
         <Router basename={props.pageInfo.basePath}>
@@ -22,18 +23,23 @@ const RouterPage = (props) => {
                 <Route exact path="/">
                     <Home {...props} />
                 </Route>
-                <Route path="/sample">
-                    <SamplePage {...props} />
+                <Route path="/hooks">
+                    <HooksPage {...props} />
+                </Route>
+                <Route path="/terms">
+                    <TermsPage {...props} />
+                </Route>
+                <Route path="/links">
+                    <LinksPage {...props} />
                 </Route>
             </Switch>
         </Router>
-    )
-
+    );
 };
 
 RouterPage.propTypes = {
     pageInfo: PropTypes.object.isRequired,
-     cardInfo: PropTypes.object.isRequired
+    cardInfo: PropTypes.object.isRequired,
 };
 
 export default RouterPage;
