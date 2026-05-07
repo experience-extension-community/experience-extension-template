@@ -6,6 +6,25 @@
 // (TermsPage). Returns data already sorted via sortAcademicPeriods
 // so consumers never reorder their own copy and the two surfaces
 // can never disagree.
+//
+// TODO(roadmap): wrap this in `useCache` from
+// @ellucian/experience-extension-utils so the dashboard and the
+// page share a browser-cached copy scoped by extensionId|cardId.
+// Today every mount re-runs the pipeline; the underlying
+// `ethosProxyGet` segment caches server-side for 300s, but adding
+// `useCache` on top would skip the network entirely on warm
+// navigations between EthosFetchCard and TermsPage. Sketch:
+//
+//   const cache = useCache();
+//   const cached = cache.getItem({ key: 'academic-periods' });
+//   if (cached) setRawData(cached);
+//   ...
+//   if (result.status === 'success') {
+//     setRawData(result.data);
+//     cache.storeItem({ key: 'academic-periods', data: result.data });
+//   }
+//
+// `refresh()` should bypass the cache (force re-fetch) and overwrite.
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useData, useCardInfo } from '@ellucian/experience-extension-utils';
