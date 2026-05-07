@@ -10,7 +10,7 @@
 //
 // cardType remains 'PageLinkCard' for backwards compatibility.
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
@@ -26,7 +26,7 @@ import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
-import DebugHooksDialog from '../../components/common/DebugHooksDialog';
+import DebugTrigger from '../../components/common/DebugTrigger';
 
 const BRAND_FONT_STACK =
     '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -127,47 +127,12 @@ const styles = () => ({
         transition:
             'opacity 120ms ease-out, transform 120ms ease-out',
     },
-    debugButton: {
-        position: 'absolute',
-        bottom: spacing20,
-        right: spacing20,
-        width: 24,
-        height: 24,
-        padding: 0,
-        background: 'transparent',
-        border: 'none',
-        borderRadius: 4,
-        cursor: 'pointer',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: brandColors.textMuted,
-        opacity: 0.3,
-        transition:
-            'opacity 120ms ease-out, color 120ms ease-out, background-color 120ms ease-out',
-        '&:hover': {
-            opacity: 1,
-            color: brandColors.primary,
-            backgroundColor: brandColors.surfaceMuted,
-        },
-        '&:focus-visible': {
-            opacity: 1,
-            outline: `2px solid ${brandColors.focusRing}`,
-            outlineOffset: 1,
-        },
-    },
-    debugIcon: {
-        fontFamily: 'Material Symbols Outlined',
-        fontSize: '1rem',
-        lineHeight: 1,
-    },
 });
 
 const PageLinkCard = (props) => {
     const { classes, cardControl: { navigateToPage } = {} } = props;
     const intl = useIntl();
     const { setLoadingStatus } = useExtensionControl() || {};
-    const [debugOpen, setDebugOpen] = useState(false);
 
     useTypekitFont();
     useMaterialIconFonts();
@@ -218,24 +183,7 @@ const PageLinkCard = (props) => {
                     </button>
                 ))}
             </Box>
-            <button
-                type="button"
-                className={classes.debugButton}
-                onClick={() => setDebugOpen(true)}
-                aria-label="Show hooks and properties"
-                title="Show hooks and properties"
-            >
-                <span aria-hidden="true" className={classes.debugIcon}>
-                    data_object
-                </span>
-            </button>
-            {debugOpen && (
-                <DebugHooksDialog
-                    open={debugOpen}
-                    onClose={() => setDebugOpen(false)}
-                    cardProps={props}
-                />
-            )}
+            <DebugTrigger cardProps={props} />
         </Box>
     );
 };

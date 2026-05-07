@@ -6,10 +6,8 @@
 // Renders a small user identity tile from useUserInfo(): avatar with
 // initials, time-of-day greeting + first name, full name (if it
 // differs from first+last), email, and a locale chip.
-//
-// EDS 8.x: withStyles(Component, styles, { name }) + withIntl outermost.
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
@@ -25,7 +23,7 @@ import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
-import DebugHooksDialog from '../../components/common/DebugHooksDialog';
+import DebugTrigger from '../../components/common/DebugTrigger';
 
 const BRAND_FONT_STACK =
     '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -145,40 +143,6 @@ const styles = () => ({
         fontSize: '0.875rem',
         lineHeight: 1,
     },
-    debugButton: {
-        position: 'absolute',
-        bottom: spacing20,
-        right: spacing20,
-        width: 24,
-        height: 24,
-        padding: 0,
-        background: 'transparent',
-        border: 'none',
-        borderRadius: 4,
-        cursor: 'pointer',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: brandColors.textMuted,
-        opacity: 0.3,
-        transition:
-            'opacity 120ms ease-out, color 120ms ease-out, background-color 120ms ease-out',
-        '&:hover': {
-            opacity: 1,
-            color: brandColors.primary,
-            backgroundColor: brandColors.surfaceMuted,
-        },
-        '&:focus-visible': {
-            opacity: 1,
-            outline: `2px solid ${brandColors.focusRing}`,
-            outlineOffset: 1,
-        },
-    },
-    debugIcon: {
-        fontFamily: 'Material Symbols Outlined',
-        fontSize: '1rem',
-        lineHeight: 1,
-    },
 });
 
 const computeGreeting = () => {
@@ -193,7 +157,6 @@ const HelloUserCard = (props) => {
     const intl = useIntl();
     const userInfo = useUserInfo() || {};
     const { firstName, lastName, fullName, emailAddress, locale } = userInfo;
-    const [debugOpen, setDebugOpen] = useState(false);
 
     useTypekitFont();
     useMaterialIconFonts();
@@ -262,24 +225,7 @@ const HelloUserCard = (props) => {
                 </Box>
             )}
 
-            <button
-                type="button"
-                className={classes.debugButton}
-                onClick={() => setDebugOpen(true)}
-                aria-label="Show hooks and properties"
-                title="Show hooks and properties"
-            >
-                <span aria-hidden="true" className={classes.debugIcon}>
-                    data_object
-                </span>
-            </button>
-            {debugOpen && (
-                <DebugHooksDialog
-                    open={debugOpen}
-                    onClose={() => setDebugOpen(false)}
-                    cardProps={props}
-                />
-            )}
+            <DebugTrigger cardProps={props} />
         </Box>
     );
 };
