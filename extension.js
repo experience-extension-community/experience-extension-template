@@ -91,6 +91,10 @@ module.exports = {
         },
 
         // 4. Sample Pages — multi-section page launcher.
+        // excludeClickSelectors stops body-click navigation from
+        // hijacking the per-row link buttons (which need to either
+        // navigate to their own sub-route or open the hooks-choice
+        // dialog locally).
         {
             type: 'PageLinkCard',
             source: './src/cards/PageLinkCard/PageLinkCard.jsx',
@@ -100,6 +104,7 @@ module.exports = {
                 'Multi-section sample page — hooks reference, active terms, and configured links.',
             pageRoute: {
                 route: '/',
+                excludeClickSelectors: ['button'],
             },
         },
     ],
