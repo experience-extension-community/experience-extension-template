@@ -4,28 +4,9 @@
 // ConfigurableCard — categorized links, dashboard-tile UX with
 // collapsible category sections.
 //
-// Design references (modern dashboard nav patterns):
-//   * Linear & Vercel sidebar: tight rows (32px), no row dividers,
-//     hover bg as the only row affordance, headings are quiet
-//   * Notion sidebar: 11px uppercase muted-gray category headers
-//   * Stripe Dashboard: chevron at very low opacity, full on hover
-//   * Tailwind Catalyst Sidebar: 14px link text, 11px section headers
-//
-// What this card adopts from those:
-//   * No 1px borders between link rows — whitespace + hover bg
-//   * 32px link row (down from 44px in earlier iteration)
-//   * Category heading is small + muted (11px, textSecondary color),
-//     uppercase, NOT brand-primary — heading earns no extra weight,
-//     it's a quiet wayfinder
-//   * Hover on heading shifts text to brand primary (the hover IS
-//     the brand moment)
-//   * Chevron on each link: opacity 0.4 by default, 1.0 + 2px right
-//     nudge on hover
-//   * Sections separated by 16px gap, no underlines
-//
 // EDS 8.x: withStyles(Component, styles, { name }) + withIntl outermost.
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
@@ -43,6 +24,7 @@ import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+import DebugHooksDialog from '../../components/common/DebugHooksDialog';
 import { normalizeColors, resolveColor } from './colorPresets';
 
 const BRAND_FONT_STACK =
@@ -50,15 +32,20 @@ const BRAND_FONT_STACK =
 
 const styles = () => ({
     root: {
+        position: 'relative',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing40,                       // 16px between sections
-        padding: `${spacing30} ${spacing30}`, // 8px around — tight container padding
-        overflowY: 'auto',
         fontFamily: BRAND_FONT_STACK,
         backgroundColor: brandColors.surface,
-
+    },
+    scrollArea: {
+        flex: '1 1 auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing40,
+        padding: `${spacing30} ${spacing30}`,
+        overflowY: 'auto',
         '&::-webkit-scrollbar': { width: 6 },
         '&::-webkit-scrollbar-track': { backgroundColor: 'transparent' },
         '&::-webkit-scrollbar-thumb': {
@@ -81,7 +68,7 @@ const styles = () => ({
         display: 'flex',
         alignItems: 'center',
         gap: spacing30,
-        padding: `${spacing20} ${spacing30}`,    // 4px / 8px — quiet
+        padding: `${spacing20} ${spacing30}`,
         marginBottom: 2,
         borderRadius: 4,
         transition: 'background-color 120ms ease-out',
@@ -102,9 +89,9 @@ const styles = () => ({
     },
     categoryName: {
         flex: '1 1 auto',
-        color: 'var(--cc-category-color)',       // configurable preset
+        color: 'var(--cc-category-color)',
         fontFamily: BRAND_FONT_STACK,
-        fontSize: '0.6875rem',                   // 11px
+        fontSize: '0.6875rem',
         fontWeight: 700,
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
@@ -115,9 +102,9 @@ const styles = () => ({
         flex: '0 0 auto',
         color: brandColors.textMuted,
         fontFamily: BRAND_FONT_STACK,
-        fontSize: '0.625rem',                    // 10px
+        fontSize: '0.625rem',
         fontWeight: 500,
-        fontVariantNumeric: 'tabular-nums',      // even number widths
+        fontVariantNumeric: 'tabular-nums',
     },
     expandIcon: {
         flex: '0 0 auto',
@@ -140,11 +127,11 @@ const styles = () => ({
         display: 'flex',
         alignItems: 'center',
         gap: spacing30,
-        padding: `${spacing10} ${spacing40}`,   // 2px / 8px — tight
+        padding: `${spacing10} ${spacing40}`,
         minHeight: 28,
-        color: 'var(--cc-link-color)',          // configurable preset
+        color: 'var(--cc-link-color)',
         fontFamily: BRAND_FONT_STACK,
-        fontSize: '0.875rem',                   // 14px
+        fontSize: '0.875rem',
         fontWeight: 500,
         lineHeight: 1.4,
         textDecoration: 'none',
@@ -176,6 +163,41 @@ const styles = () => ({
         fontSize: '0.875rem',
         fontStyle: 'italic',
     },
+    debugButton: {
+        position: 'absolute',
+        bottom: spacing20,
+        right: spacing20,
+        zIndex: 1,
+        width: 24,
+        height: 24,
+        padding: 0,
+        background: 'transparent',
+        border: 'none',
+        borderRadius: 4,
+        cursor: 'pointer',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: brandColors.textMuted,
+        opacity: 0.3,
+        transition:
+            'opacity 120ms ease-out, color 120ms ease-out, background-color 120ms ease-out',
+        '&:hover': {
+            opacity: 1,
+            color: brandColors.primary,
+            backgroundColor: brandColors.surfaceMuted,
+        },
+        '&:focus-visible': {
+            opacity: 1,
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 1,
+        },
+    },
+    debugIcon: {
+        fontFamily: 'Material Symbols Outlined',
+        fontSize: '1rem',
+        lineHeight: 1,
+    },
 });
 
 const isUsableLink = (l) => l && typeof l.url === 'string' && l.url.length > 0;
@@ -185,6 +207,7 @@ const ConfigurableCard = (props) => {
     const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setLoadingStatus } = useExtensionControl() || {};
+    const [debugOpen, setDebugOpen] = useState(false);
 
     useTypekitFont();
     useMaterialIconFonts();
@@ -223,63 +246,93 @@ const ConfigurableCard = (props) => {
         };
     }, [cardInfo.configuration]);
 
+    const debugButton = (
+        <button
+            type="button"
+            className={classes.debugButton}
+            onClick={() => setDebugOpen(true)}
+            aria-label="Show hooks and properties"
+            title="Show hooks and properties"
+        >
+            <span aria-hidden="true" className={classes.debugIcon}>
+                data_object
+            </span>
+        </button>
+    );
+
+    const debugDialog = debugOpen ? (
+        <DebugHooksDialog
+            open={debugOpen}
+            onClose={() => setDebugOpen(false)}
+            cardProps={props}
+        />
+    ) : null;
+
     if (totalLinks === 0) {
         return (
             <Box className={classes.root} style={colorStyle}>
-                <Typography variant="body2" className={classes.empty}>
-                    {intl.formatMessage({
-                        id: 'card.configurable.empty',
-                        defaultMessage:
-                            'No links configured. Open the card configuration to add some.',
-                    })}
-                </Typography>
+                <Box className={classes.scrollArea}>
+                    <Typography variant="body2" className={classes.empty}>
+                        {intl.formatMessage({
+                            id: 'card.configurable.empty',
+                            defaultMessage:
+                                'No links configured. Open the card configuration to add some.',
+                        })}
+                    </Typography>
+                </Box>
+                {debugButton}
+                {debugDialog}
             </Box>
         );
     }
 
     return (
         <Box className={classes.root} style={colorStyle}>
-            {categories.map((cat, catIdx) => (
-                <details
-                    key={cat.id || catIdx}
-                    className={classes.section}
-                    open
-                >
-                    <summary className={classes.categoryHeading}>
-                        <span className={classes.categoryName}>
-                            {cat.name || intl.formatMessage({
-                                id: 'card.configurable.unnamedCategory',
-                                defaultMessage: 'Links',
-                            })}
-                        </span>
-                        <span className={classes.categoryCount}>
-                            {cat.links.length}
-                        </span>
-                        <span aria-hidden="true" className={classes.expandIcon}>
-                            expand_more
-                        </span>
-                    </summary>
-                    <ul className={classes.list}>
-                        {cat.links.map((link, idx) => (
-                            <li
-                                key={link.id || `${link.url}-${idx}`}
-                                className={classes.listItem}
-                            >
-                                <a
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={classes.link}
+            <Box className={classes.scrollArea}>
+                {categories.map((cat, catIdx) => (
+                    <details
+                        key={cat.id || catIdx}
+                        className={classes.section}
+                        open
+                    >
+                        <summary className={classes.categoryHeading}>
+                            <span className={classes.categoryName}>
+                                {cat.name || intl.formatMessage({
+                                    id: 'card.configurable.unnamedCategory',
+                                    defaultMessage: 'Links',
+                                })}
+                            </span>
+                            <span className={classes.categoryCount}>
+                                {cat.links.length}
+                            </span>
+                            <span aria-hidden="true" className={classes.expandIcon}>
+                                expand_more
+                            </span>
+                        </summary>
+                        <ul className={classes.list}>
+                            {cat.links.map((link, idx) => (
+                                <li
+                                    key={link.id || `${link.url}-${idx}`}
+                                    className={classes.listItem}
                                 >
-                                    <span className={classes.label}>
-                                        {link.label || link.url}
-                                    </span>
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </details>
-            ))}
+                                    <a
+                                        href={link.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={classes.link}
+                                    >
+                                        <span className={classes.label}>
+                                            {link.label || link.url}
+                                        </span>
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </details>
+                ))}
+            </Box>
+            {debugButton}
+            {debugDialog}
         </Box>
     );
 };

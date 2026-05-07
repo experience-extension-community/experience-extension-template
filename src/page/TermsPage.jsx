@@ -2,14 +2,14 @@
 // Copyright 2026 Experience Extension Community contributors
 //
 // TermsPage — page-sized view of the academic-periods pipeline.
-// Reuses useAcademicPeriods (same data source as EthosFetchCard) and
-// renders a full table with all columns, sorted newest-first.
+// Reuses useAcademicPeriods (same data source as EthosFetchCard).
 //
-// Note: useAcademicPeriods reads configuration.termsPipeline from
-// the launching card's cardInfo (PageLinkCard, in this template),
-// then falls back to process.env.PIPELINE_GET_TERMS at build time.
-// PageLinkCard does not currently expose a termsPipeline
-// configuration, so the env fallback is what runs.
+// IMPORTANT: For this page to load data, PageLinkCard's tenant
+// configuration must include the same `termsPipeline` and
+// `ethosApiKey` as EthosFetchCard. The page is scoped to
+// PageLinkCard's cardId; without that authorization the pipeline
+// returns 400. See PageLinkCard's configuration block in
+// extension.js.
 
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
@@ -31,8 +31,6 @@ import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
 import EmptyState from '../components/common/EmptyState';
 import { brandColors } from '../utils/branding/brandColors';
-import { useTypekitFont } from '../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../hooks/useMaterialIconFonts';
 
 const BRAND_FONT_STACK =
     '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -52,8 +50,10 @@ const styles = () => ({
         fontSize: '0.875rem',
         '&:hover': { textDecoration: 'underline' },
     },
-    header: {
+    subtitle: {
         marginBottom: spacing40,
+        color: brandColors.textSecondary,
+        fontSize: '0.9375rem',
     },
     refreshRow: {
         display: 'flex',
@@ -135,9 +135,6 @@ const TermsPage = (props) => {
     const intl = useIntl();
     const { setPageTitle } = usePageControl() || {};
 
-    useTypekitFont();
-    useMaterialIconFonts();
-
     if (typeof setPageTitle === 'function') {
         setPageTitle('Active terms');
     }
@@ -158,12 +155,9 @@ const TermsPage = (props) => {
             <Link to="/" className={classes.backLink}>
                 ← Back to overview
             </Link>
-            <Box className={classes.header}>
-                <Typography variant="h2">Active terms</Typography>
-                <Typography variant="body1">
-                    Academic periods sourced from the Data Connect pipeline.
-                </Typography>
-            </Box>
+            <Typography className={classes.subtitle}>
+                Academic periods sourced from the Data Connect pipeline.
+            </Typography>
 
             {isLoading ? (
                 <LoadingState />

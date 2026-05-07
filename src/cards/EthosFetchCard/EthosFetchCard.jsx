@@ -24,6 +24,7 @@ import { useAcademicPeriods } from '../../hooks/useAcademicPeriods';
 import LoadingState from '../../components/common/LoadingState';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
+import DebugHooksDialog from '../../components/common/DebugHooksDialog';
 import { brandColors } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
@@ -131,7 +132,7 @@ const styles = () => ({
         padding: `${spacing20} ${spacing30}`,
     },
     termActionCopied: {
-        backgroundColor: `${brandColors.success}14`, // ~8% tint
+        backgroundColor: `${brandColors.success}14`,
         '&:hover': { backgroundColor: `${brandColors.success}22` },
     },
     termTitle: {
@@ -170,14 +171,14 @@ const styles = () => ({
     termCode: {
         fontFamily:
             'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-        fontSize: '0.875rem',                    // 14px — matches body text for WCAG legibility
+        fontSize: '0.875rem',
         fontWeight: 600,
         color: brandColors.textPrimary,
         letterSpacing: '0.02em',
     },
     copyIcon: {
         fontFamily: 'Material Symbols Outlined',
-        fontSize: '1.25rem',                     // 20px — clearly visible
+        fontSize: '1.25rem',
         fontVariationSettings: '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
         lineHeight: 1,
         color: brandColors.textMuted,
@@ -186,8 +187,40 @@ const styles = () => ({
     copyIconCopied: {
         color: brandColors.success,
     },
-    refreshing: {
-        marginTop: spacing20,
+    debugButton: {
+        position: 'absolute',
+        bottom: spacing20,
+        right: spacing20,
+        zIndex: 1,
+        width: 24,
+        height: 24,
+        padding: 0,
+        background: 'transparent',
+        border: 'none',
+        borderRadius: 4,
+        cursor: 'pointer',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: brandColors.textMuted,
+        opacity: 0.3,
+        transition:
+            'opacity 120ms ease-out, color 120ms ease-out, background-color 120ms ease-out',
+        '&:hover': {
+            opacity: 1,
+            color: brandColors.primary,
+            backgroundColor: brandColors.surfaceMuted,
+        },
+        '&:focus-visible': {
+            opacity: 1,
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 1,
+        },
+    },
+    debugIcon: {
+        fontFamily: 'Material Symbols Outlined',
+        fontSize: '1rem',
+        lineHeight: 1,
     },
 });
 
@@ -202,14 +235,13 @@ const EthosFetchCard = (props) => {
     const { classes } = props;
     const intl = useIntl();
     const { setLoadingStatus } = useExtensionControl() || {};
+    const [debugOpen, setDebugOpen] = useState(false);
 
     useTypekitFont();
     useMaterialIconFonts();
 
     const { data, isLoading, isRefreshing, isError, error, refresh } = useAcademicPeriods();
 
-    // Per-row "just copied" indicator. Holds the term id of the row whose
-    // code was most recently copied; auto-clears after 1.5s.
     const [copiedId, setCopiedId] = useState(null);
     const copyCode = useCallback((id, code) => {
         if (!code) return;
@@ -225,31 +257,22 @@ const EthosFetchCard = (props) => {
         );
     }, []);
 
-    // Sort:
-    //   1. By category — 'term' first, 'subterm' second, anything else,
-    //      and 'year' ALWAYS last regardless of what else exists.
-    //   2. Within category, titles that start with a letter come before
-    //      titles that start with a digit (e.g. "Spring 2026" before
-    //      "2027-2028").
-    //   3. Within each partition, natural locale-aware alpha by title.
     const sortedTerms = useMemo(() => {
         if (!Array.isArray(data)) return [];
         const CATEGORY_RANK = { term: 0, subterm: 1 };
         const rankOfCategory = (cat) => {
             const key = String(cat || '').toLowerCase();
-            if (key === 'year') return 999;             // always last
+            if (key === 'year') return 999;
             if (CATEGORY_RANK[key] !== undefined) return CATEGORY_RANK[key];
-            return 50;                                   // unknown — between subterm and year
+            return 50;
         };
         const startsWithDigit = (s) => /^\d/.test(String(s || '').trim());
         return [...data].sort((a, b) => {
             const cr = rankOfCategory(a?.category) - rankOfCategory(b?.category);
             if (cr !== 0) return cr;
-
             const aDigit = startsWithDigit(a?.title);
             const bDigit = startsWithDigit(b?.title);
             if (aDigit !== bDigit) return aDigit ? 1 : -1;
-
             return String(a?.title || '').localeCompare(
                 String(b?.title || ''),
                 undefined,
@@ -264,10 +287,34 @@ const EthosFetchCard = (props) => {
         }
     }, [isLoading, setLoadingStatus]);
 
+    const debugButton = (
+        <button
+            type="button"
+            className={classes.debugButton}
+            onClick={() => setDebugOpen(true)}
+            aria-label="Show hooks and properties"
+            title="Show hooks and properties"
+        >
+            <span aria-hidden="true" className={classes.debugIcon}>
+                data_object
+            </span>
+        </button>
+    );
+
+    const debugDialog = debugOpen ? (
+        <DebugHooksDialog
+            open={debugOpen}
+            onClose={() => setDebugOpen(false)}
+            cardProps={props}
+        />
+    ) : null;
+
     if (isLoading) {
         return (
             <Box className={classes.root}>
                 <LoadingState />
+                {debugButton}
+                {debugDialog}
             </Box>
         );
     }
@@ -276,6 +323,8 @@ const EthosFetchCard = (props) => {
         return (
             <Box className={classes.root}>
                 <ErrorState error={error} onRetry={refresh} />
+                {debugButton}
+                {debugDialog}
             </Box>
         );
     }
@@ -294,6 +343,8 @@ const EthosFetchCard = (props) => {
                         defaultMessage: 'The pipeline returned no academic periods.',
                     })}
                 />
+                {debugButton}
+                {debugDialog}
             </Box>
         );
     }
@@ -361,29 +412,31 @@ const EthosFetchCard = (props) => {
                                 }${isCopied ? ` ${classes.termActionCopied}` : ''}`}
                             >
                                 <span className={classes.termTitle}>
-                                {term.title || term.code || '(unnamed term)'}
-                            </span>
-                            <span className={classes.termMeta}>
-                                <span className={classes.termDates}>{range || ' '}</span>
-                                {term.code && (
-                                    <span className={classes.termCodeGroup}>
-                                        <span className={classes.termCode}>{term.code}</span>
-                                        <span
-                                            aria-hidden="true"
-                                            className={`${classes.copyIcon}${
-                                                isCopied ? ` ${classes.copyIconCopied}` : ''
-                                            }`}
-                                        >
-                                            {isCopied ? 'check' : 'content_copy'}
+                                    {term.title || term.code || '(unnamed term)'}
+                                </span>
+                                <span className={classes.termMeta}>
+                                    <span className={classes.termDates}>{range || ' '}</span>
+                                    {term.code && (
+                                        <span className={classes.termCodeGroup}>
+                                            <span className={classes.termCode}>{term.code}</span>
+                                            <span
+                                                aria-hidden="true"
+                                                className={`${classes.copyIcon}${
+                                                    isCopied ? ` ${classes.copyIconCopied}` : ''
+                                                }`}
+                                            >
+                                                {isCopied ? 'check' : 'content_copy'}
+                                            </span>
                                         </span>
-                                    </span>
-                                )}
-                            </span>
+                                    )}
+                                </span>
                             </Wrapper>
                         </li>
                     );
                 })}
             </ul>
+            {debugButton}
+            {debugDialog}
         </Box>
     );
 };
