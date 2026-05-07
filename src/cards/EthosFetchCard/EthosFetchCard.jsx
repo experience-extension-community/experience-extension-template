@@ -5,7 +5,10 @@
 // pipeline and renders them as a list. Demonstrates the canonical
 // fetch lifecycle: loading → error / empty / data, with refresh.
 //
-// Data is pre-sorted by useAcademicPeriods (shared with TermsPage).
+// Data is cached + sorted by useAcademicPeriods (shared with
+// TermsPage). On warm mounts the cached data renders instantly
+// while a background refresh runs; the RefreshIndicator at top-left
+// shows the current status.
 
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
@@ -25,6 +28,7 @@ import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import LoadingState from '../../components/common/LoadingState';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
+import RefreshIndicator from '../../components/common/RefreshIndicator';
 import { brandColors, BRAND_FONT_STACK } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
@@ -38,6 +42,16 @@ const styles = () => ({
         padding: spacing30,
         fontFamily: BRAND_FONT_STACK,
         backgroundColor: brandColors.surface,
+    },
+    statusRow: {
+        position: 'absolute',
+        top: spacing20,
+        left: spacing30,
+        right: 40,
+        display: 'flex',
+        alignItems: 'center',
+        minHeight: 18,
+        pointerEvents: 'none',
     },
     refreshButton: {
         position: 'absolute',
@@ -94,6 +108,7 @@ const styles = () => ({
         display: 'flex',
         flexDirection: 'column',
         gap: spacing10,
+        marginTop: 22,
     },
     term: {
         listStyle: 'none',
@@ -201,8 +216,16 @@ const EthosFetchCard = (props) => {
     useTypekitFont();
     useMaterialIconFonts();
 
-    const { data, isLoading, isRefreshing, isError, error, refresh } =
-        useAcademicPeriods();
+    const {
+        data,
+        isLoading,
+        isRefreshing,
+        isError,
+        error,
+        lastUpdated,
+        showRefreshError,
+        refresh,
+    } = useAcademicPeriods();
     const { copiedId, copy } = useCopyToClipboard();
 
     useEffect(() => {
@@ -233,6 +256,13 @@ const EthosFetchCard = (props) => {
     } else {
         body = (
             <>
+                <div className={classes.statusRow}>
+                    <RefreshIndicator
+                        isRefreshing={isRefreshing}
+                        refreshError={showRefreshError}
+                        lastUpdated={lastUpdated}
+                    />
+                </div>
                 <button
                     type="button"
                     onClick={refresh}

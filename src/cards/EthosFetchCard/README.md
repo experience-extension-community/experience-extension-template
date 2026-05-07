@@ -4,14 +4,45 @@ Demonstrates the canonical Data Connect fetch lifecycle: loading
 → error / empty / data, with refresh. Body click opens a
 page-sized version of the same data (`TermsPage` at `/terms`).
 
-Card and page consume the **same** hook (`useAcademicPeriods`)
+Card and page consume the **same** hook (`useAcademicPeriods`),
+share the **same** browser cache (scope `eec-academic-periods`),
 and display terms in the **same** order — sort lives in
 `src/data/sortAcademicPeriods.js`, not in either component.
 
 ## What it shows
 
 A list of active academic periods, each row clickable to copy the
-term code. The top-right refresh button refetches the pipeline.
+term code. Two refresh indicators:
+
+- **Bottom-left, always visible** when there's data: small status
+  text — "Refreshing…" while a background refresh is running,
+  "Last updated 3:45 PM" when idle, "Refresh failed — showing
+  cached data." flashed for 5 seconds if a background refresh
+  failed.
+- **Top-right, hover/focus to reveal**: an icon button that
+  triggers a manual refresh.
+
+## Cache + refresh behavior (stale-while-revalidate)
+
+1. **First mount, cold cache** → `LoadingState` shows while the
+   pipeline runs. On success, data renders and is stored in the
+   cache with a `lastUpdated` timestamp.
+2. **Subsequent mount, warm cache** → cached data renders
+   **instantly** (`isLoading` stays `false`). A background
+   refresh kicks off; the inline indicator shows "Refreshing…".
+   When it completes, the data and timestamp update silently.
+3. **Background refresh fails** → cached data stays on screen.
+   The indicator flashes "Refresh failed — showing cached data."
+   for 5 seconds, then returns to the last-updated timestamp.
+4. **Manual refresh button** → skips the cache read entirely and
+   forces a network fetch. Same loading/error states as a cold
+   mount.
+
+The Data Connect pipeline itself caches at the Ethos proxy layer
+for 300s (`cache: true, cacheTTLSeconds: 300` in the
+`ethosProxyGet` segment). The browser-side `useCache` adds a
+second layer that skips the network round-trip entirely on warm
+mounts.
 
 ## SDK hooks used
 
@@ -22,14 +53,21 @@ term code. The top-right refresh button refetches the pipeline.
 
 Plus this template's hooks:
 
-- `useAcademicPeriods()` — fetch + sort. Returns
-  `{ data, isLoading, isRefreshing, isError, error, refresh }`.
-  Lives in `src/hooks/useAcademicPeriods.js`. Wraps
+- `useAcademicPeriods()` — fetch, cache (`useCache` from
+  `@ellucian/experience-extension-utils`), and sort. Returns
+  `{ data, isLoading, isRefreshing, isError, error, lastUpdated,
+  showRefreshError, refresh }`. Lives in
+  `src/hooks/useAcademicPeriods.js`. Wraps
   `src/data/academicPeriods.js` (pure fetcher) and
   `src/data/sortAcademicPeriods.js` (pure sort).
 - `useCopyToClipboard()` — flashes a "copied" affordance on row
   click and auto-resets after 1.5s.
 - `useTypekitFont()`, `useMaterialIconFonts()` — fonts.
+
+The shared `<RefreshIndicator>` component
+(`src/components/common/RefreshIndicator.jsx`) renders the
+refreshing / last-updated / refresh-failed status using only the
+hook's outputs.
 
 ## Configuration
 
@@ -66,11 +104,14 @@ This card calls a Data Connect pipeline. Before it can render data:
 | What | Where |
 |------|-------|
 | Sort order | `src/data/sortAcademicPeriods.js` (single source — card and page use the same sort). |
+| Cache key/scope | `CACHE_KEY` / `CACHE_SCOPE` constants at the top of `src/hooks/useAcademicPeriods.js`. Change `CACHE_SCOPE` to give a card-and-page pair their own private cache. |
+| Refresh-error flash duration | `REFRESH_ERROR_FLASH_MS` in `src/hooks/useAcademicPeriods.js`. Default 5000ms. |
 | Row layout / styling | `styles` block in `EthosFetchCard.jsx`. |
 | Copy-to-clipboard reset duration | Pass `{ resetMs: <ms> }` to `useCopyToClipboard()`. Default 1500. |
 | Body click target | `pageRoute.route` in `extension.js` (defaults to `/terms`). |
 | Body click exclusions | `pageRoute.excludeClickSelectors: ['button']` keeps the row buttons working. |
 | Empty / error state copy | i18n keys below. |
+| Indicator copy | `common.refreshing` / `common.lastUpdated` / `common.refreshFailed` in `src/i18n/en.json`. |
 
 ## i18n keys
 
@@ -81,6 +122,9 @@ This card calls a Data Connect pipeline. Before it can render data:
 | `card.ethosFetch.cta.refresh` | "Refresh" |
 | `card.ethosFetch.copyCode` | "Copy code {code}" |
 | `common.copied` | "Copied" |
+| `common.refreshing` | "Refreshing…" |
+| `common.lastUpdated` | "Last updated {time}" |
+| `common.refreshFailed` | "Refresh failed — showing cached data." |
 
 ## Files
 
@@ -97,21 +141,12 @@ src/data/
 └── sortAcademicPeriods.js      Pure sort
 
 src/hooks/
-└── useAcademicPeriods.js       React state machine + sort
+└── useAcademicPeriods.js       useCache + state machine + sort
+
+src/components/common/
+└── RefreshIndicator.jsx        Shared refreshing / last-updated
+                                / refresh-failed status element
 ```
-
-## Roadmap / known follow-ups
-
-- **Layer `useCache` on top of `useAcademicPeriods`.** Today every
-  card / page mount re-runs the pipeline. The underlying
-  `ethosProxyGet` segment caches server-side for 300s, so the
-  network round-trip is cheap, but a client-side cache via
-  `useCache()` (from `@ellucian/experience-extension-utils`,
-  scoped by `extensionId|cardId`) would skip the network entirely
-  on warm navigations between this card and `TermsPage`.
-  `refresh()` should bypass the cache and overwrite. See the TODO
-  block at the top of `src/hooks/useAcademicPeriods.js` for a
-  sketch.
 
 ## Replacing this card with your own data
 
@@ -121,7 +156,9 @@ src/hooks/
 3. (If sorting matters) add `src/data/sort<YourResource>.js` (pure
    sort).
 4. Add `src/hooks/use<YourResource>.js` (state machine; calls the
-   fetcher; memoizes the sort).
+   fetcher; memoizes the sort; layers `useCache` if you want
+   stale-while-revalidate). Copy the cache pattern from
+   `useAcademicPeriods.js`.
 5. Copy this card and swap `useAcademicPeriods` → your hook.
 6. Update `termsPipeline` config in `extension.js` (or add a new
    extension-level key for your pipeline).
