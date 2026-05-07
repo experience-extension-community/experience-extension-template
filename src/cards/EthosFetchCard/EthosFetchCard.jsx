@@ -7,10 +7,13 @@
 //
 // Data is cached + sorted by useAcademicPeriods (shared with
 // TermsPage). On warm mounts the cached data renders instantly
-// while a background refresh runs; the RefreshIndicator at top-left
-// shows the current status.
+// while a background refresh runs; the RefreshStatusMessage banner
+// at the top shows transient status (refreshing / success / error)
+// and the RefreshIndicator at the bottom shows a persistent
+// "Last updated <time>". The list itself is lazy-rendered —
+// initial 5 terms, +5 per scroll trigger.
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
@@ -25,9 +28,11 @@ import { useExtensionControl } from '@ellucian/experience-extension-utils';
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { useAcademicPeriods } from '../../hooks/useAcademicPeriods';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
+import { useLazyLoad } from '../../hooks/useLazyLoad';
 import LoadingState from '../../components/common/LoadingState';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
+import RefreshStatusMessage from '../../components/common/RefreshStatusMessage';
 import RefreshIndicator from '../../components/common/RefreshIndicator';
 import { brandColors, BRAND_FONT_STACK } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
@@ -39,19 +44,10 @@ const styles = () => ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        gap: spacing10,
         padding: spacing30,
         fontFamily: BRAND_FONT_STACK,
         backgroundColor: brandColors.surface,
-    },
-    statusRow: {
-        position: 'absolute',
-        top: spacing20,
-        left: spacing30,
-        right: 40,
-        display: 'flex',
-        alignItems: 'center',
-        minHeight: 18,
-        pointerEvents: 'none',
     },
     refreshButton: {
         position: 'absolute',
@@ -108,7 +104,6 @@ const styles = () => ({
         display: 'flex',
         flexDirection: 'column',
         gap: spacing10,
-        marginTop: 22,
     },
     term: {
         listStyle: 'none',
@@ -199,6 +194,20 @@ const styles = () => ({
     copyIconCopied: {
         color: brandColors.success,
     },
+    lazyTrigger: {
+        listStyle: 'none',
+        padding: spacing20,
+        textAlign: 'center',
+        color: brandColors.textSecondary,
+        fontSize: '0.75rem',
+        lineHeight: 1.4,
+    },
+    footer: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        paddingTop: spacing10,
+        borderTop: `1px solid ${brandColors.border}`,
+    },
 });
 
 const formatDate = (iso, intl) => {
@@ -224,9 +233,20 @@ const EthosFetchCard = (props) => {
         error,
         lastUpdated,
         showRefreshError,
+        showSuccessMessage,
         refresh,
     } = useAcademicPeriods();
     const { copiedId, copy } = useCopyToClipboard();
+
+    const listRef = useRef(null);
+    const {
+        visibleItems,
+        hasMore,
+        isLoading: isLoadingMore,
+        triggerRef,
+        visibleCount,
+        totalCount,
+    } = useLazyLoad(data, 5, 5, listRef);
 
     useEffect(() => {
         if (typeof setLoadingStatus === 'function') {
@@ -256,13 +276,39 @@ const EthosFetchCard = (props) => {
     } else {
         body = (
             <>
-                <div className={classes.statusRow}>
-                    <RefreshIndicator
-                        isRefreshing={isRefreshing}
-                        refreshError={showRefreshError}
-                        lastUpdated={lastUpdated}
+                {isRefreshing && (
+                    <RefreshStatusMessage
+                        type="loading"
+                        message={intl.formatMessage({
+                            id: 'common.refreshingData',
+                            defaultMessage: 'Refreshing data…',
+                        })}
                     />
-                </div>
+                )}
+                {showSuccessMessage && (
+                    <RefreshStatusMessage
+                        type="success"
+                        message={intl.formatMessage({
+                            id: 'common.refreshSuccess',
+                            defaultMessage: 'Data refreshed',
+                        })}
+                    />
+                )}
+                {showRefreshError && (
+                    <RefreshStatusMessage
+                        type="error"
+                        message={intl.formatMessage({
+                            id: 'common.refreshFailed',
+                            defaultMessage: 'Refresh failed — showing cached data.',
+                        })}
+                        onRetry={refresh}
+                        retryLabel={intl.formatMessage({
+                            id: 'common.retry',
+                            defaultMessage: 'Retry',
+                        })}
+                    />
+                )}
+
                 <button
                     type="button"
                     onClick={refresh}
@@ -287,8 +333,8 @@ const EthosFetchCard = (props) => {
                     </span>
                 </button>
 
-                <ul className={classes.list}>
-                    {data.map((term, idx) => {
+                <ul ref={listRef} className={classes.list}>
+                    {visibleItems.map((term, idx) => {
                         const rowKey = term.id || term.code || idx;
                         const isCopied = copiedId === rowKey;
                         const copyableLabel = isCopied
@@ -357,7 +403,28 @@ const EthosFetchCard = (props) => {
                             </li>
                         );
                     })}
+                    {hasMore && (
+                        <li ref={triggerRef} className={classes.lazyTrigger}>
+                            {isLoadingMore
+                                ? intl.formatMessage({
+                                      id: 'common.loadingMore',
+                                      defaultMessage: 'Loading more…',
+                                  })
+                                : intl.formatMessage(
+                                      {
+                                          id: 'common.showingCount',
+                                          defaultMessage:
+                                              'Showing {visible} of {total}',
+                                      },
+                                      { visible: visibleCount, total: totalCount },
+                                  )}
+                        </li>
+                    )}
                 </ul>
+
+                <div className={classes.footer}>
+                    <RefreshIndicator lastUpdated={lastUpdated} />
+                </div>
             </>
         );
     }
