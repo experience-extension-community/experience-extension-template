@@ -23,7 +23,6 @@ import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
-import DebugTrigger from '../../components/common/DebugTrigger';
 
 const BRAND_FONT_STACK =
     '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -224,8 +223,6 @@ const HelloUserCard = (props) => {
                     )}
                 </Box>
             )}
-
-            <DebugTrigger cardProps={props} />
         </Box>
     );
 };
