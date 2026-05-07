@@ -9,9 +9,10 @@
 // TermsPage). On warm mounts the cached data renders instantly
 // while a background refresh runs; the RefreshStatusMessage banner
 // at the top shows transient status (refreshing / success / error)
-// and the RefreshIndicator at the bottom shows a persistent
-// "Last updated <time>". The list itself is lazy-rendered —
-// initial 5 terms, +5 per scroll trigger.
+// and the RefreshIndicator ("Last updated <time>") sits at the
+// END of the list — visible only when the user scrolls to the
+// bottom of the data, not pinned to the card. The list itself is
+// lazy-rendered — initial 5 terms, +5 per scroll trigger.
 
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
@@ -202,11 +203,11 @@ const styles = () => ({
         fontSize: '0.75rem',
         lineHeight: 1.4,
     },
-    footer: {
+    lastUpdatedRow: {
+        listStyle: 'none',
         display: 'flex',
         justifyContent: 'flex-end',
-        paddingTop: spacing10,
-        borderTop: `1px solid ${brandColors.border}`,
+        padding: `${spacing10} ${spacing30} ${spacing20}`,
     },
 });
 
@@ -403,7 +404,7 @@ const EthosFetchCard = (props) => {
                             </li>
                         );
                     })}
-                    {hasMore && (
+                    {hasMore ? (
                         <li ref={triggerRef} className={classes.lazyTrigger}>
                             {isLoadingMore
                                 ? intl.formatMessage({
@@ -419,12 +420,14 @@ const EthosFetchCard = (props) => {
                                       { visible: visibleCount, total: totalCount },
                                   )}
                         </li>
+                    ) : (
+                        lastUpdated && (
+                            <li className={classes.lastUpdatedRow}>
+                                <RefreshIndicator lastUpdated={lastUpdated} />
+                            </li>
+                        )
                     )}
                 </ul>
-
-                <div className={classes.footer}>
-                    <RefreshIndicator lastUpdated={lastUpdated} />
-                </div>
             </>
         );
     }
