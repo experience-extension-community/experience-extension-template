@@ -3,10 +3,8 @@
 //
 // ConfigurableCard — categorized links, dashboard-tile UX with
 // collapsible category sections.
-//
-// EDS 8.x: withStyles(Component, styles, { name }) + withIntl outermost.
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
@@ -24,7 +22,7 @@ import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
-import DebugHooksDialog from '../../components/common/DebugHooksDialog';
+import DebugTrigger from '../../components/common/DebugTrigger';
 import { normalizeColors, resolveColor } from './colorPresets';
 
 const BRAND_FONT_STACK =
@@ -163,41 +161,6 @@ const styles = () => ({
         fontSize: '0.875rem',
         fontStyle: 'italic',
     },
-    debugButton: {
-        position: 'absolute',
-        bottom: spacing20,
-        right: spacing20,
-        zIndex: 1,
-        width: 24,
-        height: 24,
-        padding: 0,
-        background: 'transparent',
-        border: 'none',
-        borderRadius: 4,
-        cursor: 'pointer',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: brandColors.textMuted,
-        opacity: 0.3,
-        transition:
-            'opacity 120ms ease-out, color 120ms ease-out, background-color 120ms ease-out',
-        '&:hover': {
-            opacity: 1,
-            color: brandColors.primary,
-            backgroundColor: brandColors.surfaceMuted,
-        },
-        '&:focus-visible': {
-            opacity: 1,
-            outline: `2px solid ${brandColors.focusRing}`,
-            outlineOffset: 1,
-        },
-    },
-    debugIcon: {
-        fontFamily: 'Material Symbols Outlined',
-        fontSize: '1rem',
-        lineHeight: 1,
-    },
 });
 
 const isUsableLink = (l) => l && typeof l.url === 'string' && l.url.length > 0;
@@ -207,7 +170,6 @@ const ConfigurableCard = (props) => {
     const intl = useIntl();
     const cardInfo = useCardInfo() || {};
     const { setLoadingStatus } = useExtensionControl() || {};
-    const [debugOpen, setDebugOpen] = useState(false);
 
     useTypekitFont();
     useMaterialIconFonts();
@@ -246,32 +208,10 @@ const ConfigurableCard = (props) => {
         };
     }, [cardInfo.configuration]);
 
-    const debugButton = (
-        <button
-            type="button"
-            className={classes.debugButton}
-            onClick={() => setDebugOpen(true)}
-            aria-label="Show hooks and properties"
-            title="Show hooks and properties"
-        >
-            <span aria-hidden="true" className={classes.debugIcon}>
-                data_object
-            </span>
-        </button>
-    );
-
-    const debugDialog = debugOpen ? (
-        <DebugHooksDialog
-            open={debugOpen}
-            onClose={() => setDebugOpen(false)}
-            cardProps={props}
-        />
-    ) : null;
-
-    if (totalLinks === 0) {
-        return (
-            <Box className={classes.root} style={colorStyle}>
-                <Box className={classes.scrollArea}>
+    return (
+        <Box className={classes.root} style={colorStyle}>
+            <Box className={classes.scrollArea}>
+                {totalLinks === 0 ? (
                     <Typography variant="body2" className={classes.empty}>
                         {intl.formatMessage({
                             id: 'card.configurable.empty',
@@ -279,60 +219,52 @@ const ConfigurableCard = (props) => {
                                 'No links configured. Open the card configuration to add some.',
                         })}
                     </Typography>
-                </Box>
-                {debugButton}
-                {debugDialog}
-            </Box>
-        );
-    }
-
-    return (
-        <Box className={classes.root} style={colorStyle}>
-            <Box className={classes.scrollArea}>
-                {categories.map((cat, catIdx) => (
-                    <details
-                        key={cat.id || catIdx}
-                        className={classes.section}
-                        open
-                    >
-                        <summary className={classes.categoryHeading}>
-                            <span className={classes.categoryName}>
-                                {cat.name || intl.formatMessage({
-                                    id: 'card.configurable.unnamedCategory',
-                                    defaultMessage: 'Links',
-                                })}
-                            </span>
-                            <span className={classes.categoryCount}>
-                                {cat.links.length}
-                            </span>
-                            <span aria-hidden="true" className={classes.expandIcon}>
-                                expand_more
-                            </span>
-                        </summary>
-                        <ul className={classes.list}>
-                            {cat.links.map((link, idx) => (
-                                <li
-                                    key={link.id || `${link.url}-${idx}`}
-                                    className={classes.listItem}
-                                >
-                                    <a
-                                        href={link.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={classes.link}
+                ) : (
+                    categories.map((cat, catIdx) => (
+                        <details
+                            key={cat.id || catIdx}
+                            className={classes.section}
+                            open
+                        >
+                            <summary className={classes.categoryHeading}>
+                                <span className={classes.categoryName}>
+                                    {cat.name ||
+                                        intl.formatMessage({
+                                            id: 'card.configurable.unnamedCategory',
+                                            defaultMessage: 'Links',
+                                        })}
+                                </span>
+                                <span className={classes.categoryCount}>
+                                    {cat.links.length}
+                                </span>
+                                <span aria-hidden="true" className={classes.expandIcon}>
+                                    expand_more
+                                </span>
+                            </summary>
+                            <ul className={classes.list}>
+                                {cat.links.map((link, idx) => (
+                                    <li
+                                        key={link.id || `${link.url}-${idx}`}
+                                        className={classes.listItem}
                                     >
-                                        <span className={classes.label}>
-                                            {link.label || link.url}
-                                        </span>
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </details>
-                ))}
+                                        <a
+                                            href={link.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={classes.link}
+                                        >
+                                            <span className={classes.label}>
+                                                {link.label || link.url}
+                                            </span>
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </details>
+                    ))
+                )}
             </Box>
-            {debugButton}
-            {debugDialog}
+            <DebugTrigger cardProps={props} />
         </Box>
     );
 };

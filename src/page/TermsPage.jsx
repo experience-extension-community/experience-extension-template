@@ -6,7 +6,7 @@
 // The Code column is a copy-to-clipboard button with a transient
 // "copied" state, mirroring the dashboard card's behavior.
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useIntl } from 'react-intl';
@@ -22,6 +22,7 @@ import { usePageControl } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../i18n/ReactIntlProviderWrapper';
 import { useAcademicPeriods } from '../hooks/useAcademicPeriods';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
 import EmptyState from '../components/common/EmptyState';
@@ -179,21 +180,7 @@ const TermsPage = (props) => {
     }
 
     const { data, isLoading, isRefreshing, isError, refresh } = useAcademicPeriods();
-
-    const [copiedId, setCopiedId] = useState(null);
-    const copyCode = useCallback((id, code) => {
-        if (!code) return;
-        if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-            navigator.clipboard.writeText(code).catch(() => {
-                /* clipboard blocked — silently noop */
-            });
-        }
-        setCopiedId(id);
-        setTimeout(
-            () => setCopiedId((prev) => (prev === id ? null : prev)),
-            1500,
-        );
-    }, []);
+    const { copiedId, copy } = useCopyToClipboard();
 
     const sortedTerms = useMemo(() => {
         if (!Array.isArray(data)) return [];
@@ -268,7 +255,7 @@ const TermsPage = (props) => {
                                                     className={`${classes.codeButton}${
                                                         isCopied ? ` ${classes.codeButtonCopied}` : ''
                                                     }`}
-                                                    onClick={() => copyCode(rowKey, term.code)}
+                                                    onClick={() => copy(rowKey, term.code)}
                                                     aria-label={copyLabel}
                                                     title={copyLabel}
                                                 >
