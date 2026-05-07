@@ -100,6 +100,19 @@ src/hooks/
 └── useAcademicPeriods.js       React state machine + sort
 ```
 
+## Roadmap / known follow-ups
+
+- **Layer `useCache` on top of `useAcademicPeriods`.** Today every
+  card / page mount re-runs the pipeline. The underlying
+  `ethosProxyGet` segment caches server-side for 300s, so the
+  network round-trip is cheap, but a client-side cache via
+  `useCache()` (from `@ellucian/experience-extension-utils`,
+  scoped by `extensionId|cardId`) would skip the network entirely
+  on warm navigations between this card and `TermsPage`.
+  `refresh()` should bypass the cache and overwrite. See the TODO
+  block at the top of `src/hooks/useAcademicPeriods.js` for a
+  sketch.
+
 ## Replacing this card with your own data
 
 1. Add a pipeline JSON under `DataConnect/<your-resource>/`.
