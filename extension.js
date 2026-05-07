@@ -85,9 +85,9 @@ module.exports = {
             title: 'Open sample page',
             displayCardType: 'Open sample page',
             description: 'Demonstrates navigateToPage().',
-            pageRoute: {
-                route: '/',
-            },
+            // pageRoute: {
+            //     route: '/',
+            // },
         },
     ],
 
