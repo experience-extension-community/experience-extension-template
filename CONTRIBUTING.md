@@ -10,7 +10,7 @@ contribution guidance, see the
 ```bash
 nvm use                  # uses the version pinned in .nvmrc
 npm install
-cp .env.example .env.local
+cp sample.env .env       # fill in EXPERIENCE_EXTENSION_UPLOAD_TOKEN
 npm start                # runs the extension dev server
 ```
 
@@ -36,7 +36,8 @@ npm start                # runs the extension dev server
 - **Icons**: Material Symbols Outlined via the `Icon` component.
   Don't import the Path icon library.
 - **Branding**: every color / font / spacing value comes from
-  `useResolvedTheme()`. **No hardcoded hex values in components.**
+  `brandColors` (`src/utils/branding/brandColors.js`) or Path Design
+  System tokens. **No hardcoded hex values in components.**
 - **Accessibility**: WCAG 2.2 AA. Every component ships with a render
   test and a `jest-axe` test.
 - **No vendor-specific AI files** (CLAUDE.md, AGENTS.md, .cursorrules,
@@ -46,8 +47,9 @@ npm start                # runs the extension dev server
 ## Local AI tooling
 
 Use whatever assistant you like — or none. The conventions in this
-file plus `README.md` and `ARCHITECTURE.md` are the only project
-context any AI tool needs. Don't commit vendor-specific config.
+file plus `README.md`, `ARCHITECTURE.md`, and the `docs/` folder are
+the only project context any AI tool needs. Don't commit
+vendor-specific config.
 
 ## Institutional contributors
 

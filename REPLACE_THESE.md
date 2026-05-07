@@ -18,9 +18,10 @@ time: ~15–20 minutes.
 - [ ] `publisher` — your institution (overrides the `PUBLISHER` env var)
 - [ ] Each card's `type`, `title`, `displayCardType`, `description`, `template`
 - [ ] Card `configuration` knobs that apply to your real use case
+  (or rely on the extension-level `configuration` block already present)
 - [ ] Remove sample cards you don't need (HelloUserCard, EthosFetchCard,
       ConfigurableCard, PageLinkCard) and add your own
-- [ ] `page.title` and `page.fullWidth` per your design
+- [ ] `page.fullWidth` per your design
 
 ## 3. `sample.env` → `.env`
 
@@ -31,12 +32,11 @@ time: ~15–20 minutes.
 - [ ] `PIPELINE_*` — names of the pipelines in your Ethos Data Connect tenant
 - [ ] (Optional) `TYPEKIT_KIT_ID` — your Adobe Typekit kit ID, or empty
 
-## 4. Branding — `src/utils/branding/tokens.js`
+## 4. Branding — `src/utils/branding/brandColors.js`
 
-- [ ] `palette` — your institution's brand colors (verify WCAG contrast)
-- [ ] `typography.fontFamily` — your font stack
-- [ ] `assets` — your hosted logo / favicon URLs
+- [ ] `brandColors` palette — your institution's brand colors (verify WCAG contrast)
 - [ ] `fontLoader.typekitKitId` — your Typekit kit ID (or `''` to disable)
+- [ ] `assets` — your hosted logo / favicon URLs
 - [ ] (Optional) extend the `import { ... } from '@ellucian/react-design-system/core/styles/tokens'` block as components need more Path tokens
 
 ## 5. Ownership and license
@@ -57,12 +57,13 @@ time: ~15–20 minutes.
       quickstart, configuration reference, customization, license).
 - [ ] Add screenshots to `docs/screenshots/` (create the folder).
 
-## 8. Sample cards
+## 8. Sample cards and page
 
 - [ ] Replace each `src/cards/<Card>/` with your real cards.
-- [ ] Replace `src/pages/SamplePage/` with your real page (or delete
-      `src/pages/` and remove the `page` field from `extension.js`
-      if you only ship cards).
+- [ ] Replace `src/page/` (Home, HooksPage, TermsPage, LinksPage,
+      router) with your real page module — or delete `src/page/`
+      and remove the `page` field from `extension.js` if you only
+      ship cards.
 - [ ] Update `src/i18n/en.json` strings; remove keys for deleted cards.
 
 ## 9. Data Connect

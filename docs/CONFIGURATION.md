@@ -14,19 +14,24 @@ Set in the Experience admin UI; flows through SDK hooks at runtime.
 | Card-level, client-side, custom | Single-card complex UI (dropdowns) | Card configuration component, `useCardInfo()` |
 | Card-level, server-side | Single-card secret (API key) | `useCardInfo().configuration.server` |
 
-Card configuration is declared in `src/extension.js` under each card's
-`configuration.client` / `configuration.server` arrays.
+This template declares **extension-level** `configuration` in
+`extension.js`, so `termsPipeline` (client) and `ethosApiKey`
+(server) are configured once and inherited by every card and the
+page. Pattern confirmed from FloridaPoly/custom-simple-links.
+
+Card-level `configuration` is still available where you need
+per-card knobs.
 
 ## B. Environment variables (local dev only)
 
-Defined in `.env.local`. **Never committed.** In production, every value
+Defined in `.env`. **Never committed.** In production, every value
 here is set via Experience-managed configuration instead.
 
-See `.env.example` for the canonical list.
+See `sample.env` for the canonical list.
 
 ## C. Branding tokens (compile-time)
 
-Static institutional values in `src/utils/branding/tokens.js`. See
+Static institutional values in `src/utils/branding/brandColors.js`. See
 [BRANDING.md](BRANDING.md).
 
 ## Configuration reference table
@@ -36,11 +41,13 @@ their `README.md`. Fill it in as your extension grows.
 
 | Name | Surface | Type | Required | Default | Description |
 |------|---------|------|----------|---------|-------------|
-| `greetingName` | Card client | string | no | user firstName | Fallback greeting name when user has no first name. |
-| `EXPERIENCE_TENANT_URL` | env | url | yes (local dev) | — | Tenant URL for local dev. |
+| `termsPipeline` | Extension client | string | no | `eec-template-academic-periods-get` | Data Connect pipeline name for active terms. |
+| `ethosApiKey` | Extension server | password | yes | — | Ethos API key used by `authenticatedEthosFetch` for every card / page in the extension. |
+| `EXPERIENCE_EXTENSION_UPLOAD_TOKEN` | env | jwt | yes (deploy) | — | Upload token from Experience admin UI. |
+| `PUBLISHER` | env | string | no | `ExperienceExtensionCommunity` | Public publisher slug. |
+| `PIPELINE_GET_TERMS` | env | string | no | `eec-template-academic-periods-get` | Default for `termsPipeline` at build time. |
 | `ETHOS_API_KEY` | env | string | yes (local dev) | — | Ethos API key for local dev. |
-| `DATA_CONNECT_PIPELINE_URL` | env | url | no | — | Optional serverless pipeline URL. |
-| `TYPEKIT_KIT_ID` | env or `tokens.js` | string | no | `yld8vhe` | Adobe Typekit kit ID. |
+| `TYPEKIT_KIT_ID` | env or `brandColors.js` | string | no | `yld8vhe` | Adobe Typekit kit ID. |
 
 If it's not in this table, it doesn't exist. If it's in code, it must
 be in this table.

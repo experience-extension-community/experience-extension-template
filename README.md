@@ -8,7 +8,7 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D24.13.0-brightgreen)](.nvmrc)
-[![SDK](https://img.shields.io/badge/Experience%20SDK-8.1.2-7c3aed)](experience-update-docs.md)
+[![SDK](https://img.shields.io/badge/Experience%20SDK-8.1.2-7c3aed)](docs/SDK_UPDATES.md)
 
 ---
 
@@ -27,11 +27,17 @@ documentation skeleton. Out of the box it ships:
 
 - **Four sample cards**, intentionally boring, each demonstrating a
   different SDK surface:
-    - `HelloUserCard` — the minimum-viable card
-    - `EthosFetchCard` — Data Connect data with loading/error/empty states
-    - `ConfigurableCard` — a `customConfiguration` admin form
-    - `PageLinkCard` — card → full-width page navigation
-- **One sample page** exercising `useDashboardInfo` / `useExtensionInfo`.
+    - `HelloUserCard` ("User Card") — the minimum-viable identity tile
+    - `EthosFetchCard` ("Active Terms") — Data Connect data with
+      loading/error/empty states + per-row copy buttons
+    - `ConfigurableCard` ("Configurable Links") — a `customConfiguration`
+      admin form with categorized links + admin-picked colors
+    - `PageLinkCard` ("Sample Pages") — card → full-width page navigation
+      with a hooks-choice dialog
+- **One page module with four sub-pages** under `src/page/`:
+  Home (hub), HooksPage (page-context SDK hooks reference), TermsPage
+  (page-sized terms table with copy buttons), LinksPage (configurable
+  links page with live-or-demo data + admin colors).
 - **Two working Data Connect pipelines** (`persons`, `academic-periods`)
   in the top-level `DataConnect/` folder. Import them unchanged into
   any Banner or Colleague Ethos tenant.
@@ -46,7 +52,9 @@ documentation skeleton. Out of the box it ships:
   on every component — matches Ellucian samples and FL Poly extensions.
   No inline hex values.
 - **Two-layer data flow**: pure async `src/data/<domain>.js` fetchers
-  consumed by React `src/hooks/use<Domain>.js` state machines.
+  consumed by React `src/hooks/use<Domain>.js` state machines. Sort
+  logic (e.g. `sortAcademicPeriods`) lives next to its data layer so
+  card and page stay in sync.
 - **WCAG 2.2 AA** floor — every component has render + `jest-axe` tests.
 - **CI workflows** referencing the community's reusable workflow.
 
@@ -79,7 +87,7 @@ in the SDK dev shell.
 
 1. Walk through [`REPLACE_THESE.md`](REPLACE_THESE.md). It is the
    complete onboarding checklist.
-2. Edit [`src/utils/branding/tokens.js`](src/utils/branding/tokens.js)
+2. Edit [`src/utils/branding/brandColors.js`](src/utils/branding/brandColors.js)
    for colors, typography, logos, and Typekit kit ID. See
    [`docs/BRANDING.md`](docs/BRANDING.md).
 3. Replace the sample cards in `src/cards/` with your real ones.
@@ -105,12 +113,14 @@ in the SDK dev shell.
 
 ```
 .
-├── extension.js                       SDK manifest (root, CommonJS)
-├── webpack.config.js                  Re-exports SDK webpack config
-├── sample.env                         Environment variables template
-├── package.json                       Pinned to SDK 8.1.2
+├── extension.js                       SDK manifest (root, CommonJS).
+│                                      Extension-level configuration
+│                                      shared by every card + page.
+├── webpack.config.js                  Re-exports SDK webpack config.
+├── sample.env                         Environment variables template.
+├── package.json                       Pinned to SDK 8.1.2.
 │
-├── DataConnect/                       Data Connect pipeline JSONs
+├── DataConnect/                       Data Connect pipeline JSONs.
 │   ├── README.md
 │   ├── persons/
 │   └── academic-periods/
@@ -118,23 +128,27 @@ in the SDK dev shell.
 ├── src/
 │   ├── i18n/
 │   │   ├── en.json
-│   │   ├── intlUtility.js             getMessages(userLocale)
+│   │   ├── intlUtility.js              getMessages(userLocale)
 │   │   └── ReactIntlProviderWrapper.jsx
 │   ├── cards/
-│   │   ├── HelloUserCard/
-│   │   ├── EthosFetchCard/
-│   │   ├── ConfigurableCard/          (+ ConfigurableCardConfig.jsx)
-│   │   └── PageLinkCard/
-│   ├── pages/SamplePage/
-│   │   ├── router.jsx                 HashRouter entry
-│   │   └── SamplePage.jsx
+│   │   ├── HelloUserCard/              Identity tile.
+│   │   ├── EthosFetchCard/             Active terms list.
+│   │   ├── ConfigurableCard/           (+ ConfigurableCardConfig.jsx,
+│   │   │                                 + colorPresets.js)
+│   │   └── PageLinkCard/               "Sample Pages" launcher.
+│   ├── page/                          Single page module, four routes.
+│   │   ├── router.jsx                  BrowserRouter + font loaders.
+│   │   ├── Home.jsx                    Landing hub.
+│   │   ├── HooksPage.jsx               Page-context SDK hooks reference.
+│   │   ├── TermsPage.jsx               Page-sized terms table.
+│   │   └── LinksPage.jsx               Configurable-links page.
 │   ├── components/
-│   │   ├── Icon/                      Material Symbols Outlined glyph
+│   │   ├── Icon/                       Material Symbols Outlined glyph.
 │   │   └── common/
 │   │       ├── LoadingState/
 │   │       ├── ErrorState/
 │   │       ├── EmptyState/
-│   │       └── RefreshDataStatusMessage/
+│   │       └── DebugHooksDialog.jsx    Card-context hooks/props dump.
 │   ├── hooks/
 │   │   ├── useEthosFetch.js
 │   │   ├── useExtensionConfig.js
@@ -142,25 +156,31 @@ in the SDK dev shell.
 │   │   ├── usePrefersReducedMotion.js
 │   │   ├── useTypekitFont.js
 │   │   ├── useMaterialIconFonts.js
-│   │   └── useAcademicPeriods.js      (domain hook example)
+│   │   ├── useCopyToClipboard.js       Transient copy-with-confirmation.
+│   │   └── useAcademicPeriods.js       Domain hook example (pre-sorted).
 │   ├── data/
-│   │   ├── persons.js                 fetchPersons(...)
-│   │   └── academicPeriods.js         fetchAcademicPeriods(...)
+│   │   ├── persons.js                  fetchPersons(...)
+│   │   ├── academicPeriods.js          fetchAcademicPeriods(...)
+│   │   └── sortAcademicPeriods.js      Pure sort — single source for
+│   │                                   card + page ordering.
 │   └── utils/
-│       ├── branding/                  tokens (Path + institutional), theme, icons, fontLoader
-│       ├── ethos/                     authenticatedFetch, errors, serverless
-│       ├── a11y/                      announcer, IDs, keyboard helpers
-│       ├── format/                    Intl-based date/number formatting
-│       └── sdk/                       PropTypes for SDK-injected props
+│       ├── branding/                   tokens (Path + institutional),
+│       │                               theme, icons, fontLoader.
+│       ├── ethos/                      authenticatedFetch, errors,
+│       │                               serverless.
+│       ├── a11y/                       announcer, IDs, keyboard helpers.
+│       ├── format/                     Intl-based date/number formatting.
+│       └── sdk/                        PropTypes for SDK-injected props.
 │
-├── docs/
-│   ├── INSTITUTIONAL_SETUP.md
-│   ├── DEVELOPMENT.md
-│   ├── BRANDING.md
-│   ├── CONFIGURATION.md
-│   ├── DATA_CONNECT.md
-│   └── TROUBLESHOOTING.md
-└── PLAN.md                            architecture decisions for this template
+└── docs/
+    ├── INSTITUTIONAL_SETUP.md
+    ├── DEVELOPMENT.md
+    ├── BRANDING.md
+    ├── CONFIGURATION.md
+    ├── DATA_CONNECT.md
+    ├── SDK_UPDATES.md                  Ellucian's SDK changelog +
+    │                                   upgrade procedures.
+    └── TROUBLESHOOTING.md
 ```
 
 ## Configuration reference
@@ -169,9 +189,9 @@ Three configuration surfaces:
 
 | Surface | When | Where |
 |---------|------|-------|
-| Experience-managed (extension/card) | Admin-set per tenant | `extension.js` `configuration` block; read via `useCardInfo` / `useExtensionInfo` |
+| Experience-managed (extension/card) | Admin-set per tenant | `extension.js` `configuration` block (extension-level so all cards share); read via `useCardInfo()` / `useExtensionInfo()` |
 | Environment variables | Local dev only | `sample.env` → `.env`; in production every value is overridden by Experience-managed config |
-| Branding tokens | Compile-time, swappable per fork | `src/utils/branding/tokens.js` |
+| Branding tokens | Compile-time, swappable per fork | `src/utils/branding/brandColors.js` |
 
 See [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) for the full
 reference table.
@@ -186,9 +206,9 @@ against your palette.
 ## Updating the SDK
 
 Ellucian's authoritative SDK changelog lives in
-[`experience-update-docs.md`](experience-update-docs.md). When a new
-SDK version drops, follow that document — update `package.json`,
-delete `package-lock.json` and `node_modules`, then re-install. See
+[`docs/SDK_UPDATES.md`](docs/SDK_UPDATES.md). When a new SDK version
+drops, follow that document — update `package.json`, delete
+`package-lock.json` and `node_modules`, then re-install. See
 [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) for common
 upgrade issues.
 
@@ -201,7 +221,9 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md). Highlights:
 - Apache 2.0 SPDX header on every `.js`/`.jsx` file.
 - No vendor-specific AI configuration files (`CLAUDE.md`, `AGENTS.md`,
   `.cursorrules`, `copilot-instructions.md`, `.claude/`). The
-  framework is intentionally vendor-neutral.
+  framework is intentionally vendor-neutral; `README.md` +
+  `CONTRIBUTING.md` + `ARCHITECTURE.md` + `docs/*` are the only
+  context any AI tool needs.
 
 ## License
 
