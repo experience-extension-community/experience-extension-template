@@ -2,11 +2,13 @@
 // Copyright 2026 Experience Extension Community contributors
 //
 // TermsPage — page-sized view of the academic-periods pipeline.
-// Reuses useAcademicPeriods (same data source as EthosFetchCard).
+// Reuses useAcademicPeriods (same data source AND same order as
+// EthosFetchCard — sort lives in the hook).
+//
 // The Code column is a copy-to-clipboard button with a transient
 // "copied" state, mirroring the dashboard card's behavior.
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useIntl } from 'react-intl';
@@ -182,15 +184,6 @@ const TermsPage = (props) => {
     const { data, isLoading, isRefreshing, isError, refresh } = useAcademicPeriods();
     const { copiedId, copy } = useCopyToClipboard();
 
-    const sortedTerms = useMemo(() => {
-        if (!Array.isArray(data)) return [];
-        return [...data].sort((a, b) => {
-            const ad = a?.startOn ? new Date(a.startOn).getTime() : 0;
-            const bd = b?.startOn ? new Date(b.startOn).getTime() : 0;
-            return bd - ad;
-        });
-    }, [data]);
-
     return (
         <Box className={classes.root}>
             <Link to="/" className={classes.backLink}>
@@ -204,7 +197,7 @@ const TermsPage = (props) => {
                 <LoadingState />
             ) : isError ? (
                 <ErrorState onRetry={refresh} />
-            ) : sortedTerms.length === 0 ? (
+            ) : data.length === 0 ? (
                 <EmptyState
                     icon="event_busy"
                     title="No active terms"
@@ -214,8 +207,8 @@ const TermsPage = (props) => {
                 <>
                     <Box className={classes.refreshRow}>
                         <Typography variant="body2" className={classes.muted}>
-                            {sortedTerms.length} term
-                            {sortedTerms.length === 1 ? '' : 's'}
+                            {data.length} term
+                            {data.length === 1 ? '' : 's'}
                         </Typography>
                         <button
                             type="button"
@@ -237,7 +230,7 @@ const TermsPage = (props) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedTerms.map((term, idx) => {
+                            {data.map((term, idx) => {
                                 const rowKey = term.id || term.code || idx;
                                 const isCopied = copiedId === rowKey;
                                 const copyLabel = isCopied
