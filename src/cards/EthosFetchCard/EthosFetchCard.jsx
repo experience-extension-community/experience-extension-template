@@ -4,8 +4,10 @@
 // EthosFetchCard — fetches active academic terms via a Data Connect
 // pipeline and renders them as a list. Demonstrates the canonical
 // fetch lifecycle: loading → error / empty / data, with refresh.
+//
+// Data is pre-sorted by useAcademicPeriods (shared with TermsPage).
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
@@ -194,13 +196,6 @@ const formatDate = (iso, intl) => {
     return intl.formatDate(d, { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
-const extractLeadingNumber = (s) => {
-    const m = String(s || '').trim().match(/^(\d+)/);
-    return m ? parseInt(m[1], 10) : null;
-};
-
-const startsWithDigit = (s) => /^\d/.test(String(s || '').trim());
-
 const EthosFetchCard = (props) => {
     const { classes } = props;
     const intl = useIntl();
@@ -209,49 +204,9 @@ const EthosFetchCard = (props) => {
     useTypekitFont();
     useMaterialIconFonts();
 
-    const { data, isLoading, isRefreshing, isError, error, refresh } = useAcademicPeriods();
+    const { data, isLoading, isRefreshing, isError, error, refresh } =
+        useAcademicPeriods();
     const { copiedId, copy } = useCopyToClipboard();
-
-    // Sort:
-    //   1. By category — 'term' first, 'subterm' second, anything else,
-    //      and 'year' ALWAYS last regardless of what else exists.
-    //   2. Within category: alpha titles first, digit-leading titles second.
-    //   3. Within the digit-leading group: sort by leading number
-    //      DESCENDING (newest year first).
-    //   4. Within the alpha group: locale-aware natural alphabetical.
-    const sortedTerms = useMemo(() => {
-        if (!Array.isArray(data)) return [];
-        const CATEGORY_RANK = { term: 0, subterm: 1 };
-        const rankOfCategory = (cat) => {
-            const key = String(cat || '').toLowerCase();
-            if (key === 'year') return 999;
-            if (CATEGORY_RANK[key] !== undefined) return CATEGORY_RANK[key];
-            return 50;
-        };
-        return [...data].sort((a, b) => {
-            const cr = rankOfCategory(a?.category) - rankOfCategory(b?.category);
-            if (cr !== 0) return cr;
-
-            const aTitle = String(a?.title || '');
-            const bTitle = String(b?.title || '');
-            const aDigit = startsWithDigit(aTitle);
-            const bDigit = startsWithDigit(bTitle);
-            if (aDigit !== bDigit) return aDigit ? 1 : -1;
-
-            if (aDigit) {
-                const aNum = extractLeadingNumber(aTitle);
-                const bNum = extractLeadingNumber(bTitle);
-                if (aNum !== null && bNum !== null && aNum !== bNum) {
-                    return bNum - aNum;
-                }
-            }
-
-            return aTitle.localeCompare(bTitle, undefined, {
-                numeric: true,
-                sensitivity: 'base',
-            });
-        });
-    }, [data]);
 
     useEffect(() => {
         if (typeof setLoadingStatus === 'function') {
@@ -264,7 +219,7 @@ const EthosFetchCard = (props) => {
         body = <LoadingState />;
     } else if (isError) {
         body = <ErrorState error={error} onRetry={refresh} />;
-    } else if (!sortedTerms || sortedTerms.length === 0) {
+    } else if (!data || data.length === 0) {
         body = (
             <EmptyState
                 icon="event_busy"
@@ -306,7 +261,7 @@ const EthosFetchCard = (props) => {
                 </button>
 
                 <ul className={classes.list}>
-                    {sortedTerms.map((term, idx) => {
+                    {data.map((term, idx) => {
                         const rowKey = term.id || term.code || idx;
                         const isCopied = copiedId === rowKey;
                         const copyableLabel = isCopied

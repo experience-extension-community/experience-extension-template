@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Experience Extension Community contributors
 //
-// Pattern adapted byte-for-byte from FloridaPoly/exp-account-details-custom
-// (src/hooks/useAccountDetails.js).
+// Domain hook for the academic-periods pipeline. Used by both the
+// dashboard card (EthosFetchCard) and the page-sized view
+// (TermsPage). Returns data already sorted via sortAcademicPeriods
+// so consumers never reorder their own copy and the two surfaces
+// can never disagree.
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useData, useCardInfo } from '@ellucian/experience-extension-utils';
 
 import { fetchAcademicPeriods } from '../data/academicPeriods';
+import { sortAcademicPeriods } from '../data/sortAcademicPeriods';
 
 /**
- * Domain hook for the EthosFetchCard.
+ * Domain hook for the academic-periods pipeline.
  *
  * @returns {{
  *   data: Array,
@@ -27,7 +31,7 @@ export function useAcademicPeriods() {
     const pipeline =
         configuration?.termsPipeline || process.env.PIPELINE_GET_TERMS;
 
-    const [data, setData] = useState([]);
+    const [rawData, setRawData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -47,14 +51,14 @@ export function useAcademicPeriods() {
                     pipeline,
                 });
                 if (result.status === 'success') {
-                    setData(Array.isArray(result.data) ? result.data : []);
+                    setRawData(Array.isArray(result.data) ? result.data : []);
                 } else {
                     setIsError(true);
-                    setData([]);
+                    setRawData([]);
                 }
             } catch {
                 setIsError(true);
-                setData([]);
+                setRawData([]);
             } finally {
                 setIsLoading(false);
                 setIsRefreshing(false);
@@ -70,6 +74,8 @@ export function useAcademicPeriods() {
     const refresh = useCallback(() => {
         loadData(true);
     }, [loadData]);
+
+    const data = useMemo(() => sortAcademicPeriods(rawData), [rawData]);
 
     return { data, isLoading, isRefreshing, isError, refresh };
 }
