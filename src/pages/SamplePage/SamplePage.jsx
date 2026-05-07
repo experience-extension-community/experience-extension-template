@@ -7,11 +7,17 @@
 
 import React from 'react';
 
-const SamplePage = () => (
-    <div style={{ padding: 32, fontFamily: 'sans-serif' }}>
-        <h1>Sample page</h1>
-        <p>If you can see this, the page module mounted successfully.</p>
-    </div>
-);
+const SamplePage = () => {
+
+    return (
+        <div style={{ padding: 32, fontFamily: 'sans-serif' }}>
+            <h1>Sample page</h1>
+            <p>If you can see this, the page module mounted successfully.</p>
+        </div>
+    )
+
+}
+
+
 
 export default SamplePage;
