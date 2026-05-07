@@ -27,27 +27,24 @@ documentation skeleton. Out of the box it ships:
 
 - **Four sample cards**, intentionally boring, each demonstrating a
   different SDK surface:
-    - `HelloUserCard` ("User Card") — the minimum-viable identity tile
-    - `EthosFetchCard` ("Active Terms") — Data Connect data with
-      loading/error/empty states + per-row copy buttons
-    - `ConfigurableCard` ("Configurable Links") — a `customConfiguration`
-      admin form with categorized links + admin-picked colors
-    - `PageLinkCard` ("Sample Pages") — card → full-width page navigation
-      with a hooks-choice dialog
-- **One page module with four sub-pages** under `src/page/`:
+    - [`HelloUserCard`](src/cards/HelloUserCard/README.md) ("User Card") — the minimum-viable identity tile
+    - [`EthosFetchCard`](src/cards/EthosFetchCard/README.md) ("Active Terms") — Data Connect data with loading/error/empty states + per-row copy buttons
+    - [`ConfigurableCard`](src/cards/ConfigurableCard/README.md) ("Configurable Links") — a `customConfiguration` admin form with categorized links + admin-picked colors
+    - [`PageLinkCard`](src/cards/PageLinkCard/README.md) ("Sample Pages") — card → full-width page navigation with a hooks-choice dialog
+- **One [page module with four sub-pages](src/page/README.md)** under `src/page/`:
   Home (hub), HooksPage (page-context SDK hooks reference), TermsPage
   (page-sized terms table with copy buttons), LinksPage (configurable
   links page with live-or-demo data + admin colors).
 - **Two working Data Connect pipelines** (`persons`, `academic-periods`)
-  in the top-level `DataConnect/` folder. Import them unchanged into
-  any Banner or Colleague Ethos tenant.
+  in the top-level [`DataConnect/`](DataConnect/README.md) folder. Import them
+  unchanged into any Banner or Colleague Ethos tenant.
 - **Branding tokens** layered: Path Design System tokens (baseline) +
   institutional overlay (Florida Poly defaults, swappable) + live
   dashboard theme (`useThemeInfo`).
 - **Material Symbols Outlined** icons via a single `<Icon>` component;
   font auto-loaded with retry.
 - **Adobe Typekit** brand-font loader, configurable per institution.
-- **`react-intl`** with locale cascade (exact → language → English).
+- **`react-intl`** with locale cascade (exact → language → English). See [`docs/I18N.md`](docs/I18N.md).
 - **`withStyles`** HOC from `@ellucian/react-design-system/core/styles`
   on every component — matches Ellucian samples and FL Poly extensions.
   No inline hex values.
@@ -60,6 +57,28 @@ documentation skeleton. Out of the box it ships:
 
 It is **not** a fork of `experience-sdk-sample-extensions`. It is
 community-built for institutional adoption.
+
+## Documentation map
+
+Reading order for a new contributor (or AI assistant):
+
+1. **README.md** (this file) — what + entry points.
+2. [**ARCHITECTURE.md**](ARCHITECTURE.md) — data flow, three-layer pattern, SDK hooks used, configuration model.
+3. [**CONTRIBUTING.md**](CONTRIBUTING.md) — hard rules (license, stack, accessibility, AI-tooling policy).
+4. [**REPLACE_THESE.md**](REPLACE_THESE.md) — onboarding checklist for a forking institution.
+5. **Per-card READMEs** — one for each of the four samples (linked above).
+6. [**src/page/README.md**](src/page/README.md) — the page module.
+7. **`docs/`** deep-dive guides:
+   - [`INSTITUTIONAL_SETUP.md`](docs/INSTITUTIONAL_SETUP.md) — 30-minute walkthrough for a forking institution.
+   - [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) — day-to-day commands, layout, conventions.
+   - [`BRANDING.md`](docs/BRANDING.md) — re-skinning for your institution.
+   - [`CONFIGURATION.md`](docs/CONFIGURATION.md) — the three configuration surfaces in detail.
+   - [`DATA_CONNECT.md`](docs/DATA_CONNECT.md) — pipeline import + permissions.
+   - [`I18N.md`](docs/I18N.md) — adding locales, naming keys, plurals.
+   - [`SDK_UPDATES.md`](docs/SDK_UPDATES.md) — Ellucian's SDK changelog and upgrade procedures.
+   - [`TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) — common adoption issues.
+8. **Per-folder READMEs** under `src/`:
+   - [`src/data/README.md`](src/data/README.md), [`src/components/README.md`](src/components/README.md), [`src/utils/README.md`](src/utils/README.md).
 
 ## Prerequisites
 
@@ -90,8 +109,10 @@ in the SDK dev shell.
 2. Edit [`src/utils/branding/brandColors.js`](src/utils/branding/brandColors.js)
    for colors, typography, logos, and Typekit kit ID. See
    [`docs/BRANDING.md`](docs/BRANDING.md).
-3. Replace the sample cards in `src/cards/` with your real ones.
-4. Update `src/i18n/en.json` strings.
+3. Replace the sample cards in `src/cards/` with your real ones —
+   see each card's README for what to change.
+4. Update `src/i18n/en.json` strings; add locale files as needed.
+   See [`docs/I18N.md`](docs/I18N.md).
 5. Import the [`DataConnect/`](DataConnect/) pipelines into your
    Ethos tenant, or replace them with your institution's. See
    [`docs/DATA_CONNECT.md`](docs/DATA_CONNECT.md).
@@ -130,19 +151,21 @@ in the SDK dev shell.
 │   │   ├── en.json
 │   │   ├── intlUtility.js              getMessages(userLocale)
 │   │   └── ReactIntlProviderWrapper.jsx
-│   ├── cards/
+│   ├── cards/                          (READMEs in each)
 │   │   ├── HelloUserCard/              Identity tile.
 │   │   ├── EthosFetchCard/             Active terms list.
 │   │   ├── ConfigurableCard/           (+ ConfigurableCardConfig.jsx,
 │   │   │                                 + colorPresets.js)
 │   │   └── PageLinkCard/               "Sample Pages" launcher.
 │   ├── page/                          Single page module, four routes.
+│   │   ├── README.md
 │   │   ├── router.jsx                  BrowserRouter + font loaders.
 │   │   ├── Home.jsx                    Landing hub.
 │   │   ├── HooksPage.jsx               Page-context SDK hooks reference.
 │   │   ├── TermsPage.jsx               Page-sized terms table.
 │   │   └── LinksPage.jsx               Configurable-links page.
 │   ├── components/
+│   │   ├── README.md
 │   │   ├── Icon/                       Material Symbols Outlined glyph.
 │   │   └── common/
 │   │       ├── LoadingState/
@@ -159,11 +182,13 @@ in the SDK dev shell.
 │   │   ├── useCopyToClipboard.js       Transient copy-with-confirmation.
 │   │   └── useAcademicPeriods.js       Domain hook example (pre-sorted).
 │   ├── data/
+│   │   ├── README.md
 │   │   ├── persons.js                  fetchPersons(...)
 │   │   ├── academicPeriods.js          fetchAcademicPeriods(...)
 │   │   └── sortAcademicPeriods.js      Pure sort — single source for
 │   │                                   card + page ordering.
 │   └── utils/
+│       ├── README.md
 │       ├── branding/                   tokens (Path + institutional),
 │       │                               theme, icons, fontLoader.
 │       ├── ethos/                      authenticatedFetch, errors,
@@ -178,6 +203,8 @@ in the SDK dev shell.
     ├── BRANDING.md
     ├── CONFIGURATION.md
     ├── DATA_CONNECT.md
+    ├── I18N.md                         Adding locales, naming keys,
+    │                                   plurals, testing.
     ├── SDK_UPDATES.md                  Ellucian's SDK changelog +
     │                                   upgrade procedures.
     └── TROUBLESHOOTING.md
@@ -222,8 +249,8 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md). Highlights:
 - No vendor-specific AI configuration files (`CLAUDE.md`, `AGENTS.md`,
   `.cursorrules`, `copilot-instructions.md`, `.claude/`). The
   framework is intentionally vendor-neutral; `README.md` +
-  `CONTRIBUTING.md` + `ARCHITECTURE.md` + `docs/*` are the only
-  context any AI tool needs.
+  `CONTRIBUTING.md` + `ARCHITECTURE.md` + `docs/*` + per-folder
+  READMEs are the only context any AI tool needs.
 
 ## License
 

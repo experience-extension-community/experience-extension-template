@@ -1,39 +1,76 @@
-# HelloUserCard
+# HelloUserCard ("User Card")
 
-The minimum viable Experience card. **Use this as your starting point**
-when adding a new card. It's also the only card in the manifest that
-carries a `template:` block (the catalog showcase entry).
+Minimum-viable card. Greets the signed-in user with avatar, full
+name, email, and locale chip. No data fetch, no configuration. Use
+as a starting point when adding a new card.
 
-## What it demonstrates
+## What it shows
 
-- `function Card({ classes }) { ... }` shape — class-name injection
-  via `withStyles` HOC, accessed from props
-- `useUserInfo()` hook for the signed-in user's name
-- `<div className={classes.root}>` outer wrapper (NOT `<Card>` —
-  Experience supplies the card chrome itself; wrapping in another
-  Card is redundant)
-- `<IconSprite />` from `@ellucian/ds-icons/lib` rendered once near
-  the top so Path icons render
-- `Typography` + `spacing20`/`spacing30` design tokens
-- HOC composition: `withStyles(styles)(HelloUserCard)`
+- Avatar with initials (`firstName[0]` + `lastName[0]`).
+- Time-of-day greeting + first name (Good morning / afternoon /
+  evening).
+- Full name (only if it differs from "firstName lastName").
+- Email (`mailto:` link).
+- Locale chip.
 
-## Pattern matches
+## SDK hooks used
 
-Mirrors Florida Poly's working extension cards:
-- `exp-account-details-custom/src/cards/AccountDetails.jsx` (hooks for SDK access)
-- `custom-simple-links/src/cards/FavoriteLinks/FavoriteLinksCard.jsx` (withStyles + literal strings)
-- Ellucian official `sdk-samples/extension.js` shape
+| Hook | What it gives | Why |
+|------|---------------|-----|
+| `useUserInfo()` | `firstName`, `lastName`, `fullName`, `emailAddress`, `locale` | The whole point of the card. |
+| `useIntl()` | `formatMessage` | Localized greeting + fallback name. |
 
-## What it does NOT use
+Plus two template-internal hooks:
 
-Intentionally omitted to keep the starting point as simple as possible:
+- `useTypekitFont()` — loads the institution's Typekit kit.
+- `useMaterialIconFonts()` — loads Material Symbols Outlined for icons.
 
-- `withIntl` / `useIntl` / `injectIntl` — literal English strings only.
-  Add localization later if needed (see `src/i18n/` for the wiring).
-- `useTypekitFont`, `useMaterialIconFonts` — brand fonts not loaded.
-  Add them if you need Typekit / Material Symbols Outlined glyphs.
-- `useExtensionControl().setLoadingStatus` — not needed for cards
-  with no async data.
-- Custom configuration / pipeline.
+## Configuration
 
-Add these one at a time as your card needs them.
+None. Renders entirely off `useUserInfo()`. The extension-level
+`ethosApiKey` and `termsPipeline` declared in `extension.js` are
+ignored by this card.
+
+## Customization points
+
+| What | Where |
+|------|-------|
+| Brand colors / fonts | `src/utils/branding/brandColors.js` (project-wide; this card consumes `brandColors.primary` for the avatar, `surface`/`surfaceMuted` for backgrounds, `textPrimary`/`textSecondary`/`textMuted` for typography). |
+| Greeting copy | `src/i18n/en.json` keys below. |
+| Time thresholds | `computeGreeting()` in `HelloUserCard.jsx` (defaults: <12 morning, <18 afternoon, else evening). |
+| Layout | `styles` block at top of `HelloUserCard.jsx`. |
+
+## i18n keys
+
+| Key | Default | Notes |
+|-----|---------|-------|
+| `hello.morning` | "Good morning" | Used when local hour < 12. |
+| `hello.afternoon` | "Good afternoon" | Used when local hour < 18. |
+| `hello.evening` | "Good evening" | Used otherwise. |
+| `hello.fallback` | "Welcome" | Shown when `firstName` is empty. |
+
+Add matching keys in `src/i18n/<locale>.json` to localize. See
+[`docs/I18N.md`](../../../docs/I18N.md).
+
+## Files
+
+```
+HelloUserCard/
+└── HelloUserCard.jsx     The card component
+```
+
+## Replacing this card
+
+This is a teaching card. To remove or replace:
+
+1. Delete the `HelloUserCard/` folder.
+2. Remove its entry from `extension.js` `cards: [...]`.
+3. Remove its keys from `src/i18n/en.json` (and any locale files).
+4. (Optional) Remove `useUserInfo` from
+   `__mocks__/@ellucian/experience-extension-utils.js` if no other
+   card uses it.
+
+If you're keeping it as a starting point, copy the folder and
+rename. Update the `type`, `title`, `displayCardType`, and
+`source` in `extension.js`. Replace the body of the component with
+your own JSX.
