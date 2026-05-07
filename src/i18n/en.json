@@ -44,8 +44,13 @@
 
     "common.copied": "Copied",
     "common.refreshing": "Refreshing…",
-    "common.lastUpdated": "Last updated {time}",
+    "common.refreshingData": "Refreshing data…",
+    "common.refreshSuccess": "Data refreshed",
     "common.refreshFailed": "Refresh failed — showing cached data.",
+    "common.lastUpdated": "Last updated {time}",
+    "common.retry": "Retry",
+    "common.loadingMore": "Loading more…",
+    "common.showingCount": "Showing {visible} of {total}",
 
     "ethos.error.auth": "You are not authorized for this data.",
     "ethos.error.network": "Cannot reach the server. Check your connection and try again.",

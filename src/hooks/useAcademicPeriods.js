@@ -13,12 +13,13 @@
 //     drops `isLoading`, and fires a background refresh.
 //   - Background refresh sets `isRefreshing` (NOT `isLoading`).
 //     Components show the cached data while the indicator runs.
-//   - On success, the cache is overwritten with the fresh data
-//     and a `lastUpdated` timestamp.
+//   - On success of a refresh (warm cache or manual), the cache is
+//     overwritten with fresh data + a `lastUpdated` timestamp, AND
+//     `showSuccessMessage` flashes for 3 seconds.
 //   - On failure of a background refresh, cached data stays on
 //     screen and `showRefreshError` flashes for 5 seconds.
-//   - `refresh()` is a manual refresh — it skips the cache read
-//     and forces a network fetch.
+//   - `refresh()` is the manual path — skips the cache read and
+//     forces a network fetch.
 //
 // A custom `scope: 'eec-academic-periods'` is passed to
 // getItem/storeItem so the dashboard card and the page share the
@@ -38,6 +39,7 @@ import { sortAcademicPeriods } from '../data/sortAcademicPeriods';
 const CACHE_KEY = 'academic-periods';
 const CACHE_SCOPE = 'eec-academic-periods';
 const REFRESH_ERROR_FLASH_MS = 5000;
+const SUCCESS_FLASH_MS = 3000;
 
 /**
  * Domain hook for the academic-periods pipeline.
@@ -50,6 +52,7 @@ const REFRESH_ERROR_FLASH_MS = 5000;
  *   error: any,
  *   lastUpdated: number | null,
  *   showRefreshError: boolean,
+ *   showSuccessMessage: boolean,
  *   refresh: Function,
  * }}
  */
@@ -69,9 +72,11 @@ export function useAcademicPeriods() {
     const [error, setError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
     const [showRefreshError, setShowRefreshError] = useState(false);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
     const hasFetchedOnMount = useRef(false);
     const refreshErrorTimeoutId = useRef(null);
+    const successTimeoutId = useRef(null);
     const currentDataRef = useRef(rawData);
 
     useEffect(() => {
@@ -85,11 +90,20 @@ export function useAcademicPeriods() {
             setIsError(false);
             setError(null);
             setShowRefreshError(false);
+            setShowSuccessMessage(false);
             clearTimeout(refreshErrorTimeoutId.current);
+            clearTimeout(successTimeoutId.current);
 
-            // Try cache first (skip on manual refresh).
-            let hasCachedData = false;
-            if (!isManualRefresh && typeof getItem === 'function') {
+            const hadDataOnEntry = currentDataRef.current.length > 0;
+            let hasCachedData = hadDataOnEntry;
+
+            // Try cache first (skip on manual refresh OR if data is
+            // already on screen from a prior render in this session).
+            if (
+                !isManualRefresh &&
+                !hadDataOnEntry &&
+                typeof getItem === 'function'
+            ) {
                 const cached = getItem({ key: CACHE_KEY, scope: CACHE_SCOPE });
                 if (cached?.data) {
                     setRawData(Array.isArray(cached.data) ? cached.data : []);
@@ -101,7 +115,7 @@ export function useAcademicPeriods() {
 
             // Always fetch fresh. Loading vs refreshing depends on
             // whether we already have something to show.
-            if (hasCachedData || currentDataRef.current.length > 0) {
+            if (hasCachedData) {
                 setIsRefreshing(true);
             } else {
                 setIsLoading(true);
@@ -127,8 +141,16 @@ export function useAcademicPeriods() {
                             lastUpdated: timestamp,
                         });
                     }
+                    // Flash success only when this was a refresh
+                    // (warm cache mount or manual refresh) — not on
+                    // a cold initial load.
+                    if (hasCachedData) {
+                        setShowSuccessMessage(true);
+                        successTimeoutId.current = setTimeout(() => {
+                            setShowSuccessMessage(false);
+                        }, SUCCESS_FLASH_MS);
+                    }
                 } else if (hasCachedData) {
-                    // Keep cached data showing; flash a refresh error.
                     setShowRefreshError(true);
                     refreshErrorTimeoutId.current = setTimeout(() => {
                         setShowRefreshError(false);
@@ -167,6 +189,7 @@ export function useAcademicPeriods() {
     useEffect(
         () => () => {
             clearTimeout(refreshErrorTimeoutId.current);
+            clearTimeout(successTimeoutId.current);
         },
         [],
     );
@@ -185,6 +208,7 @@ export function useAcademicPeriods() {
         error,
         lastUpdated,
         showRefreshError,
+        showSuccessMessage,
         refresh,
     };
 }

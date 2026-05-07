@@ -7,7 +7,8 @@
 // the 'eec-academic-periods' scope).
 //
 // The Code column is a copy-to-clipboard button with a transient
-// "copied" state, mirroring the dashboard card's behavior.
+// "copied" state, mirroring the dashboard card's behavior. Table
+// rows are lazy-rendered (initial 25, +25 per scroll trigger).
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -26,9 +27,11 @@ import { usePageControl } from '@ellucian/experience-extension-utils';
 import { withIntl } from '../i18n/ReactIntlProviderWrapper';
 import { useAcademicPeriods } from '../hooks/useAcademicPeriods';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+import { useLazyLoad } from '../hooks/useLazyLoad';
 import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
 import EmptyState from '../components/common/EmptyState';
+import RefreshStatusMessage from '../components/common/RefreshStatusMessage';
 import RefreshIndicator from '../components/common/RefreshIndicator';
 import { brandColors, BRAND_FONT_STACK } from '../utils/branding/brandColors';
 
@@ -48,9 +51,12 @@ const styles = () => ({
         '&:hover': { textDecoration: 'underline' },
     },
     subtitle: {
-        marginBottom: spacing40,
+        marginBottom: spacing30,
         color: brandColors.textSecondary,
         fontSize: '0.9375rem',
+    },
+    statusBlock: {
+        marginBottom: spacing30,
     },
     refreshRow: {
         display: 'flex',
@@ -58,13 +64,6 @@ const styles = () => ({
         justifyContent: 'space-between',
         gap: spacing30,
         marginBottom: spacing30,
-    },
-    refreshLeft: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: spacing30,
-        flex: '1 1 auto',
-        minWidth: 0,
     },
     refresh: {
         display: 'inline-flex',
@@ -104,6 +103,12 @@ const styles = () => ({
         color: brandColors.textPrimary,
         borderBottom: `1px solid ${brandColors.border}`,
         verticalAlign: 'top',
+    },
+    lazyTriggerCell: {
+        padding: spacing30,
+        textAlign: 'center',
+        color: brandColors.textSecondary,
+        fontSize: '0.8125rem',
     },
     codeButton: {
         display: 'inline-flex',
@@ -170,6 +175,11 @@ const styles = () => ({
         backgroundColor: brandColors.surfaceMuted,
         color: brandColors.textSecondary,
     },
+    footer: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        marginTop: spacing30,
+    },
 });
 
 const formatDate = (iso, intl) => {
@@ -195,9 +205,19 @@ const TermsPage = (props) => {
         isError,
         lastUpdated,
         showRefreshError,
+        showSuccessMessage,
         refresh,
     } = useAcademicPeriods();
     const { copiedId, copy } = useCopyToClipboard();
+
+    const {
+        visibleItems,
+        hasMore,
+        isLoading: isLoadingMore,
+        triggerRef,
+        visibleCount,
+        totalCount,
+    } = useLazyLoad(data, 25, 25);
 
     return (
         <Box className={classes.root}>
@@ -207,6 +227,44 @@ const TermsPage = (props) => {
             <Typography className={classes.subtitle}>
                 Academic periods sourced from the Data Connect pipeline.
             </Typography>
+
+            {(isRefreshing || showSuccessMessage || showRefreshError) && (
+                <Box className={classes.statusBlock}>
+                    {isRefreshing && (
+                        <RefreshStatusMessage
+                            type="loading"
+                            message={intl.formatMessage({
+                                id: 'common.refreshingData',
+                                defaultMessage: 'Refreshing data…',
+                            })}
+                        />
+                    )}
+                    {showSuccessMessage && (
+                        <RefreshStatusMessage
+                            type="success"
+                            message={intl.formatMessage({
+                                id: 'common.refreshSuccess',
+                                defaultMessage: 'Data refreshed',
+                            })}
+                        />
+                    )}
+                    {showRefreshError && (
+                        <RefreshStatusMessage
+                            type="error"
+                            message={intl.formatMessage({
+                                id: 'common.refreshFailed',
+                                defaultMessage:
+                                    'Refresh failed — showing cached data.',
+                            })}
+                            onRetry={refresh}
+                            retryLabel={intl.formatMessage({
+                                id: 'common.retry',
+                                defaultMessage: 'Retry',
+                            })}
+                        />
+                    )}
+                </Box>
+            )}
 
             {isLoading ? (
                 <LoadingState />
@@ -221,32 +279,20 @@ const TermsPage = (props) => {
             ) : (
                 <>
                     <Box className={classes.refreshRow}>
-                        <Box className={classes.refreshLeft}>
-                            <Typography variant="body2" className={classes.muted}>
-                                {data.length} term
-                                {data.length === 1 ? '' : 's'}
-                            </Typography>
-                            <RefreshIndicator
-                                isRefreshing={isRefreshing}
-                                refreshError={showRefreshError}
-                                lastUpdated={lastUpdated}
-                            />
-                        </Box>
+                        <Typography variant="body2" className={classes.muted}>
+                            {data.length} term
+                            {data.length === 1 ? '' : 's'}
+                        </Typography>
                         <button
                             type="button"
                             className={classes.refresh}
                             onClick={refresh}
                             disabled={isRefreshing}
                         >
-                            {isRefreshing
-                                ? intl.formatMessage({
-                                      id: 'common.refreshing',
-                                      defaultMessage: 'Refreshing…',
-                                  })
-                                : intl.formatMessage({
-                                      id: 'card.ethosFetch.cta.refresh',
-                                      defaultMessage: 'Refresh',
-                                  })}
+                            {intl.formatMessage({
+                                id: 'card.ethosFetch.cta.refresh',
+                                defaultMessage: 'Refresh',
+                            })}
                         </button>
                     </Box>
                     <table className={classes.table}>
@@ -260,7 +306,7 @@ const TermsPage = (props) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.map((term, idx) => {
+                            {visibleItems.map((term, idx) => {
                                 const rowKey = term.id || term.code || idx;
                                 const isCopied = copiedId === rowKey;
                                 const copyLabel = isCopied
@@ -316,8 +362,36 @@ const TermsPage = (props) => {
                                     </tr>
                                 );
                             })}
+                            {hasMore && (
+                                <tr ref={triggerRef}>
+                                    <td
+                                        colSpan={5}
+                                        className={classes.lazyTriggerCell}
+                                    >
+                                        {isLoadingMore
+                                            ? intl.formatMessage({
+                                                  id: 'common.loadingMore',
+                                                  defaultMessage: 'Loading more…',
+                                              })
+                                            : intl.formatMessage(
+                                                  {
+                                                      id: 'common.showingCount',
+                                                      defaultMessage:
+                                                          'Showing {visible} of {total}',
+                                                  },
+                                                  {
+                                                      visible: visibleCount,
+                                                      total: totalCount,
+                                                  },
+                                              )}
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
+                    <Box className={classes.footer}>
+                        <RefreshIndicator lastUpdated={lastUpdated} />
+                    </Box>
                 </>
             )}
         </Box>
