@@ -3,16 +3,16 @@
 //
 // LinksPage — page-sized view of categorized links.
 //
-// Tries to read live config from the launching card's
-// customConfiguration.categories. PageLinkCard (which opens this
-// page) does not currently expose a customConfiguration, so the
-// page falls back to a static demo dataset. To wire to real data:
-//   1. Replicate ConfigurableCard's customConfiguration on
-//      PageLinkCard (the page is scoped to PageLinkCard's cardInfo),
-//      OR
-//   2. Add a `pageRoute` to ConfigurableCard so the configurable
-//      card itself opens this page — then `useCardInfo()` returns
-//      the configurable links directly.
+// When launched from ConfigurableCard's body click, useCardInfo()
+// returns ConfigurableCard's customConfiguration with both the
+// categories AND the admin-picked color presets. We mirror the
+// dashboard card's color treatment by exposing the same CSS
+// custom properties (--cc-category-color / --cc-link-color /
+// --cc-hover-color) so the page picks up the configured palette.
+//
+// Falls back to a static demo dataset (with default colors) when
+// the page is launched from a card that doesn't carry a
+// customConfiguration (e.g. the Sample Pages launcher button).
 
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
@@ -30,6 +30,10 @@ import { usePageControl, useCardInfo } from '@ellucian/experience-extension-util
 
 import { withIntl } from '../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../utils/branding/brandColors';
+import {
+    normalizeColors,
+    resolveColor,
+} from '../cards/ConfigurableCard/colorPresets';
 
 const BRAND_FONT_STACK =
     '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -109,7 +113,7 @@ const styles = () => ({
         fontWeight: 700,
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
-        color: brandColors.textSecondary,
+        color: 'var(--cc-category-color)',
         marginBottom: spacing30,
     },
     list: {
@@ -124,13 +128,13 @@ const styles = () => ({
         display: 'block',
         padding: `${spacing20} ${spacing30}`,
         borderRadius: 4,
-        color: brandColors.textPrimary,
+        color: 'var(--cc-link-color)',
         textDecoration: 'none',
         fontSize: '0.875rem',
         transition: 'background-color 120ms ease-out, color 120ms ease-out',
         '&:hover': {
             backgroundColor: brandColors.surfaceMuted,
-            color: brandColors.primary,
+            color: 'var(--cc-hover-color)',
         },
         '&:focus-visible': {
             outline: `2px solid ${brandColors.focusRing}`,
@@ -148,7 +152,7 @@ const LinksPage = (props) => {
     const cardInfo = useCardInfo() || {};
 
     if (typeof setPageTitle === 'function') {
-        setPageTitle('Configured links');
+        setPageTitle('Configured Links');
     }
 
     const liveCategories = useMemo(() => {
@@ -164,11 +168,27 @@ const LinksPage = (props) => {
         return filtered.length > 0 ? filtered : null;
     }, [cardInfo.configuration]);
 
+    // Mirror ConfigurableCard's color treatment. When the page is
+    // launched from ConfigurableCard, cardInfo carries the admin's
+    // customConfiguration.colors. When launched from another card
+    // (e.g. Sample Pages → /links), normalizeColors falls back to
+    // its built-in defaults.
+    const colorStyle = useMemo(() => {
+        const colors = normalizeColors(
+            cardInfo.configuration?.customConfiguration?.colors,
+        );
+        return {
+            '--cc-category-color': resolveColor(colors.category),
+            '--cc-link-color': resolveColor(colors.link),
+            '--cc-hover-color': resolveColor(colors.hover),
+        };
+    }, [cardInfo.configuration]);
+
     const usingDemoData = !liveCategories;
     const categories = liveCategories || SAMPLE_CATEGORIES;
 
     return (
-        <Box className={classes.root}>
+        <Box className={classes.root} style={colorStyle}>
             <Link to="/" className={classes.backLink}>
                 ← Back to overview
             </Link>
@@ -182,9 +202,9 @@ const LinksPage = (props) => {
 
             {usingDemoData && (
                 <Box className={classes.note}>
-                    Showing sample data. Wire to live configuration by adding a
-                    customConfiguration to PageLinkCard, or by giving
-                    ConfigurableCard its own pageRoute that targets this page.
+                    Showing sample data. Open this page from the
+                    Configurable Links card to see the live admin-configured
+                    categories and color treatment.
                 </Box>
             )}
 

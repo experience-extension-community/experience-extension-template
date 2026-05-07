@@ -38,31 +38,33 @@ module.exports = {
     },
 
     cards: [
-        // 1. HelloUserCard — minimum-viable showcase card.
+        // 1. User Card — identity showcase. (cardType remains
+        // HelloUserCard for backwards compatibility with any tenant
+        // configuration already attached.)
         {
             type: 'HelloUserCard',
             source: './src/cards/HelloUserCard/HelloUserCard.jsx',
-            title: 'Hello user',
-            displayCardType: 'Hello user',
+            title: 'User Card',
+            displayCardType: 'User Card',
             description:
-                'A minimum-viable greeting card. Use as your starting point for any new card.',
+                'Greets the signed-in user with avatar, email, and locale. Use as a starting point for any new card.',
             template: {
                 icon: 'user',
-                title: 'Hello user',
+                title: 'User Card',
                 description:
-                    'Greets the signed-in user. Demonstrates the smallest pattern an Experience card needs to render.',
+                    'Greets the signed-in user and shows basic identity info from useUserInfo().',
             },
         },
 
-        // 2. EthosFetchCard — Data Connect pipeline-driven card.
+        // 2. Active Terms — Data Connect pipeline-driven card.
         // Body click opens the page-sized version of the same data.
         // excludeClickSelectors keeps the per-row term-code copy buttons
         // working as copy-to-clipboard rather than navigation.
         {
             type: 'EthosFetchCard',
             source: './src/cards/EthosFetchCard/EthosFetchCard.jsx',
-            title: 'Active terms',
-            displayCardType: 'Active terms',
+            title: 'Active Terms',
+            displayCardType: 'Active Terms',
             description: 'Demonstrates a Data Connect pipeline-driven card.',
             pageRoute: {
                 route: '/terms',
@@ -70,14 +72,14 @@ module.exports = {
             },
         },
 
-        // 3. ConfigurableCard — admin-driven content via customConfiguration form.
+        // 3. Configurable Links — admin-driven content via customConfiguration form.
         // Body click opens the page-sized links view. excludeClickSelectors
         // keeps the link rows + collapsible category summaries working.
         {
             type: 'ConfigurableCard',
             source: './src/cards/ConfigurableCard/ConfigurableCard.jsx',
-            title: 'Configurable links',
-            displayCardType: 'Configurable links',
+            title: 'Configurable Links',
+            displayCardType: 'Configurable Links',
             description: 'A card whose content is configured by an admin via a custom form.',
             customConfiguration: {
                 source: './src/cards/ConfigurableCard/ConfigurableCardConfig.jsx',
