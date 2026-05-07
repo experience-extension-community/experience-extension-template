@@ -20,12 +20,9 @@ import {
 import { useUserInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import { brandColors } from '../../utils/branding/brandColors';
+import { brandColors, BRAND_FONT_STACK } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
-
-const BRAND_FONT_STACK =
-    '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
 const styles = () => ({
     root: {

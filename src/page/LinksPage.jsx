@@ -29,14 +29,11 @@ import {
 import { usePageControl, useCardInfo } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../i18n/ReactIntlProviderWrapper';
-import { brandColors } from '../utils/branding/brandColors';
+import { brandColors, BRAND_FONT_STACK } from '../utils/branding/brandColors';
 import {
     normalizeColors,
     resolveColor,
 } from '../cards/ConfigurableCard/colorPresets';
-
-const BRAND_FONT_STACK =
-    '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
 const SAMPLE_CATEGORIES = [
     {
@@ -168,11 +165,6 @@ const LinksPage = (props) => {
         return filtered.length > 0 ? filtered : null;
     }, [cardInfo.configuration]);
 
-    // Mirror ConfigurableCard's color treatment. When the page is
-    // launched from ConfigurableCard, cardInfo carries the admin's
-    // customConfiguration.colors. When launched from another card
-    // (e.g. Sample Pages → /links), normalizeColors falls back to
-    // its built-in defaults.
     const colorStyle = useMemo(() => {
         const colors = normalizeColors(
             cardInfo.configuration?.customConfiguration?.colors,

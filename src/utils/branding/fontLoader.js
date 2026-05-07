@@ -4,25 +4,20 @@
 // Imperative Typekit loader. Mirrors FL Poly's exp-account-details-custom
 // fontLoader exactly. The matching React-side `useTypekitFont()` hook
 // lives in `src/hooks/useTypekitFont.js`.
+//
+// The kit ID and font name come from `brandFont` in brandColors.js —
+// the single source of truth for the institution's web font. See
+// `docs/BRANDING.md`.
 
-import { fontLoader } from './brandColors';
+import { brandFont } from './brandColors';
 
-const TYPEKIT_LINK_ID = 'typekit-new-science-css';
-
-const resolveKitId = () => {
-    if (typeof process !== 'undefined' && process.env && process.env.TYPEKIT_KIT_ID) {
-        return process.env.TYPEKIT_KIT_ID;
-    }
-    return fontLoader.typekitKitId;
-};
+const TYPEKIT_LINK_ID = 'typekit-brand-font-css';
 
 export const ensureTypekitFont = () => {
     if (typeof document === 'undefined') return null;
+    if (!brandFont.kitId) return null;
 
-    const kitId = resolveKitId();
-    if (!kitId) return null;
-
-    const href = `https://use.typekit.net/${kitId}.css`;
+    const href = `https://use.typekit.net/${brandFont.kitId}.css`;
 
     let linkElement = document.getElementById(TYPEKIT_LINK_ID);
     if (linkElement) {

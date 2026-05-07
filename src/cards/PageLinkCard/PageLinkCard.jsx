@@ -32,13 +32,10 @@ import {
 import { useExtensionControl } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
-import { brandColors } from '../../utils/branding/brandColors';
+import { brandColors, BRAND_FONT_STACK } from '../../utils/branding/brandColors';
 import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
 import DebugHooksDialog from '../../components/common/DebugHooksDialog';
-
-const BRAND_FONT_STACK =
-    '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
 const HOOKS_ROUTE = '/hooks';
 
@@ -196,9 +193,6 @@ const PageLinkCard = (props) => {
             </Typography>
             <Box className={classes.list}>
                 {PAGES.map((page) => {
-                    // Hooks row works even without navigateToPage (it can
-                    // open the card-hooks dialog locally). Other rows
-                    // require navigation.
                     const rowDisabled =
                         page.route !== HOOKS_ROUTE && !navAvailable;
                     return (
