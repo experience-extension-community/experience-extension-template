@@ -3,7 +3,8 @@
 //
 // TermsPage — page-sized view of the academic-periods pipeline.
 // Reuses useAcademicPeriods (same data source AND same order as
-// EthosFetchCard — sort lives in the hook).
+// EthosFetchCard — sort lives in the hook, cache is shared via
+// the 'eec-academic-periods' scope).
 //
 // The Code column is a copy-to-clipboard button with a transient
 // "copied" state, mirroring the dashboard card's behavior.
@@ -28,6 +29,7 @@ import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
 import EmptyState from '../components/common/EmptyState';
+import RefreshIndicator from '../components/common/RefreshIndicator';
 import { brandColors, BRAND_FONT_STACK } from '../utils/branding/brandColors';
 
 const styles = () => ({
@@ -54,7 +56,15 @@ const styles = () => ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        gap: spacing30,
         marginBottom: spacing30,
+    },
+    refreshLeft: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: spacing30,
+        flex: '1 1 auto',
+        minWidth: 0,
     },
     refresh: {
         display: 'inline-flex',
@@ -178,7 +188,15 @@ const TermsPage = (props) => {
         setPageTitle('Active terms');
     }
 
-    const { data, isLoading, isRefreshing, isError, refresh } = useAcademicPeriods();
+    const {
+        data,
+        isLoading,
+        isRefreshing,
+        isError,
+        lastUpdated,
+        showRefreshError,
+        refresh,
+    } = useAcademicPeriods();
     const { copiedId, copy } = useCopyToClipboard();
 
     return (
@@ -203,17 +221,32 @@ const TermsPage = (props) => {
             ) : (
                 <>
                     <Box className={classes.refreshRow}>
-                        <Typography variant="body2" className={classes.muted}>
-                            {data.length} term
-                            {data.length === 1 ? '' : 's'}
-                        </Typography>
+                        <Box className={classes.refreshLeft}>
+                            <Typography variant="body2" className={classes.muted}>
+                                {data.length} term
+                                {data.length === 1 ? '' : 's'}
+                            </Typography>
+                            <RefreshIndicator
+                                isRefreshing={isRefreshing}
+                                refreshError={showRefreshError}
+                                lastUpdated={lastUpdated}
+                            />
+                        </Box>
                         <button
                             type="button"
                             className={classes.refresh}
                             onClick={refresh}
                             disabled={isRefreshing}
                         >
-                            {isRefreshing ? 'Refreshing…' : 'Refresh'}
+                            {isRefreshing
+                                ? intl.formatMessage({
+                                      id: 'common.refreshing',
+                                      defaultMessage: 'Refreshing…',
+                                  })
+                                : intl.formatMessage({
+                                      id: 'card.ethosFetch.cta.refresh',
+                                      defaultMessage: 'Refresh',
+                                  })}
                         </button>
                     </Box>
                     <table className={classes.table}>

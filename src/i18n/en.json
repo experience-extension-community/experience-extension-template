@@ -42,6 +42,11 @@
     "page.sample.title": "Sample page",
     "page.sample.intro": "This page exercises page-level SDK hooks. Replace it for your real use case.",
 
+    "common.copied": "Copied",
+    "common.refreshing": "Refreshing…",
+    "common.lastUpdated": "Last updated {time}",
+    "common.refreshFailed": "Refresh failed — showing cached data.",
+
     "ethos.error.auth": "You are not authorized for this data.",
     "ethos.error.network": "Cannot reach the server. Check your connection and try again.",
     "ethos.error.timeout": "The request timed out. Please try again.",
