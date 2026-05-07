@@ -79,12 +79,40 @@ module.exports = {
         // (`/page/.../PageLinkCard/`) that the dashboard publishes.
         // Required in SDK 8: without it the dashboard 404s the URL
         // even though the upload tool lists it.
+        //
+        // The page is scoped to PageLinkCard's cardInfo, so any data
+        // the page wants to load (e.g. TermsPage → academic-periods
+        // pipeline) must be configured HERE. Mirroring EthosFetchCard's
+        // configuration block authorizes PageLinkCard's cardId for the
+        // same Data Connect pipeline. Without this, page-side fetches
+        // return 400 ("cardId not configured for pipeline").
         {
             type: 'PageLinkCard',
             source: './src/cards/PageLinkCard/PageLinkCard.jsx',
-            title: 'Open sample page',
-            displayCardType: 'Open sample page',
-            description: 'Demonstrates navigateToPage().',
+            title: 'Extension page',
+            displayCardType: 'Extension page',
+            description: 'Multi-section extension page hub.',
+            configuration: {
+                client: [
+                    {
+                        key: 'termsPipeline',
+                        label: 'Terms pipeline (Data Connect)',
+                        type: 'text',
+                        require: false,
+                        default:
+                            process.env.PIPELINE_GET_TERMS || 'eec-template-academic-periods-get',
+                    },
+                ],
+                server: [
+                    {
+                        key: 'ethosApiKey',
+                        label: 'Ethos API key',
+                        type: 'password',
+                        require: true,
+                        value: process.env.ETHOS_API_KEY || '',
+                    },
+                ],
+            },
             pageRoute: {
                 route: '/',
             },

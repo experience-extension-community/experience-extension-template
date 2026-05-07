@@ -3,6 +3,7 @@
 //
 // Home — landing hub for the extension page. Linked from PageLinkCard.
 // Three navigation tiles, one per sub-page (/hooks, /terms, /links).
+// Page title comes from setPageTitle — no redundant heading rendered.
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -11,7 +12,6 @@ import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { Box, Typography } from '@ellucian/react-design-system/core';
 import {
     spacing20,
-    spacing30,
     spacing40,
     spacing50,
 } from '@ellucian/react-design-system/core/styles/tokens';
@@ -29,8 +29,10 @@ const styles = () => ({
         margin: '0 auto',
         fontFamily: BRAND_FONT_STACK,
     },
-    header: {
+    intro: {
         marginBottom: spacing50,
+        color: brandColors.textSecondary,
+        fontSize: '0.9375rem',
     },
     grid: {
         display: 'grid',
@@ -110,10 +112,9 @@ const Home = (props) => {
 
     return (
         <Box className={classes.root}>
-            <Box className={classes.header}>
-                <Typography variant="h2">Extension page</Typography>
-                <Typography variant="body1">Pick a section to explore.</Typography>
-            </Box>
+            <Typography className={classes.intro}>
+                Pick a section to explore.
+            </Typography>
             <Box className={classes.grid}>
                 {tiles.map((t) => (
                     <Link key={t.to} to={t.to} className={classes.tile}>

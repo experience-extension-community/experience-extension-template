@@ -30,8 +30,6 @@ import { usePageControl, useCardInfo } from '@ellucian/experience-extension-util
 
 import { withIntl } from '../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../utils/branding/brandColors';
-import { useTypekitFont } from '../hooks/useTypekitFont';
-import { useMaterialIconFonts } from '../hooks/useMaterialIconFonts';
 
 const BRAND_FONT_STACK =
     '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -80,8 +78,10 @@ const styles = () => ({
         fontSize: '0.875rem',
         '&:hover': { textDecoration: 'underline' },
     },
-    header: {
+    subtitle: {
         marginBottom: spacing40,
+        color: brandColors.textSecondary,
+        fontSize: '0.9375rem',
     },
     note: {
         marginBottom: spacing40,
@@ -147,9 +147,6 @@ const LinksPage = (props) => {
     const { setPageTitle } = usePageControl() || {};
     const cardInfo = useCardInfo() || {};
 
-    useTypekitFont();
-    useMaterialIconFonts();
-
     if (typeof setPageTitle === 'function') {
         setPageTitle('Configured links');
     }
@@ -175,21 +172,13 @@ const LinksPage = (props) => {
             <Link to="/" className={classes.backLink}>
                 ← Back to overview
             </Link>
-            <Box className={classes.header}>
-                <Typography variant="h2">
-                    {intl.formatMessage({
-                        id: 'page.links.title',
-                        defaultMessage: 'Configured links',
-                    })}
-                </Typography>
-                <Typography variant="body1">
-                    {intl.formatMessage({
-                        id: 'page.links.subtitle',
-                        defaultMessage:
-                            'A categorized directory rendered as a full-width page.',
-                    })}
-                </Typography>
-            </Box>
+            <Typography className={classes.subtitle}>
+                {intl.formatMessage({
+                    id: 'page.links.subtitle',
+                    defaultMessage:
+                        'A categorized directory rendered as a full-width page.',
+                })}
+            </Typography>
 
             {usingDemoData && (
                 <Box className={classes.note}>

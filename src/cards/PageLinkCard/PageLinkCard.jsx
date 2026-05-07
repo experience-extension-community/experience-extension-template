@@ -5,11 +5,15 @@
 //
 // Renders one link row per extension sub-page, each wired to
 // navigateToPage(). Lets a user jump straight to /hooks, /terms,
-// or /links from the dashboard rather than landing on the hub
-// first. The hub at "/" remains accessible via the back link on
-// each sub-page.
+// or /links from the dashboard. The hub at "/" remains accessible
+// via the back link on each sub-page.
+//
+// Configuration is mirrored from EthosFetchCard so the page-side
+// fetch (TermsPage → academic-periods pipeline) is authorized for
+// PageLinkCard's cardId. Without the matching server-side
+// `ethosApiKey`, page fetches return 400.
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
@@ -23,7 +27,12 @@ import { useExtensionControl } from '@ellucian/experience-extension-utils';
 
 import { withIntl } from '../../i18n/ReactIntlProviderWrapper';
 import { brandColors } from '../../utils/branding/brandColors';
+import { useTypekitFont } from '../../hooks/useTypekitFont';
 import { useMaterialIconFonts } from '../../hooks/useMaterialIconFonts';
+import DebugHooksDialog from '../../components/common/DebugHooksDialog';
+
+const BRAND_FONT_STACK =
+    '"new-science", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
 const PAGES = [
     {
@@ -48,25 +57,39 @@ const PAGES = [
 
 const styles = () => ({
     root: {
-        padding: spacing20,
+        position: 'relative',
+        padding: spacing30,
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         gap: spacing20,
+        fontFamily: BRAND_FONT_STACK,
+        backgroundColor: brandColors.surface,
+    },
+    title: {
+        fontFamily: BRAND_FONT_STACK,
+        fontSize: '1rem',
+        fontWeight: 700,
+        color: brandColors.textPrimary,
+        margin: 0,
     },
     description: {
+        fontFamily: BRAND_FONT_STACK,
+        fontSize: '0.8125rem',
         color: brandColors.textSecondary,
+        lineHeight: 1.5,
+        margin: 0,
     },
     list: {
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing10,
+        gap: 2,
         marginTop: spacing10,
     },
     linkRow: {
         display: 'flex',
         alignItems: 'center',
-        gap: spacing20,
+        gap: spacing30,
         padding: `${spacing20} ${spacing30}`,
         background: 'transparent',
         border: 'none',
@@ -74,9 +97,10 @@ const styles = () => ({
         cursor: 'pointer',
         textAlign: 'left',
         color: brandColors.textPrimary,
-        fontFamily: 'inherit',
+        fontFamily: BRAND_FONT_STACK,
         fontSize: '0.875rem',
-        transition: 'background-color 120ms ease-out, color 120ms ease-out',
+        transition:
+            'background-color 120ms ease-out, color 120ms ease-out',
         '&:hover:not(:disabled)': {
             backgroundColor: brandColors.surfaceMuted,
             color: brandColors.primary,
@@ -110,7 +134,42 @@ const styles = () => ({
         lineHeight: 1,
         color: brandColors.textMuted,
         opacity: 0.4,
-        transition: 'opacity 120ms ease-out, transform 120ms ease-out',
+        transition:
+            'opacity 120ms ease-out, transform 120ms ease-out',
+    },
+    debugButton: {
+        position: 'absolute',
+        bottom: spacing20,
+        right: spacing20,
+        width: 24,
+        height: 24,
+        padding: 0,
+        background: 'transparent',
+        border: 'none',
+        borderRadius: 4,
+        cursor: 'pointer',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: brandColors.textMuted,
+        opacity: 0.3,
+        transition:
+            'opacity 120ms ease-out, color 120ms ease-out, background-color 120ms ease-out',
+        '&:hover': {
+            opacity: 1,
+            color: brandColors.primary,
+            backgroundColor: brandColors.surfaceMuted,
+        },
+        '&:focus-visible': {
+            opacity: 1,
+            outline: `2px solid ${brandColors.focusRing}`,
+            outlineOffset: 1,
+        },
+    },
+    debugIcon: {
+        fontFamily: 'Material Symbols Outlined',
+        fontSize: '1rem',
+        lineHeight: 1,
     },
 });
 
@@ -118,7 +177,9 @@ const PageLinkCard = (props) => {
     const { classes, cardControl: { navigateToPage } = {} } = props;
     const intl = useIntl();
     const { setLoadingStatus } = useExtensionControl() || {};
+    const [debugOpen, setDebugOpen] = useState(false);
 
+    useTypekitFont();
     useMaterialIconFonts();
 
     useEffect(() => {
@@ -137,13 +198,13 @@ const PageLinkCard = (props) => {
 
     return (
         <Box className={classes.root}>
-            <Typography variant="h6">
+            <Typography className={classes.title}>
                 {intl.formatMessage({
                     id: 'card.pageLink.title',
                     defaultMessage: 'Extension page',
                 })}
             </Typography>
-            <Typography variant="body2" className={classes.description}>
+            <Typography className={classes.description}>
                 {intl.formatMessage({
                     id: 'card.pageLink.description',
                     defaultMessage: 'Open a section of the extension page.',
@@ -173,6 +234,24 @@ const PageLinkCard = (props) => {
                     </button>
                 ))}
             </Box>
+            <button
+                type="button"
+                className={classes.debugButton}
+                onClick={() => setDebugOpen(true)}
+                aria-label="Show hooks and properties"
+                title="Show hooks and properties"
+            >
+                <span aria-hidden="true" className={classes.debugIcon}>
+                    data_object
+                </span>
+            </button>
+            {debugOpen && (
+                <DebugHooksDialog
+                    open={debugOpen}
+                    onClose={() => setDebugOpen(false)}
+                    cardProps={props}
+                />
+            )}
         </Box>
     );
 };
